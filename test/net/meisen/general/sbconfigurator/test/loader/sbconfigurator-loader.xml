@@ -1,0 +1,6 @@
+<Config xmlns="http://dev.meisen.net/sbconfigurator" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://dev.meisen.net/sbconfigurator http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-loader.xsd">
+  
+  <loaderDefinition id="testSampleLoader" validationEnabled="false" selector="sbconfigurator-testSample.xml" 
+                    xslt="net/meisen/general/sbconfigurator/test/sampleplugin/sbconfigurator-testSampleToSpringContext.xslt" />
+</Config>
