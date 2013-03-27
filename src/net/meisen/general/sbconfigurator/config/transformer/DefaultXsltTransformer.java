@@ -50,7 +50,9 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 		try {
 			setXsltTransformer(new ClassPathResource(xsltClassPath).getInputStream());
 		} catch (final IOException e) {
-			throw new InvalidXsltException("", e);
+			throw new InvalidXsltException(
+					"The xslt could not be read from the classpath '" + xsltClassPath
+							+ "'", e);
 		}
 	}
 
@@ -72,7 +74,8 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 		try {
 			setXsltTransformer(new FileInputStream(xsltFile));
 		} catch (final FileNotFoundException e) {
-			throw new InvalidXsltException("", e);
+			throw new InvalidXsltException("The xslt file '" + xsltFile
+					+ "' could not be found.", e);
 		}
 	}
 
@@ -89,7 +92,7 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 		try {
 			xsltTransformer = transFact.newTransformer(xsltSource);
 		} catch (TransformerConfigurationException e) {
-			throw new InvalidXsltException("", e);
+			throw new InvalidXsltException("The xslt stream could not be read.", e);
 		} finally {
 			Streams.closeIO(xsltStream);
 		}

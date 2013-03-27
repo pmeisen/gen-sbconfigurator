@@ -123,7 +123,9 @@ public class DefaultXsdValidator implements IXsdValidator {
 		try {
 			setXsdSchema(new ClassPathResource(xsdClassPath).getInputStream());
 		} catch (final IOException e) {
-			throw new InvalidXsdException("", e);
+			throw new InvalidXsdException(
+					"The xsd could not be read from the specified classpath '"
+							+ xsdClassPath + "'", e);
 		}
 	}
 
@@ -142,7 +144,8 @@ public class DefaultXsdValidator implements IXsdValidator {
 		try {
 			setXsdSchema(new FileInputStream(xsdFile));
 		} catch (final FileNotFoundException e) {
-			throw new InvalidXsdException("", e);
+			throw new InvalidXsdException("The xsd file '" + xsdFile
+					+ "' could not be found.", e);
 		}
 	}
 
@@ -201,8 +204,8 @@ public class DefaultXsdValidator implements IXsdValidator {
 
 			// validate the file
 			validate(xmlStream);
-		} catch (IOException e) {
-			throw new ValidationFailedException("", e);
+		} catch (final IOException e) {
+			throw new ValidationFailedException("The XML stream could not be read.", e);
 		} finally {
 
 			// close the stream
@@ -247,7 +250,8 @@ public class DefaultXsdValidator implements IXsdValidator {
 			// validate the file
 			validate(xmlStream);
 		} catch (final FileNotFoundException e) {
-			throw new ValidationFailedException("", e);
+			throw new ValidationFailedException("The file '" + xmlFile
+					+ "' to be validated could not be found.", e);
 		} finally {
 
 			// close the stream
@@ -282,7 +286,7 @@ public class DefaultXsdValidator implements IXsdValidator {
 				validator.validate(xmlSource);
 			}
 		} catch (final Exception e) {
-			throw new ValidationFailedException("", e);
+			throw new ValidationFailedException("The loaded or the validation failed.", e);
 		}
 	}
 }

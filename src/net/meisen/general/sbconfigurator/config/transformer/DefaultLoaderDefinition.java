@@ -124,7 +124,8 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 		try {
 			setXsdSchema(new ClassPathResource(xsdClassPath).getInputStream());
 		} catch (final IOException e) {
-			throw new InvalidXsdException("", e);
+			throw new InvalidXsdException("The specified xsd at '" + xsdClassPath
+					+ "' could not be accessed.", e);
 		}
 	}
 
@@ -143,7 +144,8 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 		try {
 			setXsdSchema(new FileInputStream(xsdFile));
 		} catch (final FileNotFoundException e) {
-			throw new InvalidXsdException("", e);
+			throw new InvalidXsdException("The specified xsd file '" + xsdFile
+					+ "' could not be found.", e);
 		}
 	}
 
@@ -169,7 +171,7 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 		try {
 			this.xsd = Streams.copyStreamToByteArray(xsdStream);
 		} catch (final IOException e) {
-			throw new InvalidXsdException("", e);
+			throw new InvalidXsdException("The xsd stream could not be read.", e);
 		}
 	}
 
@@ -210,8 +212,7 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 				setXsltTransformer(new ClassPathResource(xsltClassPath)
 						.getInputStream());
 			} catch (final IOException e) {
-				e.printStackTrace();
-				throw new InvalidXsltException("", e);
+				throw new InvalidXsltException("The xslt stream could not be read.", e);
 			}
 		}
 	}
@@ -237,7 +238,8 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 			try {
 				setXsltTransformer(new FileInputStream(xsltFile));
 			} catch (final FileNotFoundException e) {
-				throw new InvalidXsltException("", e);
+				throw new InvalidXsltException("The specified xslt file '" + xsltFile
+						+ "' could not be found.", e);
 			}
 		}
 	}

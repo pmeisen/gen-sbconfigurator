@@ -9,9 +9,29 @@ import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostP
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ByteArrayResource;
 
+/**
+ * Some helper classes which help to work with Spring.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class SpringHelper {
 	private final static Logger LOG = LoggerFactory.getLogger(SpringHelper.class);
 
+	/**
+	 * Creates a <code>DefaultListableBeanFactory</code> with some default
+	 * settings, i.e.
+	 * <ul>
+	 * <li>support of auto-wiring annotation</li>
+	 * <li>disabled bean-overriding</li>
+	 * </ul>
+	 * 
+	 * @return a <code>DefaultListableBeanFactory</code> with some default
+	 *         settings
+	 * 
+	 * @see AutowiredAnnotationBeanPostProcessor
+	 * @see DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
+	 */
 	public static DefaultListableBeanFactory createBeanFactory() {
 
 		// create the factory

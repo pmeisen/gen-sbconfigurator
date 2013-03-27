@@ -9,8 +9,17 @@ import net.meisen.general.sbconfigurator.test.sampleplugin.SamplePlugIn;
 
 import org.junit.Test;
 
+/**
+ * Creates and loads a sample plug-in
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TestSamplePlugInLoader {
 
+	/**
+	 * Loads the sample plug-in and checks the result
+	 */
 	@Test
 	public void testLoadingOfSamplePlugIn() {
 

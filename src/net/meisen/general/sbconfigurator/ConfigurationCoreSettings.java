@@ -4,17 +4,18 @@ import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.helper.SpringHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 /**
- * The core settings of the configuration should be loaded when the application is
- * started. Those core settings are loaded via the
+ * The core settings of the configuration should be loaded when the application
+ * is started. Those core settings are loaded via the
  * <code>coreSettingsContext</code>, i.e. a Spring-context. The context-file
- * must be located at the same location as the <code>ConfigurationCoreSettings</code>
- * and therefore cannot be overridden.
+ * must be located at the same location as the
+ * <code>ConfigurationCoreSettings</code> and therefore cannot be overridden.
  * 
  * @author pmeisen
  * 
@@ -23,14 +24,15 @@ public class ConfigurationCoreSettings {
 	private final static String coreSettingsContext = "sbconfigurator-core.xml";
 
 	@Autowired
+	@Qualifier("configuration")
 	private IConfiguration configuration;
 
 	private boolean configurationValidationEnabled = true;
 	private boolean userLoaderOverridingAllowed = false;
 
 	/**
-	 * Method to load the <code>ConfigurationCoreSettings</code> from the
-	 * <code>coreSettingsContext</code>.
+	 * Method to load the <code>ConfigurationCoreSettings</code> and all the other
+	 * modules used by the <code>CoreSettings</code>.
 	 * 
 	 * @return the loaded <code>ConfigurationCoreSettings</code>
 	 */
@@ -39,8 +41,8 @@ public class ConfigurationCoreSettings {
 	}
 
 	/**
-	 * Method to load the <code>ConfigurationCoreSettings</code> from the
-	 * <code>coreSettingsContext</code>.
+	 * Method to load the <code>ConfigurationCoreSettings</code> and all the other
+	 * modules used by the <code>CoreSettings</code>.
 	 * 
 	 * @param clazz
 	 *          using the <code>coreSettingsContext</code> of the specified class
