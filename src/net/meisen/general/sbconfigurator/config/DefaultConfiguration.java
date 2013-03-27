@@ -349,7 +349,7 @@ public class DefaultConfiguration implements IConfiguration {
 				LOG.trace("Creating factory for files '" + xmlFileName
 						+ "' without context");
 			}
-
+			
 			// read all the bean.xmls on the classpath
 			final Collection<ResourceInfo> resInfos = Resource.getResources(
 					xmlFileName, true, true);

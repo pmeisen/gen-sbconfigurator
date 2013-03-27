@@ -25,7 +25,7 @@ public class TestSamplePlugInLoader {
 
 		// load the server
 		final ConfigurationCoreSettings coreSettings = ConfigurationCoreSettings
-				.loadCoreSettings();
+				.loadCoreSettings(getClass());
 		final DefaultConfiguration configuration = (DefaultConfiguration) coreSettings
 				.getConfiguration();
 		final Object module = configuration.getModule("samplePlugIn");

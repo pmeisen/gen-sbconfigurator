@@ -32,7 +32,7 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	private byte[] xsd = null;
 	private byte[] xslt = null;
 	private Class<?> context = null;
-	private boolean beanOverriding = false;
+	private boolean beanOverridingAllowed = false;
 	private boolean validationEnabled = true;
 
 	/**
@@ -349,27 +349,27 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 
 	@Override
 	public boolean isBeanOverridingAllowed() {
-		return beanOverriding;
+		return beanOverridingAllowed;
 	}
 
 	/**
 	 * Defines if bean overriding is allowed by this
 	 * <code>ILoaderDefinition</code>.
 	 * 
-	 * @param beanOverriding
+	 * @param beanOverridingAllowed
 	 *          <code>true</code> if bean overriding is allowed, otherwise
 	 *          <code>false</code>
 	 */
-	public void setBeanOverridingAllowed(final boolean beanOverriding) {
-		this.beanOverriding = beanOverriding;
+	public void setBeanOverridingAllowed(final boolean beanOverridingAllowed) {
+		this.beanOverridingAllowed = beanOverridingAllowed;
 	}
 
 	@Override
 	public String toString() {
 		return "Loader: " + selector + " (context: '"
 				+ (context == null ? null : context.getName()) + "', overriding: '"
-				+ beanOverriding + "', hasXsd: '" + hasXsdSchema() + "', hasXslt: '"
-				+ hasXsltTransformer() + "')";
+				+ beanOverridingAllowed + "', hasXsd: '" + hasXsdSchema()
+				+ "', hasXslt: '" + hasXsltTransformer() + "')";
 	}
 
 	@Override
