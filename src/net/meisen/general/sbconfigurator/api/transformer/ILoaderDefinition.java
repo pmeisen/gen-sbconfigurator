@@ -6,8 +6,8 @@ import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 
 /**
  * A <code>ILoaderDefinition</code> is used to define a specific loading
- * behavior of a configuration. It can be used to define loading packages which load
- * any kind of plug-in for the configuration.
+ * behavior of a configuration. It can be used to define loading packages which
+ * load any kind of plug-in for the configuration.
  * 
  * @author pmeisen
  * 
@@ -83,4 +83,24 @@ public interface ILoaderDefinition {
 	 * @see ConfigurationCoreSettings#isConfigurationValidationEnabled()
 	 */
 	public boolean isValidationEnabled();
+
+	/**
+	 * Defines if the defined selector should select files from the class-path (
+	 * <code>true</code>) or not (<code>false</code>).
+	 * 
+	 * @return <code>true</code> if the selected should search on the class-path,
+	 *         otherwise <code>false</code>
+	 */
+	public boolean isLoadFromClassPath();
+
+	/**
+	 * Defines if the defined selector should select files from the current
+	 * working directory and all it's sub-directories ( <code>true</code>) or not
+	 * (<code>false</code>).
+	 * 
+	 * @return <code>true</code> if the selector should search in the current
+	 *         working-directory (and all sub-directories), otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isLoadFromWorkingDir();
 }

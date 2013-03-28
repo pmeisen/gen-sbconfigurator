@@ -254,11 +254,13 @@ public class DefaultConfiguration implements IConfiguration {
 	 *         <code>LoaderDefinition</code>
 	 */
 	public ListableBeanFactory loadBeanFactory(
-			final ILoaderDefinition loaderDefinition) {
+			final ILoaderDefinition loaderDefinition) {		
 		return loadBeanFactory(loaderDefinition.getSelector(),
 				loaderDefinition.getXsltTransformerInputStream(),
 				loaderDefinition.getContext(), loaderDefinition.isValidationEnabled(),
-				loaderDefinition.isBeanOverridingAllowed());
+				loaderDefinition.isBeanOverridingAllowed(),
+				loaderDefinition.isLoadFromClassPath(),
+				loaderDefinition.isLoadFromWorkingDir());
 	}
 
 	/**
@@ -281,15 +283,23 @@ public class DefaultConfiguration implements IConfiguration {
 	 * @param beanOverriding
 	 *          <code>true</code> if beans of the context can be overwritten,
 	 *          otherwise <code>false</code>
+	 * @param loadFromClasspath
+	 *          <code>true</code> if the <code>xmlFileName</code> should be
+	 *          searched on the classpath, otherwise <code>false</code>
+	 * @param loadFromWorkingDir
+	 *          <code>true</code> if the <code>xmlFileName</code> should be
+	 *          searched in the current working-directory (and all
+	 *          sub-directories), otherwise <code>false</code>
 	 * 
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
 	 *         parameters
 	 */
 	public ListableBeanFactory loadBeanFactory(final String xmlFileName,
 			final InputStream xsltTransformer, final boolean validate,
-			final boolean beanOverriding) {
+			final boolean beanOverriding, final boolean loadFromClasspath,
+			final boolean loadFromWorkingDir) {
 		return loadBeanFactory(xmlFileName, xsltTransformer, null, validate,
-				beanOverriding);
+				beanOverriding, loadFromClasspath, loadFromWorkingDir);
 	}
 
 	/**
@@ -315,13 +325,21 @@ public class DefaultConfiguration implements IConfiguration {
 	 * @param beanOverriding
 	 *          <code>true</code> if beans of the context can be overwritten,
 	 *          otherwise <code>false</code>
+	 * @param loadFromClasspath
+	 *          <code>true</code> if the <code>xmlFileName</code> should be
+	 *          searched on the classpath, otherwise <code>false</code>
+	 * @param loadFromWorkingDir
+	 *          <code>true</code> if the <code>xmlFileName</code> should be
+	 *          searched in the current working-directory (and all
+	 *          sub-directories), otherwise <code>false</code>
 	 * 
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
 	 *         parameters
 	 */
 	public ListableBeanFactory loadBeanFactory(final String xmlFileName,
 			final InputStream xsltStream, final Class<?> context,
-			final boolean validate, final boolean beanOverriding) {
+			final boolean validate, final boolean beanOverriding,
+			final boolean loadFromClasspath, final boolean loadFromWorkingDir) {
 
 		// create the factory
 		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory();
@@ -349,10 +367,10 @@ public class DefaultConfiguration implements IConfiguration {
 				LOG.trace("Creating factory for files '" + xmlFileName
 						+ "' without context");
 			}
-			
+
 			// read all the bean.xmls on the classpath
 			final Collection<ResourceInfo> resInfos = Resource.getResources(
-					xmlFileName, true, true);
+					xmlFileName, loadFromClasspath, loadFromWorkingDir);
 
 			// read all the loaded resources
 			for (final ResourceInfo resInfo : resInfos) {

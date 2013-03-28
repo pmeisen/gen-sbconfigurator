@@ -15,6 +15,8 @@
         <xsl:variable name="selector"><xsl:value-of select="@selector"/></xsl:variable>
         <xsl:variable name="beanOverridingAllowed"><xsl:value-of select="@beanOverridingAllowed"/></xsl:variable>
         <xsl:variable name="validationEnabled"><xsl:value-of select="@validationEnabled"/></xsl:variable>
+        <xsl:variable name="loadFromClassPath"><xsl:value-of select="@loadFromClassPath"/></xsl:variable>
+        <xsl:variable name="loadFromWorkingDir"><xsl:value-of select="@loadFromWorkingDir"/></xsl:variable>
     
         <bean id="{$id}" class="net.meisen.general.sbconfigurator.config.transformer.DefaultLoaderDefinition">  
           <property name="selector" value="{$selector}" />
@@ -26,6 +28,12 @@
           </xsl:if>
           <xsl:if test="@validationEnabled != ''">
             <property name="validationEnabled" value="{$validationEnabled}" />
+          </xsl:if>
+          <xsl:if test="@loadFromClassPath != ''">
+            <property name="loadFromClassPath" value="{$loadFromClassPath}" />
+          </xsl:if>
+          <xsl:if test="@loadFromWorkingDir != ''">
+            <property name="loadFromWorkingDir" value="{$loadFromWorkingDir}" />
           </xsl:if>
         </bean>
       </xsl:for-each>

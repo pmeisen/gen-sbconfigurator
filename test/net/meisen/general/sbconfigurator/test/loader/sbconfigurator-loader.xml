@@ -2,5 +2,6 @@
           xsi:schemaLocation="http://dev.meisen.net/sbconfigurator http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-loader.xsd">
   
   <loaderDefinition id="testSampleLoader" validationEnabled="false" beanOverridingAllowed="true" selector="sbconfigurator-testSample.xml" 
+  					loadFromClassPath="true" loadFromWorkingDir="false"
                     xslt="net/meisen/general/sbconfigurator/test/sampleplugin/sbconfigurator-testSampleToSpringContext.xslt" />
 </Config>

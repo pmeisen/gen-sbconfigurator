@@ -34,6 +34,8 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	private Class<?> context = null;
 	private boolean beanOverridingAllowed = false;
 	private boolean validationEnabled = true;
+	private boolean loadFromClassPath = true;
+	private boolean loadFromWorkingDir = true;
 
 	/**
 	 * Default constructor which doesn't specify anything. The setters have to be
@@ -389,5 +391,40 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 */
 	public void setValidationEnabled(boolean validationEnabled) {
 		this.validationEnabled = validationEnabled;
+	}
+
+	@Override
+	public boolean isLoadFromClassPath() {
+		return loadFromClassPath;
+	}
+
+	/**
+	 * Defines if the selector should be applied against files on the class-path (
+	 * <code>true</code>) or not <code>false</code>.
+	 * 
+	 * @param loadFromClassPath
+	 *          <code>true</code> if the selected should search on the class-path,
+	 *          otherwise <code>false</code>
+	 */
+	public void setLoadFromClassPath(final boolean loadFromClassPath) {
+		this.loadFromClassPath = loadFromClassPath;
+	}
+
+	@Override
+	public boolean isLoadFromWorkingDir() {
+		return loadFromWorkingDir;
+	}
+
+	/**
+	 * Defines if the selector should be applied against files in the
+	 * working-directory (and all it's sub-directories) or not.
+	 * 
+	 * @param loadFromWorkingDir
+	 *          <code>true</code> if the selector should search in the current
+	 *          working-directory (and all sub-directories), otherwise
+	 *          <code>false</code>
+	 */
+	public void setLoadFromWorkingDir(final boolean loadFromWorkingDir) {
+		this.loadFromWorkingDir = loadFromWorkingDir;
 	}
 }

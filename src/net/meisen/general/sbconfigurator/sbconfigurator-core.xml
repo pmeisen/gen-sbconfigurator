@@ -22,5 +22,7 @@
     <property name="selector" value="sbconfigurator-loader.xml" />
     <property name="xslt" value="net/meisen/general/sbconfigurator/config/transformer/sbconfigurator-loaderToSpringContext.xslt" />
     <property name="beanOverridingAllowed" value="false" />
+    <property name="loadFromClassPath" value="true" />
+    <property name="loadFromWorkingDir" value="false" />
   </bean>
 </beans>

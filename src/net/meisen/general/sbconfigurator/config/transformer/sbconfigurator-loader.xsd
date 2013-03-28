@@ -56,6 +56,8 @@
               <xs:attribute name="id" type="idString" use="required" />
               <xs:attribute name="selector" type="nonEmptyString" use="required" />
               <xs:attribute name="xslt" type="xs:string" default="" />
+              <xs:attribute name="loadFromClassPath" type="xs:boolean" default="true" />
+              <xs:attribute name="loadFromWorkingDir" type="xs:boolean" default="true" />
               <xs:attribute name="beanOverridingAllowed" type="xs:boolean" default="false" />
               <xs:attribute name="validationEnabled" type="xs:boolean" default="false" />
             </xs:complexType>
