@@ -2,12 +2,16 @@ package net.meisen.general.sbconfigurator.helper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.util.ClassUtils;
 
 /**
  * Some helper classes which help to work with Spring.
@@ -26,24 +30,93 @@ public class SpringHelper {
 	 * <li>disabled bean-overriding</li>
 	 * </ul>
 	 * 
+	 * @param enableAutoWiring
+	 *          <code>true</code> if auto-wiring for the factory should be
+	 *          enabled, otherwise <code>false</code>
+	 * 
 	 * @return a <code>DefaultListableBeanFactory</code> with some default
 	 *         settings
 	 * 
 	 * @see AutowiredAnnotationBeanPostProcessor
 	 * @see DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
 	 */
-	public static DefaultListableBeanFactory createBeanFactory() {
+	public static DefaultListableBeanFactory createBeanFactory(
+			final boolean enableAutoWiring) {
 
 		// create the factory
 		final DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.setAllowBeanDefinitionOverriding(false);
 
 		// enable auto-wiring
-		final AutowiredAnnotationBeanPostProcessor autowiredPostProcessor = new AutowiredAnnotationBeanPostProcessor();
-		autowiredPostProcessor.setBeanFactory(factory);
-		factory.addBeanPostProcessor(autowiredPostProcessor);
+		if (enableAutoWiring) {
+			final AutowiredAnnotationBeanPostProcessor autowiredPostProcessor = new AutowiredAnnotationBeanPostProcessor();
+			autowiredPostProcessor.setBeanFactory(factory);
+			factory.addBeanPostProcessor(autowiredPostProcessor);
+		}
 
 		return factory;
+	}
+
+	/**
+	 * Gets all the <code>BeanDefinition</code> instances of the passed
+	 * <code>beanFactory</code>.
+	 * 
+	 * @param beanFactory
+	 *          the <code>DefaultListableBeanFactory</code> to get all the
+	 *          <code>BeanDefinitions</code> from
+	 * @param excludes
+	 *          a array of <code>Classes</code> which should be excluded, i.e. the
+	 *          classes are checked to be a super-class or super-interface as well
+	 * 
+	 * @return all the <code>BeanDefinition</code> of the <code>beanFactory</code>
+	 *         which do not define excluded classes.
+	 */
+	public static Map<String, BeanDefinition> getBeanDefinitions(
+			final DefaultListableBeanFactory beanFactory, final Class<?>... excludes) {
+		final Map<String, BeanDefinition> defs = new HashMap<String, BeanDefinition>();
+
+		// if there is a factory add all the definitions available
+		if (beanFactory != null) {
+
+			// add all the defs defined
+			for (final String defName : beanFactory.getBeanDefinitionNames()) {
+				final BeanDefinition def = beanFactory.getBeanDefinition(defName);
+
+				// get the class of the bean
+				Class<?> beanClass;
+				try {
+					beanClass = ClassUtils.forName(def.getBeanClassName(),
+							ClassUtils.getDefaultClassLoader());
+				} catch (final ClassNotFoundException e) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(
+								"Unable to determine exclusion of bean of type '"
+										+ def.getBeanClassName()
+										+ "', because the resolving led to an error.", e);
+					}
+
+					beanClass = null;
+				}
+
+				// check if we have to skip it
+				boolean skip = false;
+				if (excludes != null && beanClass != null) {
+					for (final Class<?> exclude : excludes) {
+						if (exclude.isAssignableFrom(beanClass)) {
+							skip = true;
+							break;
+						}
+					}
+				}
+
+				// add it if it isn't skipped
+				if (!skip) {
+					defs.put(defName, def);
+				}
+			}
+		}
+
+		return defs;
 	}
 
 	/**

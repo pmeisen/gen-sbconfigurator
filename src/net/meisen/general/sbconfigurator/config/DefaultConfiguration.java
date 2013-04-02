@@ -4,12 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import net.meisen.general.genmisc.resources.Resource;
 import net.meisen.general.genmisc.resources.ResourceInfo;
+import net.meisen.general.genmisc.types.Objects;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
@@ -25,12 +27,13 @@ import net.meisen.general.sbconfigurator.helper.SpringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.util.MethodInvoker;
 
 /**
  * The default implementation of the <code>IConfiguration</code> interface. This
@@ -41,11 +44,6 @@ import org.springframework.core.io.ByteArrayResource;
 public class DefaultConfiguration implements IConfiguration {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(DefaultConfiguration.class);
-
-	/**
-	 * The id used to represent the <code>coreSettings</code>
-	 */
-	private final static String coreSettingsId = "coreSettings";
 
 	/**
 	 * The <code>coreSettings</code> are defined in the
@@ -88,89 +86,134 @@ public class DefaultConfiguration implements IConfiguration {
 	private IXsltTransformer xsltTransformer;
 
 	/**
-	 * The list of all the loaded modules. A module can be anything which is
-	 * defined to be loaded via a <code>LoaderDefinition</code>. Each module is
-	 * represented by its bean-id.
+	 * The <code>Collection</code> of all the loaded modules. A module can be
+	 * anything which is defined to be loaded via a <code>LoaderDefinition</code>.
+	 * Each module is represented by its bean-id.
 	 */
 	private final Map<String, Object> modules = new HashMap<String, Object>();
 
+	/**
+	 * The <code>Collection</code> of all the <code>BeanDefinition</code> found
+	 * (so far)
+	 */
+	private final Map<String, BeanDefinition> moduleDefinitions = new HashMap<String, BeanDefinition>();
+
+	/**
+	 * The <code>DefaultListableBeanFactory</code> which is used to load all the
+	 * modules. This factory has to be an attribute, because of pre-loading
+	 * purposes, i.e. if a bean retrieves a module from the configuration prior to
+	 * the loading of the module (i.e. within a init-method).
+	 */
+	private DefaultListableBeanFactory moduleFactory = null;
+
 	@Override
 	public void loadConfiguration() throws InvalidConfigurationException {
+		final Map<String, ILoaderDefinition> userLoaderDefinitions = new HashMap<String, ILoaderDefinition>();
 
-		// register the LoaderDefinitions which are defined by the core
-		// implementation
-		final Map<String, ILoaderDefinition> coreLoaderDefinitions = registerCoreLoaderDefinitions();
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Starting to load the Configuration...");
+		}
+
+		// check if something was added via auto-wiring, if not there is nothing
+		// more to do
+		if (loaderDefinitions == null) {
+
+			// make sure we have a Collection from now on
+			loaderDefinitions = new HashMap<String, ILoaderDefinition>();
+		} else {
+
+			// load the default loader definitions
+			for (final Entry<String, ILoaderDefinition> entry : loaderDefinitions
+					.entrySet()) {
+				final ILoaderDefinition loaderDefinition = entry.getValue();
+
+				// do some logging
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Loading configuration from loader '" + entry.getKey()
+							+ "'; " + loaderDefinition);
+				}
+
+				// now load the definition
+				final DefaultListableBeanFactory beanFactory = loadBeanFactory(loaderDefinition);
+				final Map<String, ILoaderDefinition> loaderBeans = beanFactory
+						.getBeansOfType(ILoaderDefinition.class);
+
+				// load the core LoaderDefinitions
+				for (final Entry<String, ILoaderDefinition> coreEntry : loaderBeans
+						.entrySet()) {
+					final ILoaderDefinition loader = coreEntry.getValue();
+					final String id = coreEntry.getKey();
+
+					// ILoaderDefinitions have to be loaded
+					if (loader instanceof ILoaderDefinition) {
+						if (userLoaderDefinitions.containsKey(id)) {
+							if (!isUserLoaderOverridingAllowed()) {
+								throw new InvalidConfigurationException(
+										"The id of the loader '"
+												+ id
+												+ "' is used multiple times, which is not allowed via the coreSettings.");
+							}
+
+							// override the current one
+							final ILoaderDefinition newDef = (ILoaderDefinition) loader;
+							final ILoaderDefinition oldDef = userLoaderDefinitions.put(id,
+									newDef);
+
+							// log the overriding
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("The loader '" + id + "' ('"
+										+ oldDef.getClass().getName() + "' was overridden by '"
+										+ newDef.getClass().getName());
+							}
+						} else if (loaderDefinitions.containsKey(id)) {
+							throw new InvalidConfigurationException("The id of the loader '"
+									+ id + "' is already used by a core LoaderDefinition.");
+						} else {
+							userLoaderDefinitions.put(id, (ILoaderDefinition) loader);
+						}
+					}
+				}
+
+				// add all the other definitions to be loaded later
+				final Map<String, BeanDefinition> defs = SpringHelper
+						.getBeanDefinitions(beanFactory, ILoaderDefinition.class);
+
+				// everything else is registered as module
+				registerModuleBeanDefinitions(defs, entry.getKey());
+			}
+		}
 
 		// the core engine is up and running now
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("Core implementation is up and running, found "
-					+ coreLoaderDefinitions.size()
+			LOG.trace("Core implementation of Configuration is up and running, found "
+					+ userLoaderDefinitions.size()
 					+ " more LoaderDefinition(s) to be loaded.");
 		}
 
 		// load the additional definitions which are defined by users
-		registerUserLoaderDefinitions(coreLoaderDefinitions);
-	}
+		registerUserLoaderDefinitions(userLoaderDefinitions);
 
-	/**
-	 * Registers all the others <code>LoaderDefintions</code> which are defined by
-	 * default, i.e. by the <code>sbconfigurator-core.xml</code> context.
-	 * 
-	 * @return the <code>Collection</code> of <code>LoaderDefinitions</code>
-	 *         defined by the core configuration
-	 */
-	protected Map<String, ILoaderDefinition> registerCoreLoaderDefinitions() {
-		final Map<String, ILoaderDefinition> userLoaderDefinitions = new HashMap<String, ILoaderDefinition>();
-
-		// load the default loader definitions
-		for (final Entry<String, ILoaderDefinition> entry : loaderDefinitions
-				.entrySet()) {
-			final ILoaderDefinition loaderDefinition = entry.getValue();
-
-			// do some logging
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Loading configuration from loader '" + entry.getKey()
-						+ "'; " + loaderDefinition);
-			}
-
-			// now load the definition
-			final ListableBeanFactory beanFactory = loadBeanFactory(loaderDefinition);
-			final Map<String, ILoaderDefinition> beans = beanFactory
-					.getBeansOfType(ILoaderDefinition.class);
-
-			// load the core LoaderDefinitions
-			for (final Entry<String, ILoaderDefinition> userEntry : beans.entrySet()) {
-				final String loaderId = userEntry.getKey();
-
-				if (userLoaderDefinitions.containsKey(loaderId)) {
-					if (!isUserLoaderOverridingAllowed()) {
-						throw new InvalidConfigurationException(
-								"The id of the loader '"
-										+ loaderId
-										+ "' is used multiple times, which is not allowed via the coreSettings.");
-					}
-
-					// override the current one
-					final ILoaderDefinition newDef = entry.getValue();
-					final ILoaderDefinition oldDef = userLoaderDefinitions.put(loaderId,
-							userEntry.getValue());
-
-					// log the overriding
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("The loader '" + loaderId + "' ('"
-								+ oldDef.getClass().getName() + "' was overridden by '"
-								+ newDef.getClass().getName());
-					}
-				} else if (loaderDefinitions.containsKey(loaderId)) {
-					throw new InvalidConfigurationException("The id of the loader '"
-							+ loaderId + "' is already used by a core LoaderDefinition.");
-				} else {
-					userLoaderDefinitions.put(loaderId, userEntry.getValue());
-				}
-			}
+		// we collected everything
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("All moduleDefinitions '" + moduleDefinitions.size()
+					+ "' are loaded. The modules will be instantiated now.");
 		}
 
-		return userLoaderDefinitions;
+		// create the factory
+		moduleFactory = SpringHelper.createBeanFactory(true);
+		moduleFactory.registerSingleton(coreSettingsId, coreSettings);
+		moduleFactory.registerSingleton(coreConfigurationId, this);
+		for (final Entry<String, BeanDefinition> entry : moduleDefinitions
+				.entrySet()) {
+			moduleFactory.registerBeanDefinition(entry.getKey(), entry.getValue());
+		}
+
+		// now let's add all the modules
+		final Map<String, Object> modules = moduleFactory
+				.getBeansOfType(Object.class);
+		for (final Entry<String, Object> entry : modules.entrySet()) {
+			registerModule(entry.getKey(), entry.getValue());
+		}
 	}
 
 	/**
@@ -190,56 +233,169 @@ public class DefaultConfiguration implements IConfiguration {
 			final ILoaderDefinition loaderDefinition = entry.getValue();
 
 			// load the definitions
-			final ListableBeanFactory beanFactory = loadBeanFactory(loaderDefinition);
+			final DefaultListableBeanFactory beanFactory = loadBeanFactory(loaderDefinition);
 
 			// add it to the loaded ones
 			loaderDefinitions.put(entry.getKey(), loaderDefinition);
 
-			// get the beans of the loader
-			final Map<String, Object> beans = beanFactory
-					.getBeansOfType(Object.class);
+			// add all the definitions to be loaded later
+			final Map<String, BeanDefinition> defs = SpringHelper.getBeanDefinitions(
+					beanFactory, ILoaderDefinition.class);
 
-			// add the module
-			for (final Entry<String, Object> loadedEntry : beans.entrySet()) {
+			// everything else is registered as module
+			registerModuleBeanDefinitions(defs, entry.getKey());
+		}
+	}
 
-				// the coreSettings should not be added as module, they are added for
-				// wiring-purposes only
-				if (coreSettingsId.equals(loadedEntry.getKey())) {
-					continue;
-				} else if (loadedEntry.getValue() instanceof ConfigurationCoreSettings) {
-					continue;
-				}
+	/**
+	 * Checks if the specified <code>module</code> is really a valid module, i.e.
+	 * if it can be added to the loaded modules or not.
+	 * 
+	 * @param id
+	 *          the id of the module to be checked
+	 * @param module
+	 *          the module to be checked
+	 * 
+	 * @return <code>true</code> if the specified <code>module</code> should be
+	 *         added, otherwise <code>false</code>
+	 */
+	protected boolean isModule(final String id, final Object module) {
+		if (id == null || module == null) {
+			return false;
+		} else if (coreSettingsId.equals(id)) {
+			return false;
+		} else if (coreConfigurationId.equals(id)) {
+			return false;
+		} else if (module instanceof ConfigurationCoreSettings) {
+			return false;
+		}
+		// also don't add any Factories of Spring those are helper beans
+		else if (module instanceof MethodInvoker) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
-				// log it
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Loaded the module '" + loadedEntry.getKey()
-							+ "' from loaderDefinition '" + entry.getKey() + "'");
-				}
+	/**
+	 * Registers the specified <code>beanDefinitions</code> to the one that will
+	 * be loaded for the <code>Configuration</code>.
+	 * 
+	 * @param beanDefinitions
+	 *          the collection of <code>BeanDefinition</code> instances to be
+	 *          registered
+	 * @param loaderId
+	 *          the loader's identifier for logging purposes
+	 */
+	protected void registerModuleBeanDefinitions(
+			final Map<String, BeanDefinition> beanDefinitions, final String loaderId) {
 
-				// add it and warn if we overwrite something
-				if (modules.put(loadedEntry.getKey(), loadedEntry.getValue()) != null) {
-					if (LOG.isWarnEnabled()) {
-						LOG.warn("Overloading the module '" + loadedEntry.getKey()
-								+ "' with the one from the loaderDefinition '" + entry.getKey()
-								+ "'");
-					}
-				}
+		// add each beanDefinition
+		for (final Entry<String, BeanDefinition> entry : beanDefinitions.entrySet()) {
+			registerModuleBeanDefinition(entry.getKey(), entry.getValue(), loaderId);
+		}
+	}
+
+	/**
+	 * Registers a single <code>beanDefinition</code> to be loaded for the
+	 * <code>Configuration</code>.
+	 * 
+	 * @param id
+	 *          the <code>beanDefinition</code>'s identifier
+	 * @param beanDefinition
+	 *          the <code>BeanDefinition</code> instance to be registered
+	 * @param loaderId
+	 *          the loader's identifier for logging purposes
+	 */
+	protected void registerModuleBeanDefinition(final String id,
+			final BeanDefinition beanDefinition, final String loaderId) {
+
+		// register the module
+		if (Objects.empty(beanDefinition) || Objects.empty(id)) {
+			throw new IllegalArgumentException("The id ('" + id
+					+ "') or the beanDefinition cannot be null.");
+		} else if (moduleDefinitions.put(id, beanDefinition) != null) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("Overloading the moduleDefinition '" + id
+						+ "' with the one from the loaderDefinition '" + loaderId + "'");
+			}
+		} else {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Added the moduleDefinition '" + id
+						+ "' from loaderDefinition '" + loaderId + "'");
 			}
 		}
 	}
 
 	/**
-	 * Get the loaded module for a specified <code>name</code>
+	 * Registers the specified <code>module</code> to all the loaded modules.
 	 * 
-	 * @param name
-	 *          the name of the module to retrieve
+	 * @param id
+	 *          the id of the module to be registered
+	 * @param module
+	 *          the <code>module</code> to be registered
+	 * @param loaderId
+	 *          the id of the loader which loaded the <code>module</code>
 	 * 
-	 * @return the <code>Object</code> associated to the <code>name</code>
-	 *         specified, might be <code>null</code> if no module with the
-	 *         specified <code>name</code> could be found
+	 * @return <code>true</code> if the <code>module</code> was added, otherwise
+	 *         <code>false</code>
 	 */
+	protected boolean registerModule(final String id, final Object module) {
+		final Object current;
+
+		// register the module
+		if (!isModule(id, module)) {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Skipping the bean '" + id + "' as module");
+			}
+
+			return false;
+		} else if ((current = modules.put(id, module)) != null) {
+
+			if (LOG.isWarnEnabled() && !Objects.equals(current, module)) {
+				LOG.warn("Overloading the module '" + id + "'");
+			}
+
+			return true;
+		} else {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Loaded the module '" + id + "'");
+			}
+
+			return true;
+		}
+	}
+
+	@Override
 	public Object getModule(final String name) {
-		return modules.get(name);
+		Object module = modules.get(name);
+
+		// it might be that the module is not instantiated yet
+		if (module == null && moduleFactory != null
+				&& moduleDefinitions.containsKey(name)) {
+			module = moduleFactory.getBean(name);
+
+			// register the module
+			if (registerModule(name, module)) {
+
+				// do some logging
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Pre-Loaded the module '"
+							+ name
+							+ "', no need to be worried this might happen if init-methods are used.");
+				}
+			} else {
+				module = null;
+			}
+		}
+
+		// return the module
+		return module;
+	}
+
+	@Override
+	public Map<String, Object> getAllModules() {
+		return Collections.unmodifiableMap(modules);
 	}
 
 	/**
@@ -253,8 +409,8 @@ public class DefaultConfiguration implements IConfiguration {
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
 	 *         <code>LoaderDefinition</code>
 	 */
-	public ListableBeanFactory loadBeanFactory(
-			final ILoaderDefinition loaderDefinition) {		
+	public DefaultListableBeanFactory loadBeanFactory(
+			final ILoaderDefinition loaderDefinition) {
 		return loadBeanFactory(loaderDefinition.getSelector(),
 				loaderDefinition.getXsltTransformerInputStream(),
 				loaderDefinition.getContext(), loaderDefinition.isValidationEnabled(),
@@ -294,7 +450,7 @@ public class DefaultConfiguration implements IConfiguration {
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
 	 *         parameters
 	 */
-	public ListableBeanFactory loadBeanFactory(final String xmlFileName,
+	public DefaultListableBeanFactory loadBeanFactory(final String xmlFileName,
 			final InputStream xsltTransformer, final boolean validate,
 			final boolean beanOverriding, final boolean loadFromClasspath,
 			final boolean loadFromWorkingDir) {
@@ -336,17 +492,15 @@ public class DefaultConfiguration implements IConfiguration {
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
 	 *         parameters
 	 */
-	public ListableBeanFactory loadBeanFactory(final String xmlFileName,
+	public DefaultListableBeanFactory loadBeanFactory(final String xmlFileName,
 			final InputStream xsltStream, final Class<?> context,
 			final boolean validate, final boolean beanOverriding,
 			final boolean loadFromClasspath, final boolean loadFromWorkingDir) {
 
-		// create the factory
-		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory();
+		// create the factory and enable auto-wiring to setup the core system
+		final DefaultListableBeanFactory factory = SpringHelper
+				.createBeanFactory(false);
 		factory.setAllowBeanDefinitionOverriding(beanOverriding);
-
-		// register the Singleton of the ConfigurationCoreSettings for auto-wiring
-		factory.registerSingleton(coreSettingsId, coreSettings);
 
 		// create the reader
 		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);

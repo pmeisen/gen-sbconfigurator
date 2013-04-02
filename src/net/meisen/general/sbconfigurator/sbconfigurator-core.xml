@@ -10,9 +10,9 @@
   </bean>
   
   <!-- stuff needed for the configuration, the validator and transformer are used for all reads -->
-  <bean id="configuration"   class="net.meisen.general.sbconfigurator.config.DefaultConfiguration" init-method="loadConfiguration" />
-  <bean id="xsdValidator"    class="net.meisen.general.sbconfigurator.config.transformer.DefaultXsdValidator" />
-  <bean id="xsltTransformer" class="net.meisen.general.sbconfigurator.config.transformer.DefaultXsltTransformer" />
+  <bean id="coreConfiguration" class="net.meisen.general.sbconfigurator.config.DefaultConfiguration" />
+  <bean id="xsdValidator"      class="net.meisen.general.sbconfigurator.config.transformer.DefaultXsdValidator" />
+  <bean id="xsltTransformer"   class="net.meisen.general.sbconfigurator.config.transformer.DefaultXsltTransformer" />
   
   <!-- 
       add some core-definitions, those are implemented via the plug-in architecture but without 
@@ -21,6 +21,13 @@
   <bean id="coreLoaderDefinition" class="net.meisen.general.sbconfigurator.config.transformer.DefaultLoaderDefinition">
     <property name="selector" value="sbconfigurator-loader.xml" />
     <property name="xslt" value="net/meisen/general/sbconfigurator/config/transformer/sbconfigurator-loaderToSpringContext.xslt" />
+    <property name="beanOverridingAllowed" value="false" />
+    <property name="loadFromClassPath" value="true" />
+    <property name="loadFromWorkingDir" value="false" />
+  </bean>
+  
+  <bean id="coreBeanLoaderDefinition" class="net.meisen.general.sbconfigurator.config.transformer.DefaultLoaderDefinition">
+    <property name="selector" value="sbconfigurator-bean.xml" />
     <property name="beanOverridingAllowed" value="false" />
     <property name="loadFromClassPath" value="true" />
     <property name="loadFromWorkingDir" value="false" />

@@ -35,7 +35,7 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	private boolean beanOverridingAllowed = false;
 	private boolean validationEnabled = true;
 	private boolean loadFromClassPath = true;
-	private boolean loadFromWorkingDir = true;
+	private boolean loadFromWorkingDir = false;
 
 	/**
 	 * Default constructor which doesn't specify anything. The setters have to be

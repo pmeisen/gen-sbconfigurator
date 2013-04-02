@@ -3,6 +3,8 @@ package net.meisen.general.sbconfigurator;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.helper.SpringHelper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -23,8 +25,11 @@ import org.springframework.core.io.Resource;
 public class ConfigurationCoreSettings {
 	private final static String coreSettingsContext = "sbconfigurator-core.xml";
 
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ConfigurationCoreSettings.class);
+
 	@Autowired
-	@Qualifier("configuration")
+	@Qualifier(IConfiguration.coreConfigurationId)
 	private IConfiguration configuration;
 
 	private boolean configurationValidationEnabled = true;
@@ -51,20 +56,28 @@ public class ConfigurationCoreSettings {
 	 */
 	public static ConfigurationCoreSettings loadCoreSettings(final Class<?> clazz) {
 
-		// create the factory
-		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory();
+		// create the factory with auto-wiring this will bring up the core-system
+		final DefaultListableBeanFactory factory = SpringHelper
+				.createBeanFactory(true);
 		factory.setAllowBeanDefinitionOverriding(false);
 
 		// create the reader
 		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
 
 		// load the core resource into the reader
-		final Resource res = new ClassPathResource(coreSettingsContext, clazz);
-		reader.loadBeanDefinitions(res);
+		final Resource coreRes = new ClassPathResource(coreSettingsContext, clazz);
+		reader.loadBeanDefinitions(coreRes);
 
 		// get the bean
 		final ConfigurationCoreSettings settings = (ConfigurationCoreSettings) factory
 				.getBean("coreSettings");
+
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("The coreSettings are loaded and auto-wired.");
+		}
+
+		// trigger the loading of the Configuration
+		settings.getConfiguration().loadConfiguration();
 
 		return settings;
 	}

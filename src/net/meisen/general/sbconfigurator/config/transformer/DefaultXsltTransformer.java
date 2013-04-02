@@ -16,6 +16,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import net.meisen.general.genmisc.types.Objects;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.api.transformer.IXsltTransformer;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
@@ -47,12 +48,18 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 	 */
 	public void setXsltTransformer(final String xsltClassPath)
 			throws InvalidXsltException {
-		try {
-			setXsltTransformer(new ClassPathResource(xsltClassPath).getInputStream());
-		} catch (final IOException e) {
-			throw new InvalidXsltException(
-					"The xslt could not be read from the classpath '" + xsltClassPath
-							+ "'", e);
+
+		if (Objects.empty(xsltClassPath)) {
+			setXsltTransformer((InputStream) null);
+		} else {
+			try {
+				setXsltTransformer(new ClassPathResource(xsltClassPath)
+						.getInputStream());
+			} catch (final IOException e) {
+				throw new InvalidXsltException(
+						"The xslt could not be read from the classpath '" + xsltClassPath
+								+ "'", e);
+			}
 		}
 	}
 
@@ -71,11 +78,16 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 	 */
 	public void setXsltTransformer(final File xsltFile)
 			throws InvalidXsltException {
-		try {
-			setXsltTransformer(new FileInputStream(xsltFile));
-		} catch (final FileNotFoundException e) {
-			throw new InvalidXsltException("The xslt file '" + xsltFile
-					+ "' could not be found.", e);
+
+		if (Objects.empty(xsltFile)) {
+			setXsltTransformer((InputStream) null);
+		} else {
+			try {
+				setXsltTransformer(new FileInputStream(xsltFile));
+			} catch (final FileNotFoundException e) {
+				throw new InvalidXsltException("The xslt file '" + xsltFile
+						+ "' could not be found.", e);
+			}
 		}
 	}
 
@@ -83,18 +95,23 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 	public void setXsltTransformer(final InputStream xsltStream)
 			throws InvalidXsltException {
 
-		// create an instance of TransformerFactory
-		final TransformerFactory transFact = TransformerFactory.newInstance();
+		if (Objects.empty(xsltStream)) {
+			xsltTransformer = null;
+		} else {
 
-		// create the source
-		final Source xsltSource = new StreamSource(xsltStream);
+			// create an instance of TransformerFactory
+			final TransformerFactory transFact = TransformerFactory.newInstance();
 
-		try {
-			xsltTransformer = transFact.newTransformer(xsltSource);
-		} catch (TransformerConfigurationException e) {
-			throw new InvalidXsltException("The xslt stream could not be read.", e);
-		} finally {
-			Streams.closeIO(xsltStream);
+			// create the source
+			final Source xsltSource = new StreamSource(xsltStream);
+
+			try {
+				xsltTransformer = transFact.newTransformer(xsltSource);
+			} catch (TransformerConfigurationException e) {
+				throw new InvalidXsltException("The xslt stream could not be read.", e);
+			} finally {
+				Streams.closeIO(xsltStream);
+			}
 		}
 	}
 
@@ -192,11 +209,23 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 
 		final Source xmlSource = new StreamSource(xmlStream);
 		final Result result = new StreamResult(outputStream);
+		
+		if (xsltTransformer == null) {
+			try {
+				Streams.copyStream(xmlStream, outputStream);
+			} catch (final IOException e) {
+				throw new TransformationFailedException(
+						"The xmlStream could not be copied to the outputStream", e);
+			}
+		} else {
 
-		try {
-			xsltTransformer.transform(xmlSource, result);
-		} catch (final TransformerException e) {
-			throw new TransformationFailedException("", e);
+			try {
+				xsltTransformer.transform(xmlSource, result);
+			} catch (final TransformerException e) {
+				throw new TransformationFailedException(
+						"The xslt could not transform the specified xmlStream into a valid outputStream",
+						e);
+			}
 		}
 
 		// close the stream - just to be sure
