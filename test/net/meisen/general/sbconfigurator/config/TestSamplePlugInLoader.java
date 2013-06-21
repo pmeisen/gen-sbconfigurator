@@ -33,14 +33,14 @@ public class TestSamplePlugInLoader {
 		assertEquals(configuration.getAllModules().size(), 2);
 
 		// check the module of the loading via loaderDefinition
-		final Object module = configuration.getModule("samplePlugIn");
+		final Object moduleSamplePlugIn = configuration.getModule("samplePlugIn");
 
 		// do some tests
-		assertNotNull(module);
-		assertTrue(module instanceof SamplePlugIn);
+		assertNotNull(moduleSamplePlugIn);
+		assertTrue(moduleSamplePlugIn instanceof SamplePlugIn);
 
 		// now check the plugin
-		final SamplePlugIn plugIn = (SamplePlugIn) module;
+		final SamplePlugIn plugIn = (SamplePlugIn) moduleSamplePlugIn;
 		assertEquals(plugIn.coreSettings, coreSettings);
 		assertEquals(plugIn.configuration, coreSettings.getConfiguration());
 
@@ -48,7 +48,7 @@ public class TestSamplePlugInLoader {
 		final Object beanModule = configuration.getModule("testSampleBeanPlugIn");
 
 		// do some tests
-		assertNotNull(module);
+		assertNotNull(moduleSamplePlugIn);
 		assertTrue("beanModule is instanceof '"
 				+ (beanModule == null ? null : beanModule.getClass().getName()) + "'",
 				beanModule instanceof SamplePlugIn);

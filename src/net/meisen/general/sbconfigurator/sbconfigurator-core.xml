@@ -3,6 +3,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
+  <!-- get the properties used for the whole configuration -->
+  <bean id="corePropertyHolder" class="net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder">
+    <property name="locationSelector" value="*.properties" />
+  </bean>
+
   <!-- get the general settings -->
   <bean id="coreSettings" class="net.meisen.general.sbconfigurator.ConfigurationCoreSettings">
     <property name="configurationValidationEnabled" value="true"/>
@@ -10,9 +15,11 @@
   </bean>
   
   <!-- stuff needed for the configuration, the validator and transformer are used for all reads -->
-  <bean id="coreConfiguration" class="net.meisen.general.sbconfigurator.config.DefaultConfiguration" />
-  <bean id="xsdValidator"      class="net.meisen.general.sbconfigurator.config.transformer.DefaultXsdValidator" />
-  <bean id="xsltTransformer"   class="net.meisen.general.sbconfigurator.config.transformer.DefaultXsltTransformer" />
+  <bean id="coreConfiguration"    class="net.meisen.general.sbconfigurator.config.DefaultConfiguration" />
+  <bean id="xsdValidator"         class="net.meisen.general.sbconfigurator.config.transformer.DefaultXsdValidator" />
+  <bean id="xsltTransformer"      class="net.meisen.general.sbconfigurator.config.transformer.DefaultXsltTransformer" />
+  <bean id="propertyReplacer"     class="net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyReplacer" />
+  <bean id="xmlPropertyReplacer"  class="net.meisen.general.sbconfigurator.config.placeholder.DefaultXmlPropertyReplacer" />
   
   <!-- 
       add some core-definitions, those are implemented via the plug-in architecture but without 

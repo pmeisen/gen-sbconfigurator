@@ -8,9 +8,12 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -33,6 +36,9 @@ public class SpringHelper {
 	 * @param enableAutoWiring
 	 *          <code>true</code> if auto-wiring for the factory should be
 	 *          enabled, otherwise <code>false</code>
+	 * @param allowBeanOverriding
+	 *          <code>true</code> if a bean can override another bean with the
+	 *          same id, otherwise <code>false</code>
 	 * 
 	 * @return a <code>DefaultListableBeanFactory</code> with some default
 	 *         settings
@@ -41,17 +47,23 @@ public class SpringHelper {
 	 * @see DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
 	 */
 	public static DefaultListableBeanFactory createBeanFactory(
-			final boolean enableAutoWiring) {
+			final boolean enableAutoWiring, final boolean allowBeanOverriding) {
 
 		// create the factory
 		final DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-		factory.setAllowBeanDefinitionOverriding(false);
+		factory.setAllowBeanDefinitionOverriding(allowBeanOverriding);
 
 		// enable auto-wiring
 		if (enableAutoWiring) {
+			// get the resolver used for autowiring, we want the qualifier to be used
+			// when resolving
+			final AutowireCandidateResolver resolver = new QualifierAnnotationAutowireCandidateResolver();
+
+			// now create the post processor and set the factory and the resolver
 			final AutowiredAnnotationBeanPostProcessor autowiredPostProcessor = new AutowiredAnnotationBeanPostProcessor();
 			autowiredPostProcessor.setBeanFactory(factory);
 			factory.addBeanPostProcessor(autowiredPostProcessor);
+			factory.setAutowireCandidateResolver(resolver);
 		}
 
 		return factory;
@@ -124,8 +136,7 @@ public class SpringHelper {
 	 * the exceptions away and makes handling easier.
 	 * 
 	 * @param res
-	 *          the <code>ByteArrayResource</code> to get the
-	 *          <code>InputStream</code> for
+	 *          the <code>Resource</code> to get the <code>InputStream</code> for
 	 * 
 	 * @return the <code>InputStream</code> for the <code>ByteArrayResource</code>
 	 *         or <code>null</code> if an exception was thrown while creating the
@@ -133,7 +144,7 @@ public class SpringHelper {
 	 * 
 	 * @see ByteArrayResource#getInputStream()
 	 */
-	public static InputStream getInputStream(final ByteArrayResource res) {
+	public static InputStream getInputStream(final Resource res) {
 
 		try {
 			return res.getInputStream();

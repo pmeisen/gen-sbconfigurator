@@ -24,6 +24,10 @@ public interface IConfiguration {
 	 * @see ConfigurationCoreSettings#getConfiguration()
 	 */
 	public final static String coreConfigurationId = "coreConfiguration";
+	/**
+	 * The id used to represent the <code>corePropertyHolder</code>
+	 */
+	public final static String corePropertyHolderId = "corePropertyHolder";
 
 	/**
 	 * Loads the <code>Configuration</code> of the application. This method is

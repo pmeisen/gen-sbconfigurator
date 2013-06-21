@@ -55,11 +55,27 @@ public class ConfigurationCoreSettings {
 	 * @return the loaded <code>ConfigurationCoreSettings</code>
 	 */
 	public static ConfigurationCoreSettings loadCoreSettings(final Class<?> clazz) {
+		return loadCoreSettings(coreSettingsContext, clazz);
+	}
+
+	/**
+	 * Method to load the <code>ConfigurationCoreSettings</code> and all the other
+	 * modules used by the <code>CoreSettings</code>.
+	 * 
+	 * @param coreSettingsContext
+	 *          the name of the context file to load the
+	 *          <code>ConfigurationCoreSettings</code> from
+	 * @param clazz
+	 *          using the <code>coreSettingsContext</code> of the specified class
+	 * 
+	 * @return the loaded <code>ConfigurationCoreSettings</code>
+	 */
+	public static ConfigurationCoreSettings loadCoreSettings(
+			final String coreSettingsContext, final Class<?> clazz) {
 
 		// create the factory with auto-wiring this will bring up the core-system
-		final DefaultListableBeanFactory factory = SpringHelper
-				.createBeanFactory(true);
-		factory.setAllowBeanDefinitionOverriding(false);
+		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory(
+				true, true);
 
 		// create the reader
 		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);

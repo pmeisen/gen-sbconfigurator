@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+  <bean class="net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder">
+  	<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_NEVER"/>
+    <property name="propertiesArray">
+      <list>
+        <value>
+          first.testValue1=1st-value1
+          first.testValue2=1st-value2
+        </value>
+        <value>
+          second.testValue1=2nd-value1
+          second.testValue2=2nd-value2
+        </value>
+      </list>
+    </property>
+  </bean>
+</beans>

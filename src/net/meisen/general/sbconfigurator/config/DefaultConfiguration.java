@@ -8,13 +8,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import net.meisen.general.genmisc.resources.Resource;
 import net.meisen.general.genmisc.resources.ResourceInfo;
+import net.meisen.general.genmisc.resources.Xml;
 import net.meisen.general.genmisc.types.Objects;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
+import net.meisen.general.sbconfigurator.api.placeholder.IXmlPropertyReplacer;
 import net.meisen.general.sbconfigurator.api.transformer.ILoaderDefinition;
 import net.meisen.general.sbconfigurator.api.transformer.IXsdValidator;
 import net.meisen.general.sbconfigurator.api.transformer.IXsltTransformer;
@@ -22,6 +25,7 @@ import net.meisen.general.sbconfigurator.config.exception.InvalidConfigurationEx
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
 import net.meisen.general.sbconfigurator.config.exception.TransformationFailedException;
 import net.meisen.general.sbconfigurator.config.exception.ValidationFailedException;
+import net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder;
 import net.meisen.general.sbconfigurator.helper.SpringHelper;
 
 import org.slf4j.Logger;
@@ -31,9 +35,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.DefaultDocumentLoader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.MethodInvoker;
+import org.springframework.util.xml.XmlValidationModeDetector;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  * The default implementation of the <code>IConfiguration</code> interface. This
@@ -55,6 +64,10 @@ public class DefaultConfiguration implements IConfiguration {
 	@Autowired
 	@Qualifier(coreSettingsId)
 	private ConfigurationCoreSettings coreSettings;
+
+	@Autowired
+	@Qualifier(corePropertyHolderId)
+	private SpringPropertyHolder corePropertyHolder;
 
 	/**
 	 * This <code>Collection</code> is auto-wired with all the
@@ -84,6 +97,10 @@ public class DefaultConfiguration implements IConfiguration {
 	@Autowired
 	@Qualifier("xsltTransformer")
 	private IXsltTransformer xsltTransformer;
+
+	@Autowired(required = false)
+	@Qualifier(IXmlPropertyReplacer.xmlReplacerId)
+	private IXmlPropertyReplacer xmlReplacer;
 
 	/**
 	 * The <code>Collection</code> of all the loaded modules. A module can be
@@ -200,9 +217,10 @@ public class DefaultConfiguration implements IConfiguration {
 		}
 
 		// create the factory
-		moduleFactory = SpringHelper.createBeanFactory(true);
+		moduleFactory = SpringHelper.createBeanFactory(true, false);
 		moduleFactory.registerSingleton(coreSettingsId, coreSettings);
 		moduleFactory.registerSingleton(coreConfigurationId, this);
+		moduleFactory.registerSingleton(corePropertyHolderId, corePropertyHolder);
 		for (final Entry<String, BeanDefinition> entry : moduleDefinitions
 				.entrySet()) {
 			moduleFactory.registerBeanDefinition(entry.getKey(), entry.getValue());
@@ -265,6 +283,8 @@ public class DefaultConfiguration implements IConfiguration {
 		} else if (coreSettingsId.equals(id)) {
 			return false;
 		} else if (coreConfigurationId.equals(id)) {
+			return false;
+		} else if (corePropertyHolderId.equals(id)) {
 			return false;
 		} else if (module instanceof ConfigurationCoreSettings) {
 			return false;
@@ -498,9 +518,8 @@ public class DefaultConfiguration implements IConfiguration {
 			final boolean loadFromClasspath, final boolean loadFromWorkingDir) {
 
 		// create the factory and enable auto-wiring to setup the core system
-		final DefaultListableBeanFactory factory = SpringHelper
-				.createBeanFactory(false);
-		factory.setAllowBeanDefinitionOverriding(beanOverriding);
+		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory(
+				beanOverriding, false);
 
 		// create the reader
 		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
@@ -564,7 +583,7 @@ public class DefaultConfiguration implements IConfiguration {
 	}
 
 	/**
-	 * Adds a specific resource to the <code>reader</code>
+	 * Adds a specific resource to the <code>reader</code>.
 	 * 
 	 * @param reader
 	 *          the <code>XmlBeanDefinitionReader</code> to which the resource
@@ -596,7 +615,10 @@ public class DefaultConfiguration implements IConfiguration {
 		}
 
 		// now let's get the resource
-		ByteArrayResource res = new ByteArrayResource(content);
+		org.springframework.core.io.Resource res = new ByteArrayResource(content);
+		if (xmlReplacer != null) {
+			res = replacePlaceholders(res);
+		}
 
 		// validate the resource if needed
 		if (validate && xsdValidator != null
@@ -672,5 +694,116 @@ public class DefaultConfiguration implements IConfiguration {
 	 */
 	public boolean isUserLoaderOverridingAllowed() {
 		return coreSettings != null && coreSettings.isUserLoaderOverridingAllowed();
+	}
+
+	/**
+	 * Loads the <code>Document</code> from the specified
+	 * {@link org.springframework.core.io.Resource Resource}.
+	 * 
+	 * @param res
+	 *          the resource to load the {@link Document} from
+	 * 
+	 * @return the <code>Document</code> specified by the passed
+	 *         <code>Resource</code>
+	 */
+	protected Document loadDocument(final org.springframework.core.io.Resource res) {
+
+		// get the resource as encoded one
+		final EncodedResource encRes = new EncodedResource(res);
+
+		// read the XML document and replace the placeholders
+		InputStream inputStream = null;
+		InputSource inputSource = null;
+		Document doc = null;
+		try {
+			inputStream = encRes.getResource().getInputStream();
+			inputSource = new InputSource(inputStream);
+			if (encRes.getEncoding() != null) {
+				inputSource.setEncoding(encRes.getEncoding());
+			}
+
+			// get the Document
+			final DefaultDocumentLoader loader = new DefaultDocumentLoader();
+			doc = loader.loadDocument(inputSource, null, null,
+					XmlValidationModeDetector.VALIDATION_NONE, false);
+		} catch (final Exception e) {
+
+			// log it
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(
+						"Unable to parse the passed ByteArrayResource '"
+								+ res.getDescription() + "'.", e);
+			}
+		} finally {
+
+			// close the streams
+			Streams.closeIO(inputSource);
+			Streams.closeIO(inputStream);
+		}
+
+		return doc;
+	}
+
+	/**
+	 * Replaces all the placeholders (i.e. properties) within the passed
+	 * {@link org.springframework.core.io.Resource Resource}.
+	 * 
+	 * @param res
+	 *          the <code>Resource</code> to replace the placeholders in
+	 * 
+	 * @return a <code>Resource</code> with replaced placeholders
+	 */
+	protected org.springframework.core.io.Resource replacePlaceholders(
+			final org.springframework.core.io.Resource res) {
+		org.springframework.core.io.Resource resultRes = res;
+
+		// replace the values
+		if (corePropertyHolder != null && xmlReplacer != null) {
+
+			// load the Document specified by the resource
+			final Document doc = loadDocument(res);
+
+			// get the properties
+			Properties properties = null;
+			try {
+				properties = corePropertyHolder.getProperties();
+			} catch (final IOException e) {
+				if (LOG.isErrorEnabled()) {
+					LOG.error(
+							"Could not load the properties specified for by propertyHolder",
+							e);
+				}
+			}
+
+			// get the document with the replacements
+			final Document resDoc = xmlReplacer.replacePlaceholders(doc, properties);
+
+			// get the content of the new document
+			final byte[] content = Xml.createByteArray(resDoc);
+
+			// now create the resource from the content
+			resultRes = new ByteArrayResource(content);
+		}
+
+		// return the new resource
+		return resultRes;
+	}
+
+	/**
+	 * Gets all the <code>Properties</code> defined for <code>this</code>
+	 * configuration.
+	 * 
+	 * @return the <code>Properties</code> of <code>this</code> configuration
+	 */
+	public Properties getProperties() {
+		try {
+			return corePropertyHolder.getProperties();
+		} catch (final IOException e) {
+			if (LOG.isErrorEnabled()) {
+				LOG.error("Unable to load the properties of the configuration.", e);
+			}
+
+			return new Properties();
+		}
 	}
 }
