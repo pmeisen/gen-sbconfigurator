@@ -551,6 +551,11 @@ public class DefaultConfiguration implements IConfiguration {
 			final Collection<ResourceInfo> resInfos = Resource.getResources(
 					xmlFileName, loadFromClasspath, loadFromWorkingDir);
 
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Found '" + resInfos.size() + "' to be loaded for selector '"
+						+ xmlFileName + "'");
+			}
+
 			// read all the loaded resources
 			for (final ResourceInfo resInfo : resInfos) {
 				final InputStream resIo = Resource.getResourceAsStream(resInfo);
