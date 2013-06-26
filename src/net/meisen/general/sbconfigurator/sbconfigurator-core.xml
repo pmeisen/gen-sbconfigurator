@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
   <!-- get the properties used for the whole configuration -->
-  <bean id="corePropertyHolder" class="net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder">
+  <bean id="corePropertyHolder" class="net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder" init-method="cacheProperties">
     <property name="locationSelector" value="sbconfigurator.properties" />
   </bean>
 

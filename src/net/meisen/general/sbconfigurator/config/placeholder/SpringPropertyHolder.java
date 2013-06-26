@@ -117,6 +117,10 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
+	private Properties allDefinedProperties = null;
+
+	private Properties allLocalProperties = null;
+
 	@Autowired(required = false)
 	List<SpringPropertyHolder> propertyHolders = new ArrayList<SpringPropertyHolder>();
 
@@ -148,6 +152,29 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	}
 
 	/**
+	 * Makes sure that the properties are cached, the cached properties will be
+	 * used until the cache is reseted.
+	 * 
+	 * @throws IOException
+	 *           if the defined properties
+	 */
+	public void cacheProperties() throws IOException {
+		resetCache();
+
+		// fill up the cache again
+		getProperties();
+	}
+
+	/**
+	 * Resets the cache, the next call of the {@link #cacheProperties()} or
+	 * {@link #getProperties(boolean)} method will set the cache again
+	 */
+	public void resetCache() {
+		allDefinedProperties = null;
+		allLocalProperties = null;
+	}
+
+	/**
 	 * Get all the properties defined by <code>this</code> holder.
 	 * 
 	 * @param inclOtherReplacer
@@ -162,15 +189,47 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 */
 	public Properties getProperties(final boolean inclOtherReplacer)
 			throws IOException {
+
+		if (inclOtherReplacer && allDefinedProperties != null) {
+			return allDefinedProperties;
+		} else if (!inclOtherReplacer && allLocalProperties != null) {
+			return allLocalProperties;
+		} else {
+			final Properties localResult = getLocalProperties();
+			final Properties otherResult = getOtherProperties();
+
+			// the result which will be set
+			final Properties result = new Properties();
+
+			// get the other replacer first if they don't overwrite
+			if (!isOtherHolderOverride()) {
+				CollectionUtils.mergePropertiesIntoMap(otherResult, result);
+			}
+
+			// get the localResults
+			CollectionUtils.mergePropertiesIntoMap(localResult, result);
+
+			// other replacer can overwrite this one
+			if (isOtherHolderOverride()) {
+				CollectionUtils.mergePropertiesIntoMap(otherResult, result);
+			}
+
+			// set the properties to keep the result in mind
+			allDefinedProperties = result;
+			allLocalProperties = localResult;
+
+			// return all properties or just the local once
+			return inclOtherReplacer ? allDefinedProperties : allLocalProperties;
+		}
+	}
+
+	protected Properties getLocalProperties() throws IOException {
+
+		// get the localResults
 		final Properties result = new Properties();
 
-		// get the other replacer first if they don't overwrite
-		if (!isOtherHolderOverride() && inclOtherReplacer) {
-			CollectionUtils
-					.mergePropertiesIntoMap(getOtherHolderProperties(), result);
-		}
-
-		// fallback means use them if no others are there, therefore add them first
+		// fallback means use them if no others are there, therefore add them
+		// first
 		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
 			CollectionUtils.mergePropertiesIntoMap(System.getProperties(), result);
 		}
@@ -184,13 +243,6 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 			CollectionUtils.mergePropertiesIntoMap(System.getProperties(), result);
 		}
 
-		// other replacer can overwrite this one
-		if (isOtherHolderOverride() && inclOtherReplacer) {
-			CollectionUtils
-					.mergePropertiesIntoMap(getOtherHolderProperties(), result);
-		}
-
-		// return all properties
 		return result;
 	}
 
@@ -206,7 +258,7 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * @throws IOException
 	 *           if a file resource is defined but cannot be read or accessed
 	 */
-	protected Properties getOtherHolderProperties() throws IOException {
+	protected Properties getOtherProperties() throws IOException {
 		final Properties result = new Properties();
 
 		for (final SpringPropertyHolder propertyHolder : propertyHolders) {
@@ -214,7 +266,7 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 					.getSystemPropertiesMode();
 			propertyHolder.setSystemPropertiesMode(SYSTEM_PROPERTIES_MODE_NEVER);
 			CollectionUtils.mergePropertiesIntoMap(
-					propertyHolder.getProperties(false), result);
+					propertyHolder.getLocalProperties(), result);
 			propertyHolder.setSystemPropertiesMode(oldSystemPropertyMode);
 		}
 
