@@ -223,6 +223,15 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 		}
 	}
 
+	/**
+	 * Method to retrieve the locally, i.e. not defined by other
+	 * <code>SpringPropertyHolder</code> instances, properties.
+	 * 
+	 * @return the locally defined properties
+	 * 
+	 * @throws IOException
+	 *           if a defined property-file cannot be read
+	 */
 	protected Properties getLocalProperties() throws IOException {
 
 		// get the localResults
