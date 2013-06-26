@@ -58,12 +58,12 @@ public class SpringHelper {
 			// get the resolver used for autowiring, we want the qualifier to be used
 			// when resolving
 			final AutowireCandidateResolver resolver = new QualifierAnnotationAutowireCandidateResolver();
-
+			factory.setAutowireCandidateResolver(resolver);
+			
 			// now create the post processor and set the factory and the resolver
 			final AutowiredAnnotationBeanPostProcessor autowiredPostProcessor = new AutowiredAnnotationBeanPostProcessor();
 			autowiredPostProcessor.setBeanFactory(factory);
 			factory.addBeanPostProcessor(autowiredPostProcessor);
-			factory.setAutowireCandidateResolver(resolver);
 		}
 
 		return factory;

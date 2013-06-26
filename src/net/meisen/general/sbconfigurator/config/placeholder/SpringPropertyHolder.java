@@ -11,13 +11,14 @@ import java.util.Set;
 
 import net.meisen.general.genmisc.resources.ResourceInfo;
 import net.meisen.general.genmisc.types.Objects;
+import net.meisen.general.genmisc.types.Streams;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.Constants;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 
@@ -119,26 +120,18 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	@Autowired(required = false)
 	List<SpringPropertyHolder> propertyHolders = new ArrayList<SpringPropertyHolder>();
 
+	/**
+	 * Default constructor, which sets the
+	 * {@link #setIgnoreUnresolvablePlaceholders(boolean)} to <code>true</code>.
+	 */
+	public SpringPropertyHolder() {
+		// change the default behavior to true
+		setIgnoreUnresolvablePlaceholders(true);
+	}
+
 	@Override
 	protected Properties mergeProperties() throws IOException {
-		final Properties result = new Properties();
-
-		// fallback means use them if no others are there, therefore add them first
-		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
-			CollectionUtils.mergePropertiesIntoMap(System.getProperties(), result);
-		}
-
-		// now override all the system once (if there are any) with the merged
-		// properties
-		CollectionUtils.mergePropertiesIntoMap(super.mergeProperties(), result);
-
-		// if system properties should override to it now
-		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
-			CollectionUtils.mergePropertiesIntoMap(System.getProperties(), result);
-		}
-
-		// return the result
-		return result;
+		return getProperties(true);
 	}
 
 	/**
@@ -177,8 +170,19 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 					.mergePropertiesIntoMap(getOtherHolderProperties(), result);
 		}
 
-		// get the merge once
-		CollectionUtils.mergePropertiesIntoMap(mergeProperties(), result);
+		// fallback means use them if no others are there, therefore add them first
+		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
+			CollectionUtils.mergePropertiesIntoMap(System.getProperties(), result);
+		}
+
+		// now override all the system once (if there are any) with the merged
+		// properties
+		CollectionUtils.mergePropertiesIntoMap(super.mergeProperties(), result);
+
+		// if system properties should override to it now
+		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
+			CollectionUtils.mergePropertiesIntoMap(System.getProperties(), result);
+		}
 
 		// other replacer can overwrite this one
 		if (isOtherHolderOverride() && inclOtherReplacer) {
@@ -249,8 +253,8 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	}
 
 	/**
-	 * Defines one selector for <code>this</code> instance. All other
-	 * pre-defined selectors are removed.
+	 * Defines one selector for <code>this</code> instance. All other pre-defined
+	 * selectors are removed.
 	 * 
 	 * @param locationSelector
 	 *          the selector to be used
@@ -309,11 +313,20 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 					continue;
 				}
 
+				// get the InputStream
 				final InputStream resIo = net.meisen.general.genmisc.resources.Resource
 						.getResourceAsStream(resInfo);
 
-				// add the inputstream
-				locations.add(new InputStreamResource(resIo));
+				// transform the stream to a byte-array
+				try {
+					final byte[] byteArray = Streams.copyStreamToByteArray(resIo);
+					locations.add(new ByteArrayResource(byteArray));
+				} catch (final IOException e) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn("Skipping resource '" + resInfo
+								+ "', unable to access the resource.", e);
+					}
+				}
 			}
 		}
 

@@ -102,7 +102,7 @@ public class DefaultXmlPropertyReplacer implements IXmlPropertyReplacer {
 			// skip it was a null node which should never happen
 		} else if (nodeType == Node.ATTRIBUTE_NODE
 				|| nodeType == Node.CDATA_SECTION_NODE || nodeType == Node.TEXT_NODE) {
-			final String replaced = replacer.replacePlaceholders(
+			final String replaced = getReplacer().replacePlaceholders(
 					node.getTextContent(), properties);
 			node.setNodeValue(replaced);
 		} else if (nodeType == Node.COMMENT_NODE || nodeType == Node.ELEMENT_NODE) {

@@ -119,7 +119,7 @@ public class DefaultConfiguration implements IConfiguration {
 	 * The <code>DefaultListableBeanFactory</code> which is used to load all the
 	 * modules. This factory has to be an attribute, because of pre-loading
 	 * purposes, i.e. if a bean retrieves a module from the configuration prior to
-	 * the loading of the module (i.e. within a init-method).
+	 * the loading of the module (i.e. within an init-method).
 	 */
 	private DefaultListableBeanFactory moduleFactory = null;
 
@@ -212,8 +212,13 @@ public class DefaultConfiguration implements IConfiguration {
 
 		// we collected everything
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("All moduleDefinitions '" + moduleDefinitions.size()
-					+ "' are loaded. The modules will be instantiated now.");
+			LOG.trace("Loaded '" + moduleDefinitions.size()
+					+ "' moduleDefinitions. The modules will be instantiated now.");
+
+			LOG.trace("The following properties have been loaded:");
+			for (final Entry<Object, Object> e : getProperties().entrySet()) {
+				LOG.trace(" - " + e.getKey() + " = " + e.getValue());
+			}
 		}
 
 		// create the factory
@@ -386,8 +391,9 @@ public class DefaultConfiguration implements IConfiguration {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getModule(final String name) {
+	public <T> T getModule(final String name) {
 		Object module = modules.get(name);
 
 		// it might be that the module is not instantiated yet
@@ -410,7 +416,7 @@ public class DefaultConfiguration implements IConfiguration {
 		}
 
 		// return the module
-		return module;
+		return (T) module;
 	}
 
 	@Override
@@ -577,6 +583,13 @@ public class DefaultConfiguration implements IConfiguration {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Loaded factory for files '" + xmlFileName + "' (size: "
 					+ factory.getBeanDefinitionCount() + ")");
+		}
+
+		// use the postProcessing to replace properties (i.e. for imports, those are
+		// loaded directly via Spring and therefore not replaced within the normal
+		// replacement)
+		if (corePropertyHolder != null) {
+			corePropertyHolder.postProcessBeanFactory(factory);
 		}
 
 		return factory;
@@ -764,16 +777,7 @@ public class DefaultConfiguration implements IConfiguration {
 			final Document doc = loadDocument(res);
 
 			// get the properties
-			Properties properties = null;
-			try {
-				properties = corePropertyHolder.getProperties();
-			} catch (final IOException e) {
-				if (LOG.isErrorEnabled()) {
-					LOG.error(
-							"Could not load the properties specified for by propertyHolder",
-							e);
-				}
-			}
+			final Properties properties = getProperties();
 
 			// get the document with the replacements
 			final Document resDoc = xmlReplacer.replacePlaceholders(doc, properties);

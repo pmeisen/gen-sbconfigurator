@@ -1,6 +1,7 @@
 package net.meisen.general.sbconfigurator.config.placeholder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -52,7 +53,31 @@ public class TestSpringPropertyHolder {
 	 *         <code>id</code>
 	 */
 	protected Properties loadPropertyBean(final String xmlFile, final String id) {
+		final SpringPropertyHolder springProperties = getSpringPropertyHolder(
+				xmlFile, id);
 
+		// get the properties
+		try {
+			return springProperties.getProperties();
+		} catch (final IOException e) {
+			throw new IllegalStateException("Invalid definition for properties.", e);
+		}
+	}
+
+	/**
+	 * Helper method to retrieve the bean which holds the properties.
+	 * 
+	 * @param xmlFile
+	 *          the <code>xmlFile</code> to load the
+	 *          <code>SpringPropertyHolder</code> from
+	 * @param id
+	 *          the id of the bean to be loaded, can be <code>null</code> if no
+	 *          specific <code>SpringPropertyHolder</code> should be used
+	 * 
+	 * @return the loaded <code>SpringPropertyHolder</code>
+	 */
+	protected SpringPropertyHolder getSpringPropertyHolder(final String xmlFile,
+			final String id) {
 		// factory for the beans
 		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory(
 				true, false);
@@ -66,16 +91,8 @@ public class TestSpringPropertyHolder {
 		reader.loadBeanDefinitions(res);
 
 		// get the bean
-		final SpringPropertyHolder springProperties = id == null ? factory
-				.getBean(SpringPropertyHolder.class) : (SpringPropertyHolder) factory
-				.getBean(id);
-
-		// get the properties
-		try {
-			return springProperties.getProperties();
-		} catch (final IOException e) {
-			throw new IllegalStateException("Invalid definition for properties.", e);
-		}
+		return id == null ? factory.getBean(SpringPropertyHolder.class)
+				: (SpringPropertyHolder) factory.getBean(id);
 	}
 
 	/**
@@ -207,5 +224,32 @@ public class TestSpringPropertyHolder {
 		assertEquals("file-value1", properties.get("testValue1"));
 		assertEquals("local-value2", properties.get("testValue2"));
 		assertEquals("file-value3", properties.get("testValue3"));
+	}
+
+	/**
+	 * Tests to read the properties retrieved by a selector several times. This
+	 * test-case was added because of a bug-report: <br/>
+	 * Accessing properties retrieved by selectors several times failed, because
+	 * the InputStream can only be read once.
+	 * 
+	 * @throws IOException
+	 *           if the properties cannot be read the first time
+	 */
+	@Test
+	public void testSeveralLoadingOfPropertiesFromSelector() throws IOException {
+		final SpringPropertyHolder holder = getSpringPropertyHolder(
+				"propertyFilesBySelectors.xml", null);
+
+		// the first time we should be able to access anyways (already tested)
+		holder.getProperties();
+
+		// the properties should be readable a second time
+		try {
+			holder.getProperties();
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail("Could not access the InputStream several times ('" + e.getMessage()
+					+ "')");
+		}
 	}
 }

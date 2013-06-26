@@ -36,5 +36,4 @@ public interface IXmlPropertyReplacer {
 	 */
 	public Document replacePlaceholders(final Document doc,
 			final Properties properties);
-
 }

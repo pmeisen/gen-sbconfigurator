@@ -2,15 +2,10 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
-  
+
   <!-- create a pojo to test replacing -->
-  <bean id="testSamplePojo" class="net.meisen.general.sbconfigurator.test.sampleplugin.SamplePojo">
+  <bean id="testAnotherPojo" class="net.meisen.general.sbconfigurator.test.sampleplugin.SamplePojo">
     <property name="testValue" value="value" />
     <property name="replacedValue" value="${test.pojo.replacement}" />
   </bean>
-
-  <!-- get the general settings -->
-  <bean id="testSampleBeanPlugIn" class="net.meisen.general.sbconfigurator.test.sampleplugin.SamplePlugIn" />
-  
-  <import resource="classpath:/net/meisen/general/sbconfigurator/test/loader/sbconfigurator-bean-test.xml"/>
 </beans>

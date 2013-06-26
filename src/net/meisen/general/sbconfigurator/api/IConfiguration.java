@@ -50,7 +50,7 @@ public interface IConfiguration {
 	 *         specified, might be <code>null</code> if no module with the
 	 *         specified <code>name</code> could be found
 	 */
-	public Object getModule(final String name);
+	public <T> T getModule(final String name);
 
 	/**
 	 * Method to retrieve all the modules loaded for the

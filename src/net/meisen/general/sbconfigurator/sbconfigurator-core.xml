@@ -5,7 +5,7 @@
 
   <!-- get the properties used for the whole configuration -->
   <bean id="corePropertyHolder" class="net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder">
-    <property name="locationSelector" value="*.properties" />
+    <property name="locationSelector" value="sbconfigurator.properties" />
   </bean>
 
   <!-- get the general settings -->

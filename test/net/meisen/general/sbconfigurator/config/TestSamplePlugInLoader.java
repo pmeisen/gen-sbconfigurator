@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.test.sampleplugin.SamplePlugIn;
+import net.meisen.general.sbconfigurator.test.sampleplugin.SamplePojo;
 
 import org.junit.Test;
 
@@ -30,11 +31,27 @@ public class TestSamplePlugInLoader {
 				.getConfiguration();
 
 		// check the loaded modules
-		assertEquals(configuration.getAllModules().size(), 2);
+		assertEquals(configuration.getAllModules().size(), 4);
 
+		// check the pojo
+		final SamplePojo moduleSamplePojo = configuration.getModule("testSamplePojo");
+		
+		// do some tests for the pojo
+		assertNotNull(moduleSamplePojo);
+		assertEquals(moduleSamplePojo.getTestValue(), "value");
+		assertEquals(moduleSamplePojo.getReplacedValue(), "replacedvalue");
+		
+		// check another pojo
+		final SamplePojo moduleAnotherPojo = configuration.getModule("testAnotherPojo");
+		
+		// do some tests for the pojo
+		assertNotNull(moduleAnotherPojo);
+		assertEquals(moduleAnotherPojo.getTestValue(), "value");
+		assertEquals(moduleAnotherPojo.getReplacedValue(), "replacedvalue");
+		
 		// check the module of the loading via loaderDefinition
 		final Object moduleSamplePlugIn = configuration.getModule("samplePlugIn");
-
+		
 		// do some tests
 		assertNotNull(moduleSamplePlugIn);
 		assertTrue(moduleSamplePlugIn instanceof SamplePlugIn);
