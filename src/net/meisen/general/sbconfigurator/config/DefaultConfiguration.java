@@ -3,9 +3,12 @@ package net.meisen.general.sbconfigurator.config;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -216,7 +219,32 @@ public class DefaultConfiguration implements IConfiguration {
 					+ "' moduleDefinitions. The modules will be instantiated now.");
 
 			LOG.trace("The following properties have been loaded:");
-			for (final Entry<Object, Object> e : getProperties().entrySet()) {
+
+			final List<Entry<Object, Object>> list = new ArrayList<Entry<Object, Object>>();
+			list.addAll(getProperties().entrySet());
+
+			Collections.sort(list, new Comparator<Entry<Object, Object>>() {
+
+				@Override
+				public int compare(final Entry<Object, Object> e1,
+						final Entry<Object, Object> e2) {
+
+					// determine if there are nulls
+					final boolean e1Null = e1 == null;
+					final boolean e2Null = e2 == null;
+
+					// check and return the result
+					if (e1Null && e2Null) {
+						return 0;
+					} else if (e1Null || e2Null) {
+						return e1Null ? -1 : 1;
+					} else {
+						return e1.getKey().toString().compareTo(e2.getKey().toString());
+					}
+				}
+			});
+
+			for (final Entry<Object, Object> e : list) {
 				LOG.trace(" - " + e.getKey() + " = " + e.getValue());
 			}
 		}
