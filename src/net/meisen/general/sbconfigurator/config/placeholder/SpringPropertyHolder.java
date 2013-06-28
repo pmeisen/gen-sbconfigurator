@@ -109,7 +109,7 @@ import org.springframework.util.CollectionUtils;
 public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(SpringPropertyHolder.class);
-
+	
 	private static final Constants constants = new Constants(
 			PropertyPlaceholderConfigurer.class);
 

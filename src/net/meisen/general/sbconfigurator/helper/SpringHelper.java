@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -59,7 +60,7 @@ public class SpringHelper {
 			// when resolving
 			final AutowireCandidateResolver resolver = new QualifierAnnotationAutowireCandidateResolver();
 			factory.setAutowireCandidateResolver(resolver);
-			
+
 			// now create the post processor and set the factory and the resolver
 			final AutowiredAnnotationBeanPostProcessor autowiredPostProcessor = new AutowiredAnnotationBeanPostProcessor();
 			autowiredPostProcessor.setBeanFactory(factory);
@@ -154,6 +155,53 @@ public class SpringHelper {
 			}
 
 			return null;
+		}
+	}
+
+	/**
+	 * 
+	 * @param exception
+	 *          the <code>Exception</code> to find the first
+	 *          none-SpringBeanException in the stack
+	 * @param exceptionClazz
+	 *          the type of the expected exception to be found
+	 * 
+	 * @throws IllegalArgumentException
+	 *           if the specified <code>exceptionClazz</code> is <code>null</code>
+	 *           or if the found none-SpringBeanException is not of the specified
+	 *           type (i.e. cannot be assigned to the <code>exceptionClazz</code>)
+	 * 
+	 * @return the first none-SpringBeanException found within the stack; will
+	 *         return <code>null</code> if the stack consists only of
+	 *         SpringBeanException or if the passed <code>exception</code> is
+	 *         <code>null</code>
+	 */
+	public static <T extends Throwable> T getNoneSpringBeanException(
+			final Throwable exception, final Class<T> exceptionClazz) {
+
+		if (exceptionClazz == null
+				|| !Throwable.class.isAssignableFrom(exceptionClazz)) {
+			throw new IllegalArgumentException(
+					"The exceptionClazz cannot be null and must be an instance of Throwable.");
+		} else if (exception == null) {
+			return null;
+		} else if (exception instanceof BeanCreationException) {
+			return getNoneSpringBeanException(exception.getCause(), exceptionClazz);
+		} else if (exceptionClazz.isAssignableFrom(exception.getClass())) {
+			@SuppressWarnings("unchecked")
+			final T tException = (T) exception;
+			return tException;
+		} else if (exceptionClazz.isAssignableFrom(RuntimeException.class)) {
+			@SuppressWarnings("unchecked")
+			final T wrapperException = (T) new RuntimeException(
+					exception.getMessage() + " ('" + exception.getClass().getName()
+							+ "')", exception.getCause());
+			return wrapperException;
+		} else {
+			throw new IllegalArgumentException("The exception '"
+					+ exception.getMessage() + " (" + exception.getClass()
+					+ ") is not assignable to the expected exceptionClazz '"
+					+ exceptionClazz.getName() + "'");
 		}
 	}
 }
