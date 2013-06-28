@@ -7,6 +7,7 @@ import net.meisen.general.sbconfigurator.config.placeholder.TestSpringPropertyHo
 import net.meisen.general.sbconfigurator.config.transformer.TestDefaultXsdValidator;
 import net.meisen.general.sbconfigurator.config.transformer.TestDefaultXsltTransformer;
 import net.meisen.general.sbconfigurator.helper.TestSpringHelper;
+import net.meisen.general.sbconfigurator.helper.TestStringParser;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -18,7 +19,7 @@ import org.junit.runners.Suite;
  * 
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ TestSpringPropertyHolder.class,
+@Suite.SuiteClasses({ TestSpringPropertyHolder.class, TestStringParser.class,
 		TestDefaultXmlPropertyReplacer.class, TestDefaultXsdValidator.class,
 		TestDefaultXsltTransformer.class, TestDefaultConfiguration.class,
 		TestSamplePlugInLoader.class, TestSpringHelper.class })
