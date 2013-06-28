@@ -560,11 +560,20 @@ public class DefaultConfiguration implements IConfiguration {
 
 		// create the transformer
 		if (xsltTransformer != null) {
+
+			// replace the properties within the xslt
+			org.springframework.core.io.Resource res = replacePlaceholders(xsltStream);
+
 			try {
-				xsltTransformer.setXsltTransformer(xsltStream);
+				final InputStream xsltReplacedStream = res == null ? null : res
+						.getInputStream();
+				xsltTransformer.setXsltTransformer(xsltReplacedStream);
 			} catch (final InvalidXsltException e) {
 				throw new InvalidConfigurationException(
-						"The specified XSLT cannot be used.", e);
+						"The specified XSLT is invalid and therefore cannot be used.", e);
+			} catch (final IOException e) {
+				throw new InvalidConfigurationException(
+						"The specified XSLT stream cannot be accessed.", e);
 			}
 		}
 
@@ -648,23 +657,7 @@ public class DefaultConfiguration implements IConfiguration {
 			final boolean validate) {
 
 		// get the content of the stream
-		final byte[] content;
-		try {
-			content = Streams.copyStreamToByteArray(resStream);
-		} catch (final IOException e) {
-			throw new BeanDefinitionStoreException("The resource could not be read",
-					e);
-		} finally {
-
-			// close the stream
-			Streams.closeIO(resStream);
-		}
-
-		// now let's get the resource
-		org.springframework.core.io.Resource res = new ByteArrayResource(content);
-		if (xmlReplacer != null) {
-			res = replacePlaceholders(res);
-		}
+		org.springframework.core.io.Resource res = replacePlaceholders(resStream);
 
 		// validate the resource if needed
 		if (validate && xsdValidator != null
@@ -788,6 +781,41 @@ public class DefaultConfiguration implements IConfiguration {
 		}
 
 		return doc;
+	}
+
+	/**
+	 * Replaces the properties within the passed <code>InputStream</code>.
+	 * 
+	 * @param resStream
+	 *          the <code>InputStream</code> which provides the source to replace
+	 *          the properties in
+	 * 
+	 * @return the <code>Resource</code> with the replaced properties
+	 */
+	protected org.springframework.core.io.Resource replacePlaceholders(
+			final InputStream resStream) {
+
+		// if we don't have anything we cannot create anything
+		if (resStream == null) {
+			return null;
+		} else {
+
+			final byte[] content;
+			try {
+				content = Streams.copyStreamToByteArray(resStream);
+			} catch (final IOException e) {
+				throw new BeanDefinitionStoreException(
+						"The resource could not be read", e);
+			} finally {
+
+				// close the stream
+				Streams.closeIO(resStream);
+			}
+
+			// now let's get the resource
+			org.springframework.core.io.Resource res = new ByteArrayResource(content);
+			return replacePlaceholders(res);
+		}
 	}
 
 	/**
