@@ -773,6 +773,9 @@ public class DefaultConfiguration implements IConfiguration {
 						"Unable to parse the passed ByteArrayResource '"
 								+ res.getDescription() + "'.", e);
 			}
+
+			throw new IllegalArgumentException(
+					"The passed resource contains an invalid document.", e);
 		} finally {
 
 			// close the streams
