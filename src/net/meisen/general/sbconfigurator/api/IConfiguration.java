@@ -59,4 +59,27 @@ public interface IConfiguration {
 	 * @return a <code>Map</code> of all the loaded modules
 	 */
 	public Map<String, Object> getAllModules();
+
+	/**
+	 * Creates an instance of the specified <code>clazz</code> and wires annotated
+	 * fields.
+	 * 
+	 * @param clazz
+	 *          the <code>Class</code> to create an instance from
+	 * 
+	 * @return the created instance
+	 */
+	public <T> T createInstance(final Class<T> clazz);
+
+	/**
+	 * Wires the passed instance, i.e. all the annotated fields will be wired
+	 * afterwards.
+	 * 
+	 * @param bean
+	 *          the instance to be wired
+	 * 
+	 * @return the wired instance (which is not a clone, it's the same as the
+	 *         passed <code>bean</code>)
+	 */
+	public <T> T wireInstance(final T bean);
 }

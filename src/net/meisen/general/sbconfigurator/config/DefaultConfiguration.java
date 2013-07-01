@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.DefaultDocumentLoader;
@@ -873,5 +874,21 @@ public class DefaultConfiguration implements IConfiguration {
 
 			return new Properties();
 		}
+	}
+
+	@Override
+	public <T> T createInstance(final Class<T> clazz) {
+		@SuppressWarnings("unchecked")
+		final T bean = (T) moduleFactory.autowire(clazz,
+				AutowireCapableBeanFactory.AUTOWIRE_NO, true);
+
+		return bean;
+	}
+
+	@Override
+	public <T> T wireInstance(final T bean) {
+		moduleFactory.autowireBeanProperties(bean,
+				AutowireCapableBeanFactory.AUTOWIRE_NO, true);
+		return bean;
 	}
 }
