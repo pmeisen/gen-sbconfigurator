@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<xsl:stylesheet xmlns:sbc="http://dev.meisen.net/sbconfigurator"
+<xsl:stylesheet xmlns="http://www.springframework.org/schema/beans"
+				xmlns:sbc="http://dev.meisen.net/sbconfigurator"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
                 
   <xsl:output method="xml" indent="yes" />
                 
   <xsl:template match="/sbc:Config">
     
-    <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
       <xsl:for-each select="sbc:loaderDefinition">
