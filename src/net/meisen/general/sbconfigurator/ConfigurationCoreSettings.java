@@ -42,7 +42,7 @@ public class ConfigurationCoreSettings {
 	 * @return the loaded <code>ConfigurationCoreSettings</code>
 	 */
 	public static ConfigurationCoreSettings loadCoreSettings() {
-		return loadCoreSettings(ConfigurationCoreSettings.class);
+		return loadCoreSettings(null);
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class ConfigurationCoreSettings {
 	 * @return the loaded <code>ConfigurationCoreSettings</code>
 	 */
 	public static ConfigurationCoreSettings loadCoreSettings(final Class<?> clazz) {
-		return loadCoreSettings(coreSettingsContext, clazz);
+		return loadCoreSettings(null, clazz);
 	}
 
 	/**
@@ -73,6 +73,11 @@ public class ConfigurationCoreSettings {
 	public static ConfigurationCoreSettings loadCoreSettings(
 			final String coreSettingsContext, final Class<?> clazz) {
 
+		final String fCoreSettingsContext = coreSettingsContext == null ? ConfigurationCoreSettings.coreSettingsContext
+				: coreSettingsContext;
+		final Class<?> fClazz = clazz == null ? ConfigurationCoreSettings.class
+				: clazz;
+
 		// create the factory with auto-wiring this will bring up the core-system
 		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory(
 				true, true);
@@ -81,7 +86,7 @@ public class ConfigurationCoreSettings {
 		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
 
 		// load the core resource into the reader
-		final Resource coreRes = new ClassPathResource(coreSettingsContext, clazz);
+		final Resource coreRes = new ClassPathResource(fCoreSettingsContext, fClazz);
 		reader.loadBeanDefinitions(coreRes);
 
 		// get the bean
