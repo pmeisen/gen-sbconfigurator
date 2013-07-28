@@ -5,7 +5,7 @@
   
   <groupId>net.meisen.general</groupId>
   <artifactId>net-meisen-general-gen-sbconfigurator</artifactId>
-  <version>1.0.0</version>
+  <version>TRUNK</version>
   <name>gen-sbconfigurator</name>
   <description>Library which allows the definition of a general configuration (i.e. XML based) which is than translated into Spring contexts (using XSLT)</description>
   <packaging>jar</packaging>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>net.meisen.general</groupId>
       <artifactId>net-meisen-general-gen-misc</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>TRUNK-SNAPSHOT</version>
     </dependency>
     
     <!-- logging -->
