@@ -8,11 +8,16 @@ import static org.junit.Assert.assertTrue;
 import java.util.Properties;
 
 import org.junit.Test;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.config.mocks.NotWiredClass;
+import net.meisen.general.sbconfigurator.config.mocks.SatisfiableWiredClass;
+import net.meisen.general.sbconfigurator.config.mocks.SetterClass;
 import net.meisen.general.sbconfigurator.config.mocks.TestPropertyHolder;
+import net.meisen.general.sbconfigurator.config.mocks.UnsatisfiableWiredClass;
 import net.meisen.general.sbconfigurator.config.mocks.WiredClass;
 
 /**
@@ -110,7 +115,58 @@ public class TestDefaultConfiguration {
 		assertNotNull(wired);
 		assertNotNull(wired.coreSettings);
 		assertEquals(configCore, wired.coreSettings);
+	}
 
+	/**
+	 * Tests the creation of an instance of a class which can be satisfied, even
+	 * if the attributes cannot be wired (i.e. not the attributes are not
+	 * required).
+	 */
+	@Test
+	public void testAutowiringForSatisfiableWiredClass() {
+		final ConfigurationCoreSettings configCore = ConfigurationCoreSettings
+				.loadCoreSettings();
+		final IConfiguration config = configCore.getConfiguration();
+
+		// create the instance
+		final SatisfiableWiredClass wired = config
+				.createInstance(SatisfiableWiredClass.class);
+		assertNotNull(wired);
+		assertNull(wired.coreSettings);
+	}
+
+	/**
+	 * Tests the creation of an instance of a class which cannot be satisfied
+	 * concerning it's required attributes.
+	 */
+	@Test(expected = BeanCreationException.class)
+	public void testAutowiringForUnsatisfiableWiredClass() {
+		final ConfigurationCoreSettings configCore = ConfigurationCoreSettings
+				.loadCoreSettings();
+		final IConfiguration config = configCore.getConfiguration();
+
+		// create the instance
+		config.createInstance(UnsatisfiableWiredClass.class);
+	}
+
+	/**
+	 * Tests the wiring of an object, which has setter methods (which should be
+	 * ignored, the object should still be wired). With dependency checking set to
+	 * <code>true</code>, Spring would throw an exception here.
+	 * 
+	 * @see DefaultListableBeanFactory#autowire(Class, int, boolean)
+	 */
+	@Test
+	public void testAutowiringForSetterClass() {
+		final ConfigurationCoreSettings configCore = ConfigurationCoreSettings
+				.loadCoreSettings();
+		final IConfiguration config = configCore.getConfiguration();
+
+		// create the instance
+		final SetterClass wired = config.createInstance(SetterClass.class);
+		assertNotNull(wired);
+		assertNotNull(wired.coreSettings);
+		assertNull(wired.something);
 	}
 
 	/**
@@ -132,6 +188,69 @@ public class TestDefaultConfiguration {
 		config.wireInstance(wired);
 		assertNotNull(wired.coreSettings);
 		assertEquals(configCore, wired.coreSettings);
+	}
 
+	/**
+	 * Tests the wiring of an object which has satisfiable (i.e. not required)
+	 * attributes.
+	 */
+	@Test
+	public void testAutowiringForSatisfiableWiredObject() {
+		final ConfigurationCoreSettings configCore = ConfigurationCoreSettings
+				.loadCoreSettings();
+		final IConfiguration config = configCore.getConfiguration();
+
+		// create the instance (not wired)
+		final SatisfiableWiredClass wired = new SatisfiableWiredClass();
+		assertNotNull(wired);
+		assertNull(wired.coreSettings);
+
+		// wire the instance
+		config.wireInstance(wired);
+		assertNull(wired.coreSettings);
+	}
+
+	/**
+	 * Tests the creation of a wired object, with an unresolvable dependency.
+	 */
+	@Test(expected = BeanCreationException.class)
+	public void testAutowiringForUnsatisfiableWiredObject() {
+		final ConfigurationCoreSettings configCore = ConfigurationCoreSettings
+				.loadCoreSettings();
+		final IConfiguration config = configCore.getConfiguration();
+
+		// create the instance (not wired)
+		final UnsatisfiableWiredClass wired = new UnsatisfiableWiredClass();
+		assertNotNull(wired);
+		assertNull(wired.coreSettings);
+
+		// wire the instance
+		config.wireInstance(wired);
+	}
+
+	/**
+	 * Tests the wiring of an object, which has setter methods (which should be
+	 * ignored, the object should still be wired). With dependency checking set to
+	 * <code>true</code>, Spring would throw an exception here.
+	 * 
+	 * @see DefaultListableBeanFactory#autowireBeanProperties(Object, int,
+	 *      boolean)
+	 */
+	@Test
+	public void testAutowiringForSetterObject() {
+		final ConfigurationCoreSettings configCore = ConfigurationCoreSettings
+				.loadCoreSettings();
+		final IConfiguration config = configCore.getConfiguration();
+
+		// create the instance (not wired)
+		final SetterClass wired = new SetterClass();
+		assertNotNull(wired);
+		assertNull(wired.coreSettings);
+		assertNull(wired.something);
+
+		// wire the instance
+		config.wireInstance(wired);
+		assertNotNull(wired.coreSettings);
+		assertNull(wired.something);
 	}
 }

@@ -880,7 +880,7 @@ public class DefaultConfiguration implements IConfiguration {
 	public <T> T createInstance(final Class<T> clazz) {
 		@SuppressWarnings("unchecked")
 		final T bean = (T) moduleFactory.autowire(clazz,
-				AutowireCapableBeanFactory.AUTOWIRE_NO, true);
+				AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 
 		return bean;
 	}
@@ -888,7 +888,7 @@ public class DefaultConfiguration implements IConfiguration {
 	@Override
 	public <T> T wireInstance(final T bean) {
 		moduleFactory.autowireBeanProperties(bean,
-				AutowireCapableBeanFactory.AUTOWIRE_NO, true);
+				AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 		return bean;
 	}
 }
