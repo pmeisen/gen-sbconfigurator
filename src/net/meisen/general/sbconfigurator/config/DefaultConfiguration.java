@@ -388,8 +388,6 @@ public class DefaultConfiguration implements IConfiguration {
 	 *          the id of the module to be registered
 	 * @param module
 	 *          the <code>module</code> to be registered
-	 * @param loaderId
-	 *          the id of the loader which loaded the <code>module</code>
 	 * 
 	 * @return <code>true</code> if the <code>module</code> was added, otherwise
 	 *         <code>false</code>
