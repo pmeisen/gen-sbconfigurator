@@ -1,9 +1,15 @@
 package net.meisen.general.sbconfigurator.runners;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
+import net.meisen.general.sbconfigurator.runners.annotations.SystemProperties;
+import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
@@ -23,17 +29,18 @@ import org.junit.runners.model.InitializationError;
 public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 
 	private final IConfiguration configuration;
+	private final Map<String, String> properties = new HashMap<String, String>();
 
 	/**
 	 * The default constructor for the runner, which specifies the
 	 * <code>Class</code> of the test to be run.
 	 * 
 	 * @param clazz
-	 *          the <code>Class</code> of the test to be run
+	 *            the <code>Class</code> of the test to be run
 	 * 
 	 * @throws InitializationError
-	 *           if the test cannot be initialized, i.e. invalid constructor,
-	 *           invalid annotations, ...
+	 *             if the test cannot be initialized, i.e. invalid constructor,
+	 *             invalid annotations, ...
 	 */
 	public JUnitConfigurationRunner(final Class<?> clazz)
 			throws InitializationError {
@@ -44,6 +51,10 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 				.getAnnotation(ContextClass.class);
 		final ContextFile contextFileAnnotation = clazz
 				.getAnnotation(ContextFile.class);
+		final SystemProperties systemProperties = clazz
+				.getAnnotation(SystemProperties.class);
+		final SystemProperty systemProperty = clazz
+				.getAnnotation(SystemProperty.class);
 
 		// define the values of the annotation
 		final Class<?> contextClazz = contextClassAnnotation == null ? null
@@ -51,16 +62,54 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 		final String contextFile = contextFileAnnotation == null ? null
 				: contextFileAnnotation.value();
 
-		// final String coreSettingsContext, final Class<?> clazz
+		// get the System-Properties
+		if (systemProperties != null) {
+			for (final SystemProperty p : systemProperties.value()) {
+				properties.put(p.property(), p.value());
+			}
+		}
+		if (systemProperty != null) {
+			properties.put(systemProperty.property(), systemProperty.value());
+		}
+
+		// set the properties
+		final Map<String, String> oldProperties = new HashMap<String, String>();
+		for (final Entry<String, String> entry : properties.entrySet()) {
+			final String key = entry.getKey();
+			final String value = entry.getValue();
+
+			// keep the old property
+			oldProperties.put(key, System.getProperty(key));
+
+			// set the new one
+			if (value == null) {
+				System.clearProperty(key);
+			} else {
+				System.setProperty(key, value);
+			}
+		}
 
 		// now we need the ConfigurationCoreSettings
 		final ConfigurationCoreSettings settings = ConfigurationCoreSettings
 				.loadCoreSettings(contextFile, contextClazz);
 		configuration = settings.getConfiguration();
+
+		// now we should reset the properties
+		for (final Entry<String, String> entry : oldProperties.entrySet()) {
+			final String key = entry.getKey();
+			final String value = entry.getValue();
+
+			if (value == null) {
+				System.clearProperty(key);
+			} else {
+				System.setProperty(key, value);
+			}
+		}
 	}
 
 	@Override
 	protected Object createTest() throws Exception {
+
 		return configuration.createInstance(getTestClass().getJavaClass());
 	}
 
