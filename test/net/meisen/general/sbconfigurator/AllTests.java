@@ -1,5 +1,6 @@
 package net.meisen.general.sbconfigurator;
 
+import net.meisen.general.sbconfigurator.authoring.TestSpringXMLAuthoring;
 import net.meisen.general.sbconfigurator.config.TestDefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.TestSamplePlugInLoader;
 import net.meisen.general.sbconfigurator.config.placeholder.TestDefaultXmlPropertyReplacer;
@@ -22,7 +23,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({ TestSpringPropertyHolder.class, TestStringParser.class,
 		TestDefaultXmlPropertyReplacer.class, TestDefaultXsdValidator.class,
 		TestDefaultXsltTransformer.class, TestDefaultConfiguration.class,
-		TestSamplePlugInLoader.class, TestSpringHelper.class })
+		TestSamplePlugInLoader.class, TestSpringHelper.class,
+		TestSpringXMLAuthoring.class })
 public class AllTests {
 	// nothing more to do here
 }

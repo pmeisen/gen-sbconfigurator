@@ -1,2 +1,2 @@
 http\://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-loader.xsd=net/meisen/general/sbconfigurator/config/transformer/sbconfigurator-loader.xsd
-http\://www.meisen.net/schema/gwt-cbwaf-ns/gwt-cbwaf-ns.xsd=gwt-cbwaf-ns.xsd
+http\://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd=net/meisen/general/sbconfigurator/authoring/sbconfigurator-ns.xsd

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gwtcbwaf="http://www.meisen.net/schema/gwt-cbwaf-ns"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sbc="http://dev.meisen.net/sbconfigurator/ns"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-						http://www.meisen.net/schema/gwt-cbwaf-ns http://www.meisen.net/schema/gwt-cbwaf-ns/gwt-cbwaf-ns.xsd">
+						http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd">
 
-	<gwtcbwaf:config id="testConfig" location="test" />
+	<sbc:config id="testConfig" location="test" />
 
 </beans>
