@@ -57,8 +57,8 @@ public class TestDefaultXsltTransformer {
 				+ "/loaderDefinitionEmpty.xml", openStream());
 
 		final String output = closeStream();
-		final String[] lines = output.split("\n");
-
+		final String[] lines = output.split(System.getProperty("line.separator"));
+System.out.println(output);
 		assertEquals(lines.length, 2);
 		assertEquals(lines[0].trim(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		assertEquals(
