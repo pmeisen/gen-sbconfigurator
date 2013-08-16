@@ -15,7 +15,7 @@ public class GwtCbwafFormatParser extends AbstractBeanDefinitionParser {
 
 		String location = element.getAttribute("location");
 		builder.addPropertyValue("location", location);
-		
+
 		return builder.getBeanDefinition();
 	}
 
