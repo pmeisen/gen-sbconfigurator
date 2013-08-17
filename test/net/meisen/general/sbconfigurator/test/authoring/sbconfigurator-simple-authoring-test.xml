@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sbc="http://dev.meisen.net/sbconfigurator/ns"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+						http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<!-- enable auto-wiring -->
+	<context:annotation-config />
+
+	<!-- create a test-instance which uses some auto-wiring of the configuration -->
+	<bean id="simpleTestInstance" class="net.meisen.general.sbconfigurator.authoring.mock.SimpleConfigurationWiring" />
+
+	<!-- create some other bean -->
+	<bean id="creationTime" class="java.util.Date" />
+	
+	<!-- get the configuration -->
+	<sbc:config id="testConfig" contextClass="net.meisen.general.sbconfigurator.ConfigurationCoreSettings">
+		<sbc:module innerId="samplePlugIn" outerId="b" />
+	</sbc:config>
+</beans>

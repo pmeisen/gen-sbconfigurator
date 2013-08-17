@@ -36,8 +36,8 @@ public class ConfigurationCoreSettings {
 	private boolean userLoaderOverridingAllowed = false;
 
 	/**
-	 * Method to load the <code>ConfigurationCoreSettings</code> and all the other
-	 * modules used by the <code>CoreSettings</code>.
+	 * Method to load the <code>ConfigurationCoreSettings</code> and all the
+	 * other modules used by the <code>CoreSettings</code>.
 	 * 
 	 * @return the loaded <code>ConfigurationCoreSettings</code>
 	 */
@@ -46,27 +46,30 @@ public class ConfigurationCoreSettings {
 	}
 
 	/**
-	 * Method to load the <code>ConfigurationCoreSettings</code> and all the other
-	 * modules used by the <code>CoreSettings</code>.
+	 * Method to load the <code>ConfigurationCoreSettings</code> and all the
+	 * other modules used by the <code>CoreSettings</code>.
 	 * 
 	 * @param clazz
-	 *          using the <code>coreSettingsContext</code> of the specified class
+	 *            using the <code>coreSettingsContext</code> of the specified
+	 *            class
 	 * 
 	 * @return the loaded <code>ConfigurationCoreSettings</code>
 	 */
-	public static ConfigurationCoreSettings loadCoreSettings(final Class<?> clazz) {
+	public static ConfigurationCoreSettings loadCoreSettings(
+			final Class<?> clazz) {
 		return loadCoreSettings(null, clazz);
 	}
 
 	/**
-	 * Method to load the <code>ConfigurationCoreSettings</code> and all the other
-	 * modules used by the <code>CoreSettings</code>.
+	 * Method to load the <code>ConfigurationCoreSettings</code> and all the
+	 * other modules used by the <code>CoreSettings</code>.
 	 * 
 	 * @param coreSettingsContext
-	 *          the name of the context file to load the
-	 *          <code>ConfigurationCoreSettings</code> from
+	 *            the name of the context file to load the
+	 *            <code>ConfigurationCoreSettings</code> from
 	 * @param clazz
-	 *          using the <code>coreSettingsContext</code> of the specified class
+	 *            using the <code>coreSettingsContext</code> of the specified
+	 *            class
 	 * 
 	 * @return the loaded <code>ConfigurationCoreSettings</code>
 	 */
@@ -78,20 +81,23 @@ public class ConfigurationCoreSettings {
 		final Class<?> fClazz = clazz == null ? ConfigurationCoreSettings.class
 				: clazz;
 
-		// create the factory with auto-wiring this will bring up the core-system
-		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory(
-				true, true);
+		// create the factory with auto-wiring this will bring up the
+		// core-system
+		final DefaultListableBeanFactory factory = SpringHelper
+				.createBeanFactory(true, true);
 
 		// create the reader
-		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
+				factory);
 
 		// load the core resource into the reader
-		final Resource coreRes = new ClassPathResource(fCoreSettingsContext, fClazz);
+		final Resource coreRes = new ClassPathResource(fCoreSettingsContext,
+				fClazz);
 		reader.loadBeanDefinitions(coreRes);
 
 		// get the bean
 		final ConfigurationCoreSettings settings = (ConfigurationCoreSettings) factory
-				.getBean("coreSettings");
+				.getBean(IConfiguration.coreSettingsId);
 
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("The coreSettings are loaded and auto-wired.");
@@ -120,9 +126,9 @@ public class ConfigurationCoreSettings {
 	 * defined or specified XSD schema. The default value is <code>true</code>.
 	 * 
 	 * @param enable
-	 *          <code>true</code> if any loaded configuration should be validated
-	 *          against it's defined or specified XSD schema, otherwise
-	 *          <code>false</code>
+	 *            <code>true</code> if any loaded configuration should be
+	 *            validated against it's defined or specified XSD schema,
+	 *            otherwise <code>false</code>
 	 */
 	public void setConfigurationValidationEnabled(final boolean enable) {
 		this.configurationValidationEnabled = enable;
@@ -133,8 +139,8 @@ public class ConfigurationCoreSettings {
 	 * user can be overridden by another user's <code>ILoaderDefinition</code>.
 	 * The default value is <code>false</code>.
 	 * 
-	 * @return <code>true</code> if a user's <code>ILoaderDefinition</code> can be
-	 *         overridden, otherwise <code>false</code>
+	 * @return <code>true</code> if a user's <code>ILoaderDefinition</code> can
+	 *         be overridden, otherwise <code>false</code>
 	 */
 	public boolean isUserLoaderOverridingAllowed() {
 		return userLoaderOverridingAllowed;
@@ -146,8 +152,8 @@ public class ConfigurationCoreSettings {
 	 * The default value is <code>false</code>.
 	 * 
 	 * @param allow
-	 *          <code>true</code> if a user's <code>ILoaderDefinition</code> can
-	 *          be overridden, otherwise <code>false</code>
+	 *            <code>true</code> if a user's <code>ILoaderDefinition</code>
+	 *            can be overridden, otherwise <code>false</code>
 	 */
 	public void setUserLoaderOverridingAllowed(final boolean allow) {
 		this.userLoaderOverridingAllowed = allow;
