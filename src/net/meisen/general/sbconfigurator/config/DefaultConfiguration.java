@@ -20,6 +20,7 @@ import net.meisen.general.genmisc.types.Objects;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
+import net.meisen.general.sbconfigurator.api.placeholder.IPropertyReplacer;
 import net.meisen.general.sbconfigurator.api.placeholder.IXmlPropertyReplacer;
 import net.meisen.general.sbconfigurator.api.transformer.ILoaderDefinition;
 import net.meisen.general.sbconfigurator.api.transformer.IXsdValidator;
@@ -78,7 +79,7 @@ public class DefaultConfiguration implements IConfiguration {
 	 * <code>LoaderDefintions</code>, which are configured via the
 	 * <code>sbconfigurator-core.xml</code> context.
 	 */
-	@Autowired
+	@Autowired(required = false)
 	private Map<String, ILoaderDefinition> loaderDefinitions;
 
 	/**
@@ -93,8 +94,8 @@ public class DefaultConfiguration implements IConfiguration {
 	private IXsdValidator xsdValidator;
 
 	/**
-	 * The <code>XsltTransformer</code> is used to transform XML definitions into
-	 * bean XML definitions. The validator must be defined in the
+	 * The <code>XsltTransformer</code> is used to transform XML definitions
+	 * into bean XML definitions. The validator must be defined in the
 	 * <code>sbconfigurator-core.xml</code> context and must use the id
 	 * <code>xsltTransformer</code>.
 	 */
@@ -106,10 +107,14 @@ public class DefaultConfiguration implements IConfiguration {
 	@Qualifier(IXmlPropertyReplacer.xmlReplacerId)
 	private IXmlPropertyReplacer xmlReplacer;
 
+	@Autowired
+	@Qualifier(IPropertyReplacer.replacerId)
+	private IPropertyReplacer replacer;
+
 	/**
 	 * The <code>Collection</code> of all the loaded modules. A module can be
-	 * anything which is defined to be loaded via a <code>LoaderDefinition</code>.
-	 * Each module is represented by its bean-id.
+	 * anything which is defined to be loaded via a
+	 * <code>LoaderDefinition</code>. Each module is represented by its bean-id.
 	 */
 	private final Map<String, Object> modules = new HashMap<String, Object>();
 
@@ -122,8 +127,8 @@ public class DefaultConfiguration implements IConfiguration {
 	/**
 	 * The <code>DefaultListableBeanFactory</code> which is used to load all the
 	 * modules. This factory has to be an attribute, because of pre-loading
-	 * purposes, i.e. if a bean retrieves a module from the configuration prior to
-	 * the loading of the module (i.e. within an init-method).
+	 * purposes, i.e. if a bean retrieves a module from the configuration prior
+	 * to the loading of the module (i.e. within an init-method).
 	 */
 	private DefaultListableBeanFactory moduleFactory = null;
 
@@ -150,8 +155,8 @@ public class DefaultConfiguration implements IConfiguration {
 
 				// do some logging
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("Loading configuration from loader '" + entry.getKey()
-							+ "'; " + loaderDefinition);
+					LOG.debug("Loading configuration from loader '"
+							+ entry.getKey() + "'; " + loaderDefinition);
 				}
 
 				// now load the definition
@@ -177,27 +182,32 @@ public class DefaultConfiguration implements IConfiguration {
 
 							// override the current one
 							final ILoaderDefinition newDef = (ILoaderDefinition) loader;
-							final ILoaderDefinition oldDef = userLoaderDefinitions.put(id,
-									newDef);
+							final ILoaderDefinition oldDef = userLoaderDefinitions
+									.put(id, newDef);
 
 							// log the overriding
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("The loader '" + id + "' ('"
-										+ oldDef.getClass().getName() + "' was overridden by '"
+										+ oldDef.getClass().getName()
+										+ "' was overridden by '"
 										+ newDef.getClass().getName());
 							}
 						} else if (loaderDefinitions.containsKey(id)) {
-							throw new InvalidConfigurationException("The id of the loader '"
-									+ id + "' is already used by a core LoaderDefinition.");
+							throw new InvalidConfigurationException(
+									"The id of the loader '"
+											+ id
+											+ "' is already used by a core LoaderDefinition.");
 						} else {
-							userLoaderDefinitions.put(id, (ILoaderDefinition) loader);
+							userLoaderDefinitions.put(id,
+									(ILoaderDefinition) loader);
 						}
 					}
 				}
 
 				// add all the other definitions to be loaded later
 				final Map<String, BeanDefinition> defs = SpringHelper
-						.getBeanDefinitions(beanFactory, ILoaderDefinition.class);
+						.getBeanDefinitions(beanFactory,
+								ILoaderDefinition.class);
 
 				// everything else is registered as module
 				registerModuleBeanDefinitions(defs, entry.getKey());
@@ -216,7 +226,8 @@ public class DefaultConfiguration implements IConfiguration {
 
 		// we collected everything
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("Loaded '" + moduleDefinitions.size()
+			LOG.trace("Loaded '"
+					+ moduleDefinitions.size()
 					+ "' moduleDefinitions. The modules will be instantiated now.");
 
 			LOG.trace("The following properties have been loaded:");
@@ -240,7 +251,8 @@ public class DefaultConfiguration implements IConfiguration {
 					} else if (e1Null || e2Null) {
 						return e1Null ? -1 : 1;
 					} else {
-						return e1.getKey().toString().compareTo(e2.getKey().toString());
+						return e1.getKey().toString()
+								.compareTo(e2.getKey().toString());
 					}
 				}
 			});
@@ -254,10 +266,12 @@ public class DefaultConfiguration implements IConfiguration {
 		moduleFactory = SpringHelper.createBeanFactory(true, false);
 		moduleFactory.registerSingleton(coreSettingsId, coreSettings);
 		moduleFactory.registerSingleton(coreConfigurationId, this);
-		moduleFactory.registerSingleton(corePropertyHolderId, corePropertyHolder);
+		moduleFactory.registerSingleton(corePropertyHolderId,
+				corePropertyHolder);
 		for (final Entry<String, BeanDefinition> entry : moduleDefinitions
 				.entrySet()) {
-			moduleFactory.registerBeanDefinition(entry.getKey(), entry.getValue());
+			moduleFactory.registerBeanDefinition(entry.getKey(),
+					entry.getValue());
 		}
 
 		// now let's add all the modules
@@ -273,8 +287,8 @@ public class DefaultConfiguration implements IConfiguration {
 	 * <code>coreLoaderDefinition</code>.
 	 * 
 	 * @param userLoaderDefinitions
-	 *          the <code>LoaderDefinition</code> instances which are provided via
-	 *          the <code>coreLoaderDefinition</code>
+	 *            the <code>LoaderDefinition</code> instances which are provided
+	 *            via the <code>coreLoaderDefinition</code>
 	 */
 	protected void registerUserLoaderDefinitions(
 			final Map<String, ILoaderDefinition> userLoaderDefinitions) {
@@ -291,8 +305,8 @@ public class DefaultConfiguration implements IConfiguration {
 			loaderDefinitions.put(entry.getKey(), loaderDefinition);
 
 			// add all the definitions to be loaded later
-			final Map<String, BeanDefinition> defs = SpringHelper.getBeanDefinitions(
-					beanFactory, ILoaderDefinition.class);
+			final Map<String, BeanDefinition> defs = SpringHelper
+					.getBeanDefinitions(beanFactory, ILoaderDefinition.class);
 
 			// everything else is registered as module
 			registerModuleBeanDefinitions(defs, entry.getKey());
@@ -300,13 +314,13 @@ public class DefaultConfiguration implements IConfiguration {
 	}
 
 	/**
-	 * Checks if the specified <code>module</code> is really a valid module, i.e.
-	 * if it can be added to the loaded modules or not.
+	 * Checks if the specified <code>module</code> is really a valid module,
+	 * i.e. if it can be added to the loaded modules or not.
 	 * 
 	 * @param id
-	 *          the id of the module to be checked
+	 *            the id of the module to be checked
 	 * @param module
-	 *          the module to be checked
+	 *            the module to be checked
 	 * 
 	 * @return <code>true</code> if the specified <code>module</code> should be
 	 *         added, otherwise <code>false</code>
@@ -336,17 +350,20 @@ public class DefaultConfiguration implements IConfiguration {
 	 * be loaded for the <code>Configuration</code>.
 	 * 
 	 * @param beanDefinitions
-	 *          the collection of <code>BeanDefinition</code> instances to be
-	 *          registered
+	 *            the collection of <code>BeanDefinition</code> instances to be
+	 *            registered
 	 * @param loaderId
-	 *          the loader's identifier for logging purposes
+	 *            the loader's identifier for logging purposes
 	 */
 	protected void registerModuleBeanDefinitions(
-			final Map<String, BeanDefinition> beanDefinitions, final String loaderId) {
+			final Map<String, BeanDefinition> beanDefinitions,
+			final String loaderId) {
 
 		// add each beanDefinition
-		for (final Entry<String, BeanDefinition> entry : beanDefinitions.entrySet()) {
-			registerModuleBeanDefinition(entry.getKey(), entry.getValue(), loaderId);
+		for (final Entry<String, BeanDefinition> entry : beanDefinitions
+				.entrySet()) {
+			registerModuleBeanDefinition(entry.getKey(), entry.getValue(),
+					loaderId);
 		}
 	}
 
@@ -355,11 +372,11 @@ public class DefaultConfiguration implements IConfiguration {
 	 * <code>Configuration</code>.
 	 * 
 	 * @param id
-	 *          the <code>beanDefinition</code>'s identifier
+	 *            the <code>beanDefinition</code>'s identifier
 	 * @param beanDefinition
-	 *          the <code>BeanDefinition</code> instance to be registered
+	 *            the <code>BeanDefinition</code> instance to be registered
 	 * @param loaderId
-	 *          the loader's identifier for logging purposes
+	 *            the loader's identifier for logging purposes
 	 */
 	protected void registerModuleBeanDefinition(final String id,
 			final BeanDefinition beanDefinition, final String loaderId) {
@@ -371,7 +388,8 @@ public class DefaultConfiguration implements IConfiguration {
 		} else if (moduleDefinitions.put(id, beanDefinition) != null) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("Overloading the moduleDefinition '" + id
-						+ "' with the one from the loaderDefinition '" + loaderId + "'");
+						+ "' with the one from the loaderDefinition '"
+						+ loaderId + "'");
 			}
 		} else {
 			if (LOG.isDebugEnabled()) {
@@ -385,9 +403,9 @@ public class DefaultConfiguration implements IConfiguration {
 	 * Registers the specified <code>module</code> to all the loaded modules.
 	 * 
 	 * @param id
-	 *          the id of the module to be registered
+	 *            the id of the module to be registered
 	 * @param module
-	 *          the <code>module</code> to be registered
+	 *            the <code>module</code> to be registered
 	 * 
 	 * @return <code>true</code> if the <code>module</code> was added, otherwise
 	 *         <code>false</code>
@@ -456,8 +474,8 @@ public class DefaultConfiguration implements IConfiguration {
 	 * <code>LoaderDefinition</code>.
 	 * 
 	 * @param loaderDefinition
-	 *          the <code>LoaderDefinition</code> which specifies which data to be
-	 *          loaded
+	 *            the <code>LoaderDefinition</code> which specifies which data
+	 *            to be loaded
 	 * 
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
 	 *         <code>LoaderDefinition</code>
@@ -466,7 +484,8 @@ public class DefaultConfiguration implements IConfiguration {
 			final ILoaderDefinition loaderDefinition) {
 		return loadBeanFactory(loaderDefinition.getSelector(),
 				loaderDefinition.getXsltTransformerInputStream(),
-				loaderDefinition.getContext(), loaderDefinition.isValidationEnabled(),
+				loaderDefinition.getContext(),
+				loaderDefinition.isValidationEnabled(),
 				loaderDefinition.isBeanOverridingAllowed(),
 				loaderDefinition.isLoadFromClassPath(),
 				loaderDefinition.isLoadFromWorkingDir());
@@ -474,31 +493,31 @@ public class DefaultConfiguration implements IConfiguration {
 
 	/**
 	 * Loads the <code>BeanFactory</code> which is specified by the passed
-	 * <code>xmlFileName</code>, using the passed <code>xsltTransformer</code> to
-	 * transform the data into a bean XML definition. The XML might be validated
-	 * if <code>validate</code> is set to <code>true</code>. Furthermore the
-	 * <code>beanOverriding</code> specifies if beans can be overwritten within
-	 * the context, i.e. all the XML files found with the specified
-	 * <code>xmlFileName</code>.
+	 * <code>xmlFileName</code>, using the passed <code>xsltTransformer</code>
+	 * to transform the data into a bean XML definition. The XML might be
+	 * validated if <code>validate</code> is set to <code>true</code>.
+	 * Furthermore the <code>beanOverriding</code> specifies if beans can be
+	 * overwritten within the context, i.e. all the XML files found with the
+	 * specified <code>xmlFileName</code>.
 	 * 
 	 * @param xmlFileName
-	 *          the XML files to be loaded
+	 *            the XML files to be loaded
 	 * @param xsltTransformer
-	 *          the XSLT transformer to be used to transform the XML files into
-	 *          bean definitions
+	 *            the XSLT transformer to be used to transform the XML files
+	 *            into bean definitions
 	 * @param validate
-	 *          <code>true</code> if the XML of the <code>xmlFileName</code>
-	 *          should be validated, otherwise <code>false</code>
+	 *            <code>true</code> if the XML of the <code>xmlFileName</code>
+	 *            should be validated, otherwise <code>false</code>
 	 * @param beanOverriding
-	 *          <code>true</code> if beans of the context can be overwritten,
-	 *          otherwise <code>false</code>
+	 *            <code>true</code> if beans of the context can be overwritten,
+	 *            otherwise <code>false</code>
 	 * @param loadFromClasspath
-	 *          <code>true</code> if the <code>xmlFileName</code> should be
-	 *          searched on the classpath, otherwise <code>false</code>
+	 *            <code>true</code> if the <code>xmlFileName</code> should be
+	 *            searched on the classpath, otherwise <code>false</code>
 	 * @param loadFromWorkingDir
-	 *          <code>true</code> if the <code>xmlFileName</code> should be
-	 *          searched in the current working-directory (and all
-	 *          sub-directories), otherwise <code>false</code>
+	 *            <code>true</code> if the <code>xmlFileName</code> should be
+	 *            searched in the current working-directory (and all
+	 *            sub-directories), otherwise <code>false</code>
 	 * 
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
 	 *         parameters
@@ -513,49 +532,54 @@ public class DefaultConfiguration implements IConfiguration {
 
 	/**
 	 * Loads the <code>BeanFactory</code> which is specified by the passed
-	 * <code>xmlFileName</code>, using the passed <code>xsltTransformer</code> to
-	 * transform the data into a bean XML definition. The XML might be validated
-	 * if <code>validate</code> is set to <code>true</code>. Furthermore the
-	 * <code>beanOverriding</code> specifies if beans can be overwritten within
-	 * the context, i.e. all the XML files found with the specified
-	 * <code>xmlFileName</code>.
+	 * <code>xmlFileName</code>, using the passed <code>xsltTransformer</code>
+	 * to transform the data into a bean XML definition. The XML might be
+	 * validated if <code>validate</code> is set to <code>true</code>.
+	 * Furthermore the <code>beanOverriding</code> specifies if beans can be
+	 * overwritten within the context, i.e. all the XML files found with the
+	 * specified <code>xmlFileName</code>.
 	 * 
-	 * @param xmlFileName
-	 *          the XML files to be loaded
+	 * @param xmlSelector
+	 *            the XML files to be loaded
 	 * @param xsltStream
-	 *          the stream of the XSLT used for transformation
+	 *            the stream of the XSLT used for transformation
 	 * @param context
-	 *          the context to look for the specified <code>xmlFileName</code>,
-	 *          might be <code>null</code> if all files on the class-path with the
-	 *          specified <code>xmlFileName</code> should be loaded
+	 *            the context to look for the specified <code>xmlFileName</code>
+	 *            , might be <code>null</code> if all files on the class-path
+	 *            with the specified <code>xmlFileName</code> should be loaded
 	 * @param validate
-	 *          <code>true</code> if the XML of the <code>xmlFileName</code>
-	 *          should be validated, otherwise <code>false</code>
+	 *            <code>true</code> if the XML of the <code>xmlFileName</code>
+	 *            should be validated, otherwise <code>false</code>
 	 * @param beanOverriding
-	 *          <code>true</code> if beans of the context can be overwritten,
-	 *          otherwise <code>false</code>
+	 *            <code>true</code> if beans of the context can be overwritten,
+	 *            otherwise <code>false</code>
 	 * @param loadFromClasspath
-	 *          <code>true</code> if the <code>xmlFileName</code> should be
-	 *          searched on the classpath, otherwise <code>false</code>
+	 *            <code>true</code> if the <code>xmlFileName</code> should be
+	 *            searched on the classpath, otherwise <code>false</code>
 	 * @param loadFromWorkingDir
-	 *          <code>true</code> if the <code>xmlFileName</code> should be
-	 *          searched in the current working-directory (and all
-	 *          sub-directories), otherwise <code>false</code>
+	 *            <code>true</code> if the <code>xmlFileName</code> should be
+	 *            searched in the current working-directory (and all
+	 *            sub-directories), otherwise <code>false</code>
 	 * 
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
 	 *         parameters
 	 */
-	public DefaultListableBeanFactory loadBeanFactory(final String xmlFileName,
+	public DefaultListableBeanFactory loadBeanFactory(final String xmlSelector,
 			final InputStream xsltStream, final Class<?> context,
 			final boolean validate, final boolean beanOverriding,
 			final boolean loadFromClasspath, final boolean loadFromWorkingDir) {
 
+		// get the selector with replaced properties
+		final String replaceXmlSelector = replacer.replacePlaceholders(
+				xmlSelector, getProperties());
+
 		// create the factory and enable auto-wiring to setup the core system
-		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory(
-				beanOverriding, false);
+		final DefaultListableBeanFactory factory = SpringHelper
+				.createBeanFactory(beanOverriding, false);
 
 		// create the reader
-		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
+				factory);
 
 		// create the transformer
 		if (xsltTransformer != null) {
@@ -569,7 +593,8 @@ public class DefaultConfiguration implements IConfiguration {
 				xsltTransformer.setXsltTransformer(xsltReplacedStream);
 			} catch (final InvalidXsltException e) {
 				throw new InvalidConfigurationException(
-						"The specified XSLT is invalid and therefore cannot be used.", e);
+						"The specified XSLT is invalid and therefore cannot be used.",
+						e);
 			} catch (final IOException e) {
 				throw new InvalidConfigurationException(
 						"The specified XSLT stream cannot be accessed.", e);
@@ -579,17 +604,18 @@ public class DefaultConfiguration implements IConfiguration {
 		// check if we have a context
 		if (context == null) {
 			if (LOG.isTraceEnabled()) {
-				LOG.trace("Creating factory for files '" + xmlFileName
+				LOG.trace("Creating factory for files '" + replaceXmlSelector
 						+ "' without context");
 			}
 
 			// read all the bean.xmls on the classpath
 			final Collection<ResourceInfo> resInfos = Resource.getResources(
-					xmlFileName, loadFromClasspath, loadFromWorkingDir);
+					replaceXmlSelector, loadFromClasspath, loadFromWorkingDir);
 
 			if (LOG.isTraceEnabled()) {
-				LOG.trace("Found '" + resInfos.size() + "' to be loaded for selector '"
-						+ xmlFileName + "'");
+				LOG.trace("Found '" + resInfos.size()
+						+ "' to be loaded for selector '" + replaceXmlSelector
+						+ "'");
 			}
 
 			// read all the loaded resources
@@ -598,8 +624,8 @@ public class DefaultConfiguration implements IConfiguration {
 
 				// log the current resource
 				if (LOG.isTraceEnabled()) {
-					LOG.trace("Loading '" + xmlFileName + "' at location '"
-							+ resInfo.getFullPath() + "'");
+					LOG.trace("Loading '" + replaceXmlSelector
+							+ "' at location '" + resInfo.getFullPath() + "'");
 				}
 
 				// add the resource
@@ -608,26 +634,28 @@ public class DefaultConfiguration implements IConfiguration {
 		} else {
 			final String contextPath = context.getPackage().getName()
 					.replace(".", "/");
-			final String fileClassPath = contextPath + "/" + xmlFileName;
+			final String fileClassPath = contextPath + "/" + replaceXmlSelector;
 
 			if (LOG.isTraceEnabled()) {
-				LOG.trace("Creating factory for file '" + xmlFileName
+				LOG.trace("Creating factory for file '" + replaceXmlSelector
 						+ "' using context '" + fileClassPath + "'");
 			}
 
 			// get the resource
-			final InputStream resIo = context.getClassLoader().getResourceAsStream(
-					fileClassPath);
+			final InputStream resIo = context.getClassLoader()
+					.getResourceAsStream(fileClassPath);
 			addResourceToReader(reader, xsltTransformer, resIo, validate);
 		}
 
 		if (LOG.isInfoEnabled()) {
-			LOG.info("Loaded factory for files '" + xmlFileName + "' (size: "
-					+ factory.getBeanDefinitionCount() + ")");
+			LOG.info("Loaded factory for files '" + replaceXmlSelector
+					+ "' (size: " + factory.getBeanDefinitionCount() + ")");
 		}
 
-		// use the postProcessing to replace properties (i.e. for imports, those are
-		// loaded directly via Spring and therefore not replaced within the normal
+		// use the postProcessing to replace properties (i.e. for imports, those
+		// are
+		// loaded directly via Spring and therefore not replaced within the
+		// normal
 		// replacement)
 		if (corePropertyHolder != null) {
 			corePropertyHolder.postProcessBeanFactory(factory);
@@ -640,20 +668,20 @@ public class DefaultConfiguration implements IConfiguration {
 	 * Adds a specific resource to the <code>reader</code>.
 	 * 
 	 * @param reader
-	 *          the <code>XmlBeanDefinitionReader</code> to which the resource
-	 *          should be added
+	 *            the <code>XmlBeanDefinitionReader</code> to which the resource
+	 *            should be added
 	 * @param xsltTransformer
-	 *          the XSLT transformer used to transform the XML stream into a XML
-	 *          bean definition
+	 *            the XSLT transformer used to transform the XML stream into a
+	 *            XML bean definition
 	 * @param resStream
-	 *          the resource to be added to the <code>reader</code>
+	 *            the resource to be added to the <code>reader</code>
 	 * @param validate
-	 *          <code>true</code> if the streamed XML should be validated,
-	 *          otherwise <code>false</code>
+	 *            <code>true</code> if the streamed XML should be validated,
+	 *            otherwise <code>false</code>
 	 */
 	protected void addResourceToReader(final XmlBeanDefinitionReader reader,
-			final IXsltTransformer xsltTransformer, final InputStream resStream,
-			final boolean validate) {
+			final IXsltTransformer xsltTransformer,
+			final InputStream resStream, final boolean validate) {
 
 		// get the content of the stream
 		org.springframework.core.io.Resource res = replacePlaceholders(resStream);
@@ -692,7 +720,8 @@ public class DefaultConfiguration implements IConfiguration {
 
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Finished transformation, result: "
-						+ System.getProperty("line.separator") + outputStream.toString());
+						+ System.getProperty("line.separator")
+						+ outputStream.toString());
 			}
 
 			// get the new content
@@ -722,16 +751,17 @@ public class DefaultConfiguration implements IConfiguration {
 
 	/**
 	 * Defines if an instance of a <code>ILoaderDefinition</code> defined by a
-	 * user can be overridden by another user's <code>ILoaderDefinition</code>. If
-	 * no <code>ConfigurationCoreSettings</code> are defined, the default return
-	 * value is <code>false</code>, otherwise the value defined by the
+	 * user can be overridden by another user's <code>ILoaderDefinition</code>.
+	 * If no <code>ConfigurationCoreSettings</code> are defined, the default
+	 * return value is <code>false</code>, otherwise the value defined by the
 	 * <code>ConfigurationCoreSettings</code> is used.
 	 * 
-	 * @return <code>true</code> if a user's <code>ILoaderDefinition</code> can be
-	 *         overridden, otherwise <code>false</code>
+	 * @return <code>true</code> if a user's <code>ILoaderDefinition</code> can
+	 *         be overridden, otherwise <code>false</code>
 	 */
 	public boolean isUserLoaderOverridingAllowed() {
-		return coreSettings != null && coreSettings.isUserLoaderOverridingAllowed();
+		return coreSettings != null
+				&& coreSettings.isUserLoaderOverridingAllowed();
 	}
 
 	/**
@@ -739,12 +769,13 @@ public class DefaultConfiguration implements IConfiguration {
 	 * {@link org.springframework.core.io.Resource Resource}.
 	 * 
 	 * @param res
-	 *          the resource to load the {@link Document} from
+	 *            the resource to load the {@link Document} from
 	 * 
 	 * @return the <code>Document</code> specified by the passed
 	 *         <code>Resource</code>
 	 */
-	protected Document loadDocument(final org.springframework.core.io.Resource res) {
+	protected Document loadDocument(
+			final org.springframework.core.io.Resource res) {
 
 		// get the resource as encoded one
 		final EncodedResource encRes = new EncodedResource(res);
@@ -789,8 +820,8 @@ public class DefaultConfiguration implements IConfiguration {
 	 * Replaces the properties within the passed <code>InputStream</code>.
 	 * 
 	 * @param resStream
-	 *          the <code>InputStream</code> which provides the source to replace
-	 *          the properties in
+	 *            the <code>InputStream</code> which provides the source to
+	 *            replace the properties in
 	 * 
 	 * @return the <code>Resource</code> with the replaced properties
 	 */
@@ -815,7 +846,8 @@ public class DefaultConfiguration implements IConfiguration {
 			}
 
 			// now let's get the resource
-			org.springframework.core.io.Resource res = new ByteArrayResource(content);
+			org.springframework.core.io.Resource res = new ByteArrayResource(
+					content);
 			return replacePlaceholders(res);
 		}
 	}
@@ -825,7 +857,7 @@ public class DefaultConfiguration implements IConfiguration {
 	 * {@link org.springframework.core.io.Resource Resource}.
 	 * 
 	 * @param res
-	 *          the <code>Resource</code> to replace the placeholders in
+	 *            the <code>Resource</code> to replace the placeholders in
 	 * 
 	 * @return a <code>Resource</code> with replaced placeholders
 	 */
@@ -843,7 +875,8 @@ public class DefaultConfiguration implements IConfiguration {
 			final Properties properties = getProperties();
 
 			// get the document with the replacements
-			final Document resDoc = xmlReplacer.replacePlaceholders(doc, properties);
+			final Document resDoc = xmlReplacer.replacePlaceholders(doc,
+					properties);
 
 			// get the content of the new document
 			final byte[] content = Xml.createByteArray(resDoc);
@@ -867,7 +900,9 @@ public class DefaultConfiguration implements IConfiguration {
 			return corePropertyHolder.getProperties();
 		} catch (final IOException e) {
 			if (LOG.isErrorEnabled()) {
-				LOG.error("Unable to load the properties of the configuration.", e);
+				LOG.error(
+						"Unable to load the properties of the configuration.",
+						e);
 			}
 
 			return new Properties();

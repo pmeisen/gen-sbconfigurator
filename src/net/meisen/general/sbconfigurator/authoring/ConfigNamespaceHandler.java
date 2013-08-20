@@ -2,6 +2,12 @@ package net.meisen.general.sbconfigurator.authoring;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
+/**
+ * Handler to register the parsers.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class ConfigNamespaceHandler extends NamespaceHandlerSupport {
 
 	@Override

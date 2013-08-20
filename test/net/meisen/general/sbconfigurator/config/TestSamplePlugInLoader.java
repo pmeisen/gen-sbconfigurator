@@ -26,12 +26,13 @@ public class TestSamplePlugInLoader {
 
 		// load the server
 		final ConfigurationCoreSettings coreSettings = ConfigurationCoreSettings
-				.loadCoreSettings();
+				.loadCoreSettings("loaderExtended-core.xml", TestSamplePlugInLoader.class);
 		final DefaultConfiguration configuration = (DefaultConfiguration) coreSettings
 				.getConfiguration();
 
 		// check the loaded modules
-		assertEquals(configuration.getAllModules().size(), 4);
+		System.out.println("---->" + configuration.getAllModules());
+		assertEquals(4, configuration.getAllModules().size());
 
 		// check the pojo
 		final SamplePojo moduleSamplePojo = configuration.getModule("testSamplePojo");

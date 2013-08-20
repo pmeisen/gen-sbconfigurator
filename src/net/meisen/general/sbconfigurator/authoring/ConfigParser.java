@@ -11,13 +11,18 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+/**
+ * Parser to parse {@code config} elements within the bean-configuration.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class ConfigParser extends AbstractBeanDefinitionParser {
-
-	public final static String XML_ATTRIBUTE_CONFIGXML = "configXml";
-	public final static String XML_ATTRIBUTE_CONTEXTCLASS = "contextClass";
-	public final static String XML_ATTRIBUTE_INNERID = "innerId";
-	public final static String XML_ATTRIBUTE_OUTERID = "outerId";
-	public final static String XML_ELEMENT_MODULE = "module";
+	private final static String XML_ATTRIBUTE_CONFIGXML = "configXml";
+	private final static String XML_ATTRIBUTE_CONTEXTCLASS = "contextClass";
+	private final static String XML_ATTRIBUTE_INNERID = "innerId";
+	private final static String XML_ATTRIBUTE_OUTERID = "outerId";
+	private final static String XML_ELEMENT_MODULE = "module";
 
 	@Override
 	protected AbstractBeanDefinition parseInternal(final Element element,
@@ -69,6 +74,17 @@ public class ConfigParser extends AbstractBeanDefinitionParser {
 		return null;
 	}
 
+	/**
+	 * Creates the mappings between the outer- and configuration-context using
+	 * internal references.
+	 * 
+	 * @param configurationHolderId
+	 *            the id of the configuration
+	 * @param element
+	 *            the {@link Element} defining the mapping
+	 * @param parserContext
+	 *            the {@link ParserContext}
+	 */
 	protected void createAndRegisterMappings(
 			final String configurationHolderId, final Element element,
 			final ParserContext parserContext) {

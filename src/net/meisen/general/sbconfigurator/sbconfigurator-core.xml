@@ -21,11 +21,4 @@
   <bean id="xsltTransformer"      class="net.meisen.general.sbconfigurator.config.transformer.DefaultXsltTransformer" />
   <bean id="propertyReplacer"     class="net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyReplacer" />
   <bean id="xmlPropertyReplacer"  class="net.meisen.general.sbconfigurator.config.placeholder.DefaultXmlPropertyReplacer" />
-  
-  <!-- 
-      add some core-definitions, those are implemented via the plug-in architecture but without 
-      this implementation there is no plug-in architecture 
-    -->              
-  <sbc:loader id="coreLoaderDefinition" validationEnabled="true" beanOverridingAllowed="false" loadFromClassPath="true" loadFromWorkingDir="false"  
-  		      selector="sbconfigurator-bean.xml" />
 </beans>

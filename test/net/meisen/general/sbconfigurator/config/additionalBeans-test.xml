@@ -12,10 +12,10 @@
 
   <!-- get the general settings -->
   <bean id="testSampleBeanPlugIn" class="net.meisen.general.sbconfigurator.test.sampleplugin.SamplePlugIn" />
-  
-  <sbc:loader id="testSampleLoader" validationEnabled="false" beanOverridingAllowed="true" selector="sbconfigurator-testSample.xml" 
-  		      loadFromClassPath="true" loadFromWorkingDir="false"
-              xslt="net/meisen/general/sbconfigurator/test/sampleplugin/sbconfigurator-testSampleToSpringContext.xslt" />
-  
-  <import resource="classpath:/net/meisen/general/sbconfigurator/test/loader/sbconfigurator-bean-test.xml"/>
+    
+  <!-- create a pojo to test replacing -->
+  <bean id="testAnotherPojo" class="net.meisen.general.sbconfigurator.test.sampleplugin.SamplePojo">
+    <property name="testValue" value="value" />
+    <property name="replacedValue" value="${test.pojo.replacement}" />
+  </bean>
 </beans>

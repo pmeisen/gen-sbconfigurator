@@ -23,7 +23,7 @@ public class TestSpringXMLAuthoring {
 	@Test
 	public void testSimpleAuthoring() {
 		final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				"net/meisen/general/sbconfigurator/test/authoring/sbconfigurator-simple-authoring-test.xml");
+				"net/meisen/general/sbconfigurator/authoring/sbconfigurator-simple-authoring-test.xml");
 
 		// force Spring to give us the holder
 		final ConfigurationHolder ch = context
@@ -45,7 +45,6 @@ public class TestSpringXMLAuthoring {
 		assertNotNull(subject);
 		assertNotNull(subject.getConfig());
 		assertEquals(config, subject.getConfig());
-		assertNotNull(subject.getSettings());
 
 		// cleanUp
 		context.close();

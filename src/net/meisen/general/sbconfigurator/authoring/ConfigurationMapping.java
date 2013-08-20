@@ -4,6 +4,12 @@ import net.meisen.general.sbconfigurator.api.IConfiguration;
 
 import org.springframework.beans.factory.FactoryBean;
 
+/**
+ * Factory method to inject the mapping into the outer context.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class ConfigurationMapping implements FactoryBean<Object> {
 
 	private String configurationModule;
@@ -36,14 +42,33 @@ public class ConfigurationMapping implements FactoryBean<Object> {
 		return true;
 	}
 
+	/**
+	 * Sets the {@link IConfiguration} this mapping should retrieve the inner
+	 * bean from.
+	 * 
+	 * @param configuration
+	 *            the {@link IConfiguration} this mapping retrieves it's bean
+	 *            from
+	 */
 	public void setConfiguration(final IConfiguration configuration) {
 		this.configuration = configuration;
 	}
 
+	/**
+	 * Gets the reference to the configuration.
+	 * 
+	 * @return the reference to the configuration
+	 */
 	public String getConfigurationModule() {
 		return configurationModule;
 	}
 
+	/**
+	 * Sets the reference to the configuration.
+	 * 
+	 * @param configurationModule
+	 *            the reference to the configuration
+	 */
 	public void setConfigurationModule(final String configurationModule) {
 		this.configurationModule = configurationModule;
 	}

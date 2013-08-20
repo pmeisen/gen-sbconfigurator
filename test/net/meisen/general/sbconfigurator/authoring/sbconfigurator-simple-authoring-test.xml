@@ -17,7 +17,7 @@
 	<bean id="creationTime" class="java.util.Date" />
 	
 	<!-- get the configuration -->
-	<sbc:config id="testConfig" contextClass="net.meisen.general.sbconfigurator.ConfigurationCoreSettings">
+	<sbc:config id="testConfig" configXml="loaderExtended-core.xml" contextClass="net.meisen.general.sbconfigurator.config.TestSamplePlugInLoader">
 		<sbc:module innerId="samplePlugIn" outerId="b" />
 	</sbc:config>
 </beans>

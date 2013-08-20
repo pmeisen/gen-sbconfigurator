@@ -9,14 +9,20 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
+/**
+ * Parser used to parse {@code loader} instances within the XML-bean
+ * configuration.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class LoaderParser extends AbstractBeanDefinitionParser {
-
-	public final static String XML_ATTRIBUTE_SELECTOR = "selector";
-	public final static String XML_ATTRIBUTE_XSLT = "xslt";
-	public final static String XML_ATTRIBUTE_LOADFROMCLASSPATH = "loadFromClassPath";
-	public final static String XML_ATTRIBUTE_LOADFROMWORKINGDIR = "loadFromWorkingDir";
-	public final static String XML_ATTRIBUTE_BEANOVERRIDINGALLOWED = "beanOverridingAllowed";
-	public final static String XML_ATTRIBUTE_VALIDATIONENABLED = "validationEnabled";
+	private final static String XML_ATTRIBUTE_SELECTOR = "selector";
+	private final static String XML_ATTRIBUTE_XSLT = "xslt";
+	private final static String XML_ATTRIBUTE_LOADFROMCLASSPATH = "loadFromClassPath";
+	private final static String XML_ATTRIBUTE_LOADFROMWORKINGDIR = "loadFromWorkingDir";
+	private final static String XML_ATTRIBUTE_BEANOVERRIDINGALLOWED = "beanOverridingAllowed";
+	private final static String XML_ATTRIBUTE_VALIDATIONENABLED = "validationEnabled";
 
 	@Override
 	protected AbstractBeanDefinition parseInternal(final Element element,
@@ -49,12 +55,46 @@ public class LoaderParser extends AbstractBeanDefinitionParser {
 		return builder.getBeanDefinition();
 	}
 
+	/**
+	 * Helper method to set a property of the {@code builder} from the passed
+	 * {@code element}. The property to be set is defined by {@code property}
+	 * and the attribute read from the {@code element} is specified by the
+	 * {@code attribute}. If the specified attribute is not available or not
+	 * defined for the {@code element} or empty, the {@code def} is used.
+	 * 
+	 * @param builder
+	 *            the {@link BeanDefinitionBuilder} to set the {@code property}
+	 *            for
+	 * @param element
+	 *            the {@link Element} to get the {@code attribute} from
+	 * @param attribute
+	 *            the attribute to be read from the {@code element}
+	 * @param property
+	 *            the property to be set
+	 * @param def
+	 *            the default value to be used if the attribute is not specified
+	 */
 	protected void setValue(final BeanDefinitionBuilder builder,
 			final Element element, final String attribute,
 			final String property, final Object def) {
 		setValue(builder, property, element.getAttribute(attribute), "");
 	}
 
+	/**
+	 * Helper method to set a property of the {@code builder} with the specified
+	 * {@code value}. The property to be set is defined by {@code property}. If
+	 * the specified {@code value} is empty, the {@code def} is used.
+	 * 
+	 * @param builder
+	 *            the {@link BeanDefinitionBuilder} to set the {@code property}
+	 *            for
+	 * @param value
+	 *            the value to be set for the property
+	 * @param property
+	 *            the property to be set
+	 * @param def
+	 *            the default value to be used if the attribute is not specified
+	 */
 	protected void setValue(final BeanDefinitionBuilder builder,
 			final String property, final Object value, final Object def) {
 
