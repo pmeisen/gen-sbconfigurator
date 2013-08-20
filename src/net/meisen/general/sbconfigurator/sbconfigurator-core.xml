@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sbc="http://dev.meisen.net/sbconfigurator/ns"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       					   http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd">
 
   <!-- get the properties used for the whole configuration -->
   <bean id="corePropertyHolder" class="net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder" init-method="cacheProperties">
@@ -24,19 +25,7 @@
   <!-- 
       add some core-definitions, those are implemented via the plug-in architecture but without 
       this implementation there is no plug-in architecture 
-    -->
-  <bean id="coreLoaderDefinition" class="net.meisen.general.sbconfigurator.config.transformer.DefaultLoaderDefinition">
-    <property name="selector" value="sbconfigurator-loader.xml" />
-    <property name="xslt" value="net/meisen/general/sbconfigurator/config/transformer/sbconfigurator-loaderToSpringContext.xslt" />
-    <property name="beanOverridingAllowed" value="false" />
-    <property name="loadFromClassPath" value="true" />
-    <property name="loadFromWorkingDir" value="false" />
-  </bean>
-  
-  <bean id="coreBeanLoaderDefinition" class="net.meisen.general.sbconfigurator.config.transformer.DefaultLoaderDefinition">
-    <property name="selector" value="sbconfigurator-bean.xml" />
-    <property name="beanOverridingAllowed" value="false" />
-    <property name="loadFromClassPath" value="true" />
-    <property name="loadFromWorkingDir" value="false" />
-  </bean>
+    -->              
+  <sbc:loader id="coreLoaderDefinition" validationEnabled="true" beanOverridingAllowed="false" loadFromClassPath="true" loadFromWorkingDir="false"  
+  		      selector="sbconfigurator-bean.xml" />
 </beans>

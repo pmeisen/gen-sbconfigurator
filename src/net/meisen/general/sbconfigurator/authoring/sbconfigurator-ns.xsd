@@ -34,4 +34,19 @@
       <xsd:attribute name="outerId" type="nonEmptyString" use="required" />
     </xsd:complexType>
   </xsd:element>
+  
+  <xsd:element name="loader">
+    <xsd:complexType>
+      <xsd:complexContent>
+        <xsd:extension base="beans:identifiedType">
+          <xsd:attribute name="selector" type="nonEmptyString" use="required" />
+          <xsd:attribute name="xslt" type="xsd:string" default="" />
+          <xsd:attribute name="loadFromClassPath" type="xsd:boolean" default="true" />
+          <xsd:attribute name="loadFromWorkingDir" type="xsd:boolean" default="true" />
+          <xsd:attribute name="beanOverridingAllowed" type="xsd:boolean" default="false" />
+          <xsd:attribute name="validationEnabled" type="xsd:boolean" default="true" />
+        </xsd:extension>
+      </xsd:complexContent>
+    </xsd:complexType>
+  </xsd:element>
 </xsd:schema>

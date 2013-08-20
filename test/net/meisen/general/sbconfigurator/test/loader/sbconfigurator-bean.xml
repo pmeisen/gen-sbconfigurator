@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sbc="http://dev.meisen.net/sbconfigurator/ns"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       					   http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd">
   
   <!-- create a pojo to test replacing -->
   <bean id="testSamplePojo" class="net.meisen.general.sbconfigurator.test.sampleplugin.SamplePojo">
@@ -11,6 +12,10 @@
 
   <!-- get the general settings -->
   <bean id="testSampleBeanPlugIn" class="net.meisen.general.sbconfigurator.test.sampleplugin.SamplePlugIn" />
+  
+  <sbc:loader id="testSampleLoader" validationEnabled="false" beanOverridingAllowed="true" selector="sbconfigurator-testSample.xml" 
+  		      loadFromClassPath="true" loadFromWorkingDir="false"
+              xslt="net/meisen/general/sbconfigurator/test/sampleplugin/sbconfigurator-testSampleToSpringContext.xslt" />
   
   <import resource="classpath:/net/meisen/general/sbconfigurator/test/loader/sbconfigurator-bean-test.xml"/>
 </beans>

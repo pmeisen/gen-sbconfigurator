@@ -1,18 +1,27 @@
 package net.meisen.general.sbconfigurator.authoring;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.authoring.mock.SimpleConfigurationWiring;
-import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+/**
+ * Tests the implementation of the authering of the configuration.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TestSpringXMLAuthoring {
 
+	/**
+	 * Tests the simple authoring with the
+	 * {@code sbconfigurator-simple-authoring-test.xml}
+	 */
 	@Test
-	public void testSimpleAuthering() {
+	public void testSimpleAuthoring() {
 		final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"net/meisen/general/sbconfigurator/test/authoring/sbconfigurator-simple-authoring-test.xml");
 
@@ -37,7 +46,7 @@ public class TestSpringXMLAuthoring {
 		assertNotNull(subject.getConfig());
 		assertEquals(config, subject.getConfig());
 		assertNotNull(subject.getSettings());
-		
+
 		// cleanUp
 		context.close();
 	}

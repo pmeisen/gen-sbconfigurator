@@ -7,5 +7,6 @@ public class ConfigNamespaceHandler extends NamespaceHandlerSupport {
 	@Override
 	public void init() {
 		registerBeanDefinitionParser("config", new ConfigParser());
+		registerBeanDefinitionParser("loader", new LoaderParser());
 	}
 }
