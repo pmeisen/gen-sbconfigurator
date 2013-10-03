@@ -1,5 +1,8 @@
 package net.meisen.general.sbconfigurator;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.helper.SpringHelper;
 
@@ -75,6 +78,28 @@ public class ConfigurationCoreSettings {
 	 */
 	public static ConfigurationCoreSettings loadCoreSettings(
 			final String coreSettingsContext, final Class<?> clazz) {
+		return loadCoreSettings(coreSettingsContext, clazz, null);
+	}
+
+	/**
+	 * Method to load the <code>ConfigurationCoreSettings</code> and all the
+	 * other modules used by the <code>CoreSettings</code>. Additionally some
+	 * other modules (beans) can be injected via the <code>injections</code>.
+	 * 
+	 * @param coreSettingsContext
+	 *            the name of the context file to load the
+	 *            <code>ConfigurationCoreSettings</code> from
+	 * @param clazz
+	 *            using the <code>coreSettingsContext</code> of the specified
+	 *            class
+	 * @param injections
+	 *            additional injections to be added, can be <code>null</code>
+	 * 
+	 * @return the loaded <code>ConfigurationCoreSettings</code>
+	 */
+	public static ConfigurationCoreSettings loadCoreSettings(
+			final String coreSettingsContext, final Class<?> clazz,
+			final Map<String, Object> injections) {
 
 		final String fCoreSettingsContext = coreSettingsContext == null ? ConfigurationCoreSettings.coreSettingsContext
 				: coreSettingsContext;
@@ -104,7 +129,12 @@ public class ConfigurationCoreSettings {
 		}
 
 		// trigger the loading of the Configuration
-		settings.getConfiguration().loadConfiguration();
+		if (injections == null) {
+			settings.getConfiguration().loadConfiguration(
+					new HashMap<String, Object>());
+		} else {
+			settings.getConfiguration().loadConfiguration(injections);
+		}
 
 		return settings;
 	}

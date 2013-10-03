@@ -1,13 +1,19 @@
 package net.meisen.general.sbconfigurator.authoring;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -23,6 +29,7 @@ public class ConfigParser extends AbstractBeanDefinitionParser {
 	private final static String XML_ATTRIBUTE_INNERID = "innerId";
 	private final static String XML_ATTRIBUTE_OUTERID = "outerId";
 	private final static String XML_ELEMENT_MODULE = "module";
+	private final static String XML_ELEMENT_INJECT = "inject";
 
 	@Override
 	protected AbstractBeanDefinition parseInternal(final Element element,
@@ -45,6 +52,8 @@ public class ConfigParser extends AbstractBeanDefinitionParser {
 		if (StringUtils.hasText(configXml)) {
 			builder.addPropertyValue("configXml", configXml);
 		}
+		builder.addPropertyValue("injections",
+				createInjectionsMap(element, parserContext));
 
 		// create the final beanDefinition
 		final AbstractBeanDefinition definition = builder.getBeanDefinition();
@@ -68,15 +77,59 @@ public class ConfigParser extends AbstractBeanDefinitionParser {
 				element.getNamespaceURI(), XML_ELEMENT_MODULE);
 		for (int i = 0; i < moduleEls.getLength(); i++) {
 			final Element el = (Element) moduleEls.item(i);
-			createAndRegisterMappings(id, el, parserContext);
+			createAndRegisterModuleMapping(id, el, parserContext);
 		}
 
 		return null;
 	}
 
 	/**
-	 * Creates the mappings between the outer- and configuration-context using
-	 * internal references.
+	 * Creates a <code>Map</code> which contains all the defined injections. The
+	 * map is a <code>ManagedMap</code>, so that the references will be
+	 * resolved.
+	 * 
+	 * @param element
+	 *            the parent element which contains all the injections
+	 * @param parserContext
+	 *            the <code>ParserContext</code>
+	 * 
+	 * @return the <code>Map</code> containing the beans to be injected
+	 * 
+	 * @see ParserContext
+	 * @see ManagedMap
+	 */
+	protected Map<?, ?> createInjectionsMap(final Element element,
+			final ParserContext parserContext) {
+		final List<Element> injEls = DomUtils.getChildElementsByTagName(
+				element, XML_ELEMENT_INJECT);
+
+		// create the map
+		final ManagedMap<Object, Object> map = new ManagedMap<Object, Object>(
+				injEls.size());
+		map.setSource(parserContext.extractSource(element));
+		map.setKeyTypeName(String.class.getName());
+		map.setValueTypeName(Object.class.getName());
+		map.setMergeEnabled(false);
+
+		// insert the values
+		for (final Element injEl : injEls) {
+			final String innerId = injEl.getAttribute(XML_ATTRIBUTE_INNERID);
+			final String outerId = injEl.getAttribute(XML_ATTRIBUTE_OUTERID);
+
+			// generate the reference
+			final RuntimeBeanReference ref = new RuntimeBeanReference(outerId);
+			ref.setSource(parserContext.extractSource(injEl));
+
+			// add it
+			map.put(innerId, ref);
+		}
+
+		return map;
+	}
+
+	/**
+	 * Creates the mapping for a module between the outer- and
+	 * configuration-context using internal references.
 	 * 
 	 * @param configurationHolderId
 	 *            the id of the configuration
@@ -85,31 +138,32 @@ public class ConfigParser extends AbstractBeanDefinitionParser {
 	 * @param parserContext
 	 *            the {@link ParserContext}
 	 */
-	protected void createAndRegisterMappings(
+	protected void createAndRegisterModuleMapping(
 			final String configurationHolderId, final Element element,
 			final ParserContext parserContext) {
+
+		// get the defined attributes
+		final String innerId = element.getAttribute(XML_ATTRIBUTE_INNERID);
+		final String outerId = element.getAttribute(XML_ATTRIBUTE_OUTERID);
 
 		// get a builder for the mapping to be build
 		final BeanDefinitionBuilder builder = BeanDefinitionBuilder
 				.genericBeanDefinition();
 
 		// specify the type which is returned by this definition
-		builder.getRawBeanDefinition().setBeanClass(ConfigurationMapping.class);
+		builder.getRawBeanDefinition().setBeanClass(
+				ConfigurationModuleMapping.class);
 
 		// read some attributes and add those to the definition
-		builder.addPropertyValue("configurationModule",
-				element.getAttribute(XML_ATTRIBUTE_INNERID));
+		builder.addPropertyValue("configurationModule", innerId);
 		builder.addPropertyReference("configuration", configurationHolderId);
 
 		// create the final beanDefinition
 		final AbstractBeanDefinition definition = builder.getBeanDefinition();
 
-		// get the defined id or generate one
-		final String id = element.getAttribute(XML_ATTRIBUTE_OUTERID);
-
 		// bind the definition and the id
 		final BeanDefinitionHolder holder = new BeanDefinitionHolder(
-				definition, id);
+				definition, outerId);
 
 		/*
 		 * register the mapping (i.e. bound definition and id) within the

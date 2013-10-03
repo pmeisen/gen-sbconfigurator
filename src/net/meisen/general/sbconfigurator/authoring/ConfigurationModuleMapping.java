@@ -10,7 +10,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @author pmeisen
  * 
  */
-public class ConfigurationMapping implements FactoryBean<Object> {
+public class ConfigurationModuleMapping implements FactoryBean<Object> {
 
 	private String configurationModule;
 	private IConfiguration configuration;

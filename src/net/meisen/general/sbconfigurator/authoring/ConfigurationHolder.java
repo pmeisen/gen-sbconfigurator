@@ -1,5 +1,7 @@
 package net.meisen.general.sbconfigurator.authoring;
 
+import java.util.Map;
+
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 
@@ -17,6 +19,8 @@ public class ConfigurationHolder implements FactoryBean<IConfiguration> {
 	private Class<?> contextClass = null;
 	private String configXml = null;
 
+	private Map<String, Object> injections = null;
+
 	/**
 	 * Helper method to get the {@link IConfiguration} wrapped by this factory.
 	 * 
@@ -25,7 +29,7 @@ public class ConfigurationHolder implements FactoryBean<IConfiguration> {
 	public IConfiguration getConfiguration() {
 		if (c == null) {
 			final ConfigurationCoreSettings c = ConfigurationCoreSettings
-					.loadCoreSettings(configXml, contextClass);
+					.loadCoreSettings(configXml, contextClass, getInjections());
 			this.c = c.getConfiguration();
 		}
 
@@ -83,5 +87,24 @@ public class ConfigurationHolder implements FactoryBean<IConfiguration> {
 	 */
 	public void setConfigXml(final String configXml) {
 		this.configXml = configXml;
+	}
+
+	/**
+	 * Get all the injections defined for the configuration.
+	 * 
+	 * @return all the injections defined for the configuration
+	 */
+	public Map<String, Object> getInjections() {
+		return injections;
+	}
+
+	/**
+	 * Defines all the injections for the configuration.
+	 * 
+	 * @param injections
+	 *            all the injections of the configuration
+	 */
+	public void setInjections(final Map<String, Object> injections) {
+		this.injections = injections;
 	}
 }

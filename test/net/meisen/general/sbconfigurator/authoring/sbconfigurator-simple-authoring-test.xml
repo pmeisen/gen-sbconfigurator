@@ -19,5 +19,9 @@
 	<!-- get the configuration -->
 	<sbc:config id="testConfig" configXml="loaderExtended-core.xml" contextClass="net.meisen.general.sbconfigurator.config.TestSamplePlugInLoader">
 		<sbc:module innerId="samplePlugIn" outerId="b" />
+		<sbc:module innerId="testAnotherPojo" outerId="c" />
+		
+		<sbc:inject innerId="date" outerId="creationTime" />
+		<sbc:inject innerId="instance" outerId="simpleTestInstance" />
 	</sbc:config>
 </beans>

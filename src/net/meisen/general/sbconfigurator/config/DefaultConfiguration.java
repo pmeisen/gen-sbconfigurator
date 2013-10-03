@@ -133,7 +133,8 @@ public class DefaultConfiguration implements IConfiguration {
 	private DefaultListableBeanFactory moduleFactory = null;
 
 	@Override
-	public void loadConfiguration() throws InvalidConfigurationException {
+	public void loadConfiguration(final Map<String, Object> injections)
+			throws InvalidConfigurationException {
 		final Map<String, ILoaderDefinition> userLoaderDefinitions = new HashMap<String, ILoaderDefinition>();
 
 		if (LOG.isTraceEnabled()) {
@@ -208,7 +209,7 @@ public class DefaultConfiguration implements IConfiguration {
 				final Map<String, BeanDefinition> defs = SpringHelper
 						.getBeanDefinitions(beanFactory,
 								ILoaderDefinition.class);
-
+	
 				// everything else is registered as module
 				registerModuleBeanDefinitions(defs, entry.getKey());
 			}
@@ -272,6 +273,9 @@ public class DefaultConfiguration implements IConfiguration {
 				.entrySet()) {
 			moduleFactory.registerBeanDefinition(entry.getKey(),
 					entry.getValue());
+		}
+		for (final Entry<String, Object> entry : injections.entrySet()) {
+			moduleFactory.registerSingleton(entry.getKey(), entry.getValue());
 		}
 
 		// now let's add all the modules
@@ -652,11 +656,11 @@ public class DefaultConfiguration implements IConfiguration {
 					+ "' (size: " + factory.getBeanDefinitionCount() + ")");
 		}
 
-		// use the postProcessing to replace properties (i.e. for imports, those
-		// are
-		// loaded directly via Spring and therefore not replaced within the
-		// normal
-		// replacement)
+		/*
+		 * use the postProcessing to replace properties (i.e. for imports, those
+		 * are loaded directly via Spring and therefore not replaced within the
+		 * normal replacement)
+		 */
 		if (corePropertyHolder != null) {
 			corePropertyHolder.postProcessBeanFactory(factory);
 		}

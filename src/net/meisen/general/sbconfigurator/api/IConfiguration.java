@@ -35,16 +35,21 @@ public interface IConfiguration {
 	 * <code>sbconfigurator-core.xml</code>) right after everything is set up
 	 * (i.e. as <code>init-method</code>).
 	 * 
+	 * @param injections
+	 *            additional modules which are defined outside and should be
+	 *            added to the configuration, cannot be <code>null</code>
+	 * 
 	 * @throws InvalidConfigurationException
-	 *           if the <code>DefaultConfiguration</code> could not be loaded
+	 *             if the <code>DefaultConfiguration</code> could not be loaded
 	 */
-	public void loadConfiguration() throws InvalidConfigurationException;
+	public void loadConfiguration(final Map<String, Object> injections)
+			throws InvalidConfigurationException;
 
 	/**
 	 * Get the loaded module for a specified <code>name</code>.
 	 * 
 	 * @param name
-	 *          the name of the module to retrieve
+	 *            the name of the module to retrieve
 	 * 
 	 * @return the <code>Object</code> associated to the <code>name</code>
 	 *         specified, might be <code>null</code> if no module with the
@@ -61,11 +66,11 @@ public interface IConfiguration {
 	public Map<String, Object> getAllModules();
 
 	/**
-	 * Creates an instance of the specified <code>clazz</code> and wires annotated
-	 * fields.
+	 * Creates an instance of the specified <code>clazz</code> and wires
+	 * annotated fields.
 	 * 
 	 * @param clazz
-	 *          the <code>Class</code> to create an instance from
+	 *            the <code>Class</code> to create an instance from
 	 * 
 	 * @return the created instance
 	 */
@@ -76,7 +81,7 @@ public interface IConfiguration {
 	 * afterwards.
 	 * 
 	 * @param bean
-	 *          the instance to be wired
+	 *            the instance to be wired
 	 * 
 	 * @return the wired instance (which is not a clone, it's the same as the
 	 *         passed <code>bean</code>)

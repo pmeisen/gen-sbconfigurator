@@ -31,7 +31,6 @@ public class TestSamplePlugInLoader {
 				.getConfiguration();
 
 		// check the loaded modules
-		System.out.println("---->" + configuration.getAllModules());
 		assertEquals(4, configuration.getAllModules().size());
 
 		// check the pojo

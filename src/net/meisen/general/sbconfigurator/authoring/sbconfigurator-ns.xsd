@@ -18,8 +18,9 @@
     <xsd:complexType>
       <xsd:complexContent>
         <xsd:extension base="beans:identifiedType">
-          <xsd:sequence>
+          <xsd:sequence maxOccurs="unbounded">
             <xsd:element ref="module" minOccurs="0" />
+            <xsd:element ref="inject" minOccurs="0" />
           </xsd:sequence>
           <xsd:attribute name="configXml" type="nonEmptyString" default="sbconfigurator-core.xml" />
           <xsd:attribute name="contextClass" type="nonEmptyString" default="net.meisen.general.sbconfigurator.ConfigurationCoreSettings" />
@@ -34,6 +35,14 @@
       <xsd:attribute name="outerId" type="nonEmptyString" use="required" />
     </xsd:complexType>
   </xsd:element>
+  
+  <xsd:element name="inject">
+    <xsd:complexType>
+      <xsd:attribute name="innerId" type="nonEmptyString" use="required" />
+      <xsd:attribute name="outerId" type="nonEmptyString" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+  
   
   <xsd:element name="loader">
     <xsd:complexType>
