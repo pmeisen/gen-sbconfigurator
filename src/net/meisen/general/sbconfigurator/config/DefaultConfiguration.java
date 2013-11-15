@@ -342,10 +342,18 @@ public class DefaultConfiguration implements IConfiguration {
 		} else if (module instanceof ConfigurationCoreSettings) {
 			return false;
 		}
-		// also don't add any Factories of Spring those are helper beans
-		else if (module instanceof MethodInvoker
-				|| module instanceof MethodInvokingFactoryBean) {
+		// also don't add any Factories or creation of those of Spring those are
+		// helper beans
+		else if (module instanceof MethodInvoker) {
 			return false;
+		} else if (module instanceof BeanDefinition) {
+			final String className = ((BeanDefinition) module)
+					.getBeanClassName();
+			if (MethodInvokingFactoryBean.class.getName().equals(className)) {
+				return false;
+			} else {
+				return true;
+			}
 		} else {
 			return true;
 		}
