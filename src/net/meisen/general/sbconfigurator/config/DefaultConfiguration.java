@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.DefaultDocumentLoader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -209,7 +210,7 @@ public class DefaultConfiguration implements IConfiguration {
 				final Map<String, BeanDefinition> defs = SpringHelper
 						.getBeanDefinitions(beanFactory,
 								ILoaderDefinition.class);
-	
+
 				// everything else is registered as module
 				registerModuleBeanDefinitions(defs, entry.getKey());
 			}
@@ -342,7 +343,8 @@ public class DefaultConfiguration implements IConfiguration {
 			return false;
 		}
 		// also don't add any Factories of Spring those are helper beans
-		else if (module instanceof MethodInvoker) {
+		else if (module instanceof MethodInvoker
+				|| module instanceof MethodInvokingFactoryBean) {
 			return false;
 		} else {
 			return true;
@@ -389,6 +391,11 @@ public class DefaultConfiguration implements IConfiguration {
 		if (Objects.empty(beanDefinition) || Objects.empty(id)) {
 			throw new IllegalArgumentException("The id ('" + id
 					+ "') or the beanDefinition cannot be null.");
+		} else if (!isModule(id, beanDefinition)) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Skipping ModuleBeanDefinition '" + id
+						+ "' because it's identified as none module.");
+			}
 		} else if (moduleDefinitions.put(id, beanDefinition) != null) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("Overloading the moduleDefinition '" + id
