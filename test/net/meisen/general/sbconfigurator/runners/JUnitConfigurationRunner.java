@@ -109,7 +109,6 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 
 	@Override
 	protected Object createTest() throws Exception {
-
 		return configuration.createInstance(getTestClass().getJavaClass());
 	}
 

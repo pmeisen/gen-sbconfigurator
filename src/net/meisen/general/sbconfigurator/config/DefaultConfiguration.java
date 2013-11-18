@@ -346,14 +346,6 @@ public class DefaultConfiguration implements IConfiguration {
 		// helper beans
 		else if (module instanceof MethodInvoker) {
 			return false;
-		} else if (module instanceof BeanDefinition) {
-			final String className = ((BeanDefinition) module)
-					.getBeanClassName();
-			if (MethodInvokingFactoryBean.class.getName().equals(className)) {
-				return false;
-			} else {
-				return true;
-			}
 		} else {
 			return true;
 		}
@@ -399,11 +391,6 @@ public class DefaultConfiguration implements IConfiguration {
 		if (Objects.empty(beanDefinition) || Objects.empty(id)) {
 			throw new IllegalArgumentException("The id ('" + id
 					+ "') or the beanDefinition cannot be null.");
-		} else if (!isModule(id, beanDefinition)) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Skipping ModuleBeanDefinition '" + id
-						+ "' because it's identified as none module.");
-			}
 		} else if (moduleDefinitions.put(id, beanDefinition) != null) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("Overloading the moduleDefinition '" + id
@@ -439,6 +426,20 @@ public class DefaultConfiguration implements IConfiguration {
 			}
 
 			return false;
+		} else if (id.matches(".*#\\d+$")) {
+			if (id.startsWith(MethodInvokingFactoryBean.class.getName())) {
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("Skipping the bean '"
+							+ id
+							+ "' as module, because it is an anonymous bean used for MethodInvokation");
+				}
+			} else if (LOG.isWarnEnabled()) {
+				LOG.warn("Skipping the bean '"
+						+ id
+						+ "' as module, because it is probably an anonymous bean");
+			}
+
+			return false;
 		} else if ((current = modules.put(id, module)) != null) {
 
 			if (LOG.isWarnEnabled() && !Objects.equals(current, module)) {
@@ -448,7 +449,8 @@ public class DefaultConfiguration implements IConfiguration {
 			return true;
 		} else {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("Loaded the module '" + id + "'");
+				LOG.debug("Loaded the module '" + id + "' of type '"
+						+ module.getClass().getName() + "'");
 			}
 
 			return true;
