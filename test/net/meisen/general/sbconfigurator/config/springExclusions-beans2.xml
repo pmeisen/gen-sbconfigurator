@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
   
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetObject"><ref bean="coreConfiguration" /></property>
-    <property name="targetMethod" value="toString" />
+    <property name="targetObject"><ref bean="CallCounter" /></property>
+    <property name="targetMethod" value="increase" />
   </bean>
 </beans>

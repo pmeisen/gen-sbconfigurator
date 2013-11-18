@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -391,6 +392,12 @@ public class DefaultConfiguration implements IConfiguration {
 		if (Objects.empty(beanDefinition) || Objects.empty(id)) {
 			throw new IllegalArgumentException("The id ('" + id
 					+ "') or the beanDefinition cannot be null.");
+		}
+
+		// in the case of an anonymous id we should never override
+		if (isAnonymousId(id) && moduleDefinitions.containsKey(id)) {
+			moduleDefinitions.put(UUID.randomUUID().toString() + "_" + id,
+					beanDefinition);
 		} else if (moduleDefinitions.put(id, beanDefinition) != null) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("Overloading the moduleDefinition '" + id
@@ -426,7 +433,7 @@ public class DefaultConfiguration implements IConfiguration {
 			}
 
 			return false;
-		} else if (id.matches(".*#\\d+$")) {
+		} else if (isAnonymousId(id)) {
 			if (id.startsWith(MethodInvokingFactoryBean.class.getName())) {
 				if (LOG.isTraceEnabled()) {
 					LOG.trace("Skipping the bean '"
@@ -455,6 +462,18 @@ public class DefaultConfiguration implements IConfiguration {
 
 			return true;
 		}
+	}
+
+	/**
+	 * Checks if the id is a created one of Spring for an anonymous bean.
+	 * 
+	 * @param id
+	 *            the id to be checked
+	 * @return <code>true</code> if the id is anonymous, otherwise
+	 *         <code>false</code>
+	 */
+	protected boolean isAnonymousId(final String id) {
+		return id.matches(".*#\\d+$");
 	}
 
 	@SuppressWarnings("unchecked")

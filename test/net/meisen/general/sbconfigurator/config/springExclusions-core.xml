@@ -7,10 +7,7 @@
   <!-- include the default configuration -->
   <import resource="classpath:/net/meisen/general/sbconfigurator/sbconfigurator-core.xml"/>
 
-  <sbc:loader id="addBeans" selector="springExclusions-beans.xml" />
-
-  <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetObject"><ref bean="coreSettings" /></property>
-    <property name="targetMethod" value="toString" />
-  </bean>
+  <sbc:loader id="addBeans1" selector="springExclusions-beans1.xml" />
+  <sbc:loader id="addBeans2" selector="springExclusions-beans2.xml" />
+  <sbc:loader id="addBeans3" selector="springExclusions-beans3.xml" />
 </beans>
