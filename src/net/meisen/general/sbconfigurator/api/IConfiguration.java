@@ -1,5 +1,6 @@
 package net.meisen.general.sbconfigurator.api;
 
+import java.io.InputStream;
 import java.util.Map;
 
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
@@ -87,4 +88,23 @@ public interface IConfiguration {
 	 *         passed <code>bean</code>)
 	 */
 	public <T> T wireInstance(final T bean);
+
+	/**
+	 * Loads the modules of an instance delayed. This means that the system
+	 * might have been initialized already but a specific configuration should
+	 * be loaded with the knowledge of the configuration's context but without
+	 * being part of the configuration (i.e. as module).
+	 * 
+	 * @param loaderId
+	 *            the loader used to load the delayed modules
+	 * @param resIo
+	 *            the <code>InputStreamy</code> of the modules to be loaded
+	 *            delayed
+	 * 
+	 * @return the loaded modules without any module which is included in the
+	 *         configuration; the loaded modules are not added to the
+	 *         configuration
+	 */
+	public Map<String, Object> loadDelayed(final String loaderId,
+			final InputStream resIo);
 }

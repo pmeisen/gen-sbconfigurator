@@ -1,10 +1,14 @@
 package net.meisen.general.sbconfigurator.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import java.io.InputStream;
+import java.util.Map;
+
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
-import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.test.sampleplugin.SamplePlugIn;
 import net.meisen.general.sbconfigurator.test.sampleplugin.SamplePojo;
 
@@ -24,9 +28,10 @@ public class TestSamplePlugInLoader {
 	@Test
 	public void testLoadingOfSamplePlugIn() {
 
-		// load the server
+		// load the configuration
 		final ConfigurationCoreSettings coreSettings = ConfigurationCoreSettings
-				.loadCoreSettings("loaderExtended-core.xml", TestSamplePlugInLoader.class);
+				.loadCoreSettings("loaderExtended-core.xml",
+						TestSamplePlugInLoader.class);
 		final DefaultConfiguration configuration = (DefaultConfiguration) coreSettings
 				.getConfiguration();
 
@@ -34,24 +39,27 @@ public class TestSamplePlugInLoader {
 		assertEquals(4, configuration.getAllModules().size());
 
 		// check the pojo
-		final SamplePojo moduleSamplePojo = configuration.getModule("testSamplePojo");
-		
+		final SamplePojo moduleSamplePojo = configuration
+				.getModule("testSamplePojo");
+
 		// do some tests for the pojo
 		assertNotNull(moduleSamplePojo);
 		assertEquals(moduleSamplePojo.getTestValue(), "value");
 		assertEquals(moduleSamplePojo.getReplacedValue(), "replacedvalue");
-		
+
 		// check another pojo
-		final SamplePojo moduleAnotherPojo = configuration.getModule("testAnotherPojo");
-		
+		final SamplePojo moduleAnotherPojo = configuration
+				.getModule("testAnotherPojo");
+
 		// do some tests for the pojo
 		assertNotNull(moduleAnotherPojo);
 		assertEquals(moduleAnotherPojo.getTestValue(), "value");
 		assertEquals(moduleAnotherPojo.getReplacedValue(), "replacedvalue");
-		
+
 		// check the module of the loading via loaderDefinition
-		final Object moduleSamplePlugIn = configuration.getModule("samplePlugIn");
-		
+		final Object moduleSamplePlugIn = configuration
+				.getModule("samplePlugIn");
+
 		// do some tests
 		assertNotNull(moduleSamplePlugIn);
 		assertTrue(moduleSamplePlugIn instanceof SamplePlugIn);
@@ -62,17 +70,56 @@ public class TestSamplePlugInLoader {
 		assertEquals(plugIn.configuration, coreSettings.getConfiguration());
 
 		// check the loading of the beanModule
-		final Object beanModule = configuration.getModule("testSampleBeanPlugIn");
+		final Object beanModule = configuration
+				.getModule("testSampleBeanPlugIn");
 
 		// do some tests
 		assertNotNull(moduleSamplePlugIn);
 		assertTrue("beanModule is instanceof '"
-				+ (beanModule == null ? null : beanModule.getClass().getName()) + "'",
-				beanModule instanceof SamplePlugIn);
+				+ (beanModule == null ? null : beanModule.getClass().getName())
+				+ "'", beanModule instanceof SamplePlugIn);
 
 		// now check the plugin
 		final SamplePlugIn beanPlugIn = (SamplePlugIn) beanModule;
 		assertEquals(beanPlugIn.coreSettings, coreSettings);
 		assertEquals(beanPlugIn.configuration, coreSettings.getConfiguration());
+	}
+
+	/**
+	 * Test the delayed loading
+	 */
+	@Test
+	public void testDelayedLoading() {
+
+		// load the configuration
+		final ConfigurationCoreSettings coreSettings = ConfigurationCoreSettings
+				.loadCoreSettings("loaderExtended-core.xml",
+						TestSamplePlugInLoader.class);
+		final DefaultConfiguration configuration = (DefaultConfiguration) coreSettings
+				.getConfiguration();
+		final int allModulesSize = configuration.getAllModules().size();
+
+		// get the resource to be loaded delayed
+		final InputStream ios = getClass()
+				.getResourceAsStream(
+						"/net/meisen/general/sbconfigurator/test/sampleplugin/sbconfigurator-testDelayedSample.xml");
+		assertNotNull(ios);
+
+		// load it delayed
+		final Map<String, Object> modules = configuration.loadDelayed(
+				"testSampleLoader", ios);
+		assertNotNull(modules);
+		assertEquals(1, modules.size());
+		assertTrue(modules.values().iterator().next() instanceof SamplePlugIn);
+
+		// get the plugin
+		final SamplePlugIn sample = (SamplePlugIn) modules.values().iterator()
+				.next();
+		assertEquals(sample, modules.get("samplePlugIn"));
+		assertNotNull(sample);
+		assertFalse(sample.equals(configuration.getModule("samplePlugIn")));
+
+		// make sure no new modules are loaded
+		assertEquals(allModulesSize, configuration.getAllModules().size());
 	}
 }

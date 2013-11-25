@@ -8,7 +8,7 @@
   <import resource="classpath:/net/meisen/general/sbconfigurator/sbconfigurator-core.xml"/>
     
   <!-- register a loader to load the sample plugin -->
-  <sbc:loader id="testSampleLoader" validationEnabled="false" beanOverridingAllowed="true" selector="sbconfigurator-testSample.xml" 
+  <sbc:loader id="testSampleLoader" validationEnabled="false" beanOverridingAllowed="false" selector="sbconfigurator-testSample.xml" 
   		      loadFromClassPath="true" loadFromWorkingDir="false"
               xslt="net/meisen/general/sbconfigurator/test/sampleplugin/sbconfigurator-testSampleToSpringContext.xslt" />
 

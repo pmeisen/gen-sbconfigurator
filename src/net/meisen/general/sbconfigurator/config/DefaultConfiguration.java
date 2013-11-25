@@ -267,10 +267,7 @@ public class DefaultConfiguration implements IConfiguration {
 
 		// create the factory
 		moduleFactory = SpringHelper.createBeanFactory(true, false);
-		moduleFactory.registerSingleton(coreSettingsId, coreSettings);
-		moduleFactory.registerSingleton(coreConfigurationId, this);
-		moduleFactory.registerSingleton(corePropertyHolderId,
-				corePropertyHolder);
+		registerDefaults(moduleFactory);
 		for (final Entry<String, BeanDefinition> entry : moduleDefinitions
 				.entrySet()) {
 			moduleFactory.registerBeanDefinition(entry.getKey(),
@@ -286,6 +283,19 @@ public class DefaultConfiguration implements IConfiguration {
 		for (final Entry<String, Object> entry : modules.entrySet()) {
 			registerModule(entry.getKey(), entry.getValue());
 		}
+	}
+
+	/**
+	 * Helper method which registers all the default singletons (e.g.
+	 * coreSettings, coreConfiguration).
+	 * 
+	 * @param factory
+	 *            the {@link DefaultListableBeanFactory} to add the beans to
+	 */
+	protected void registerDefaults(final DefaultListableBeanFactory factory) {
+		factory.registerSingleton(coreSettingsId, coreSettings);
+		factory.registerSingleton(coreConfigurationId, this);
+		factory.registerSingleton(corePropertyHolderId, corePropertyHolder);
 	}
 
 	/**
@@ -340,10 +350,12 @@ public class DefaultConfiguration implements IConfiguration {
 			return false;
 		} else if (corePropertyHolderId.equals(id)) {
 			return false;
+		} else if (isAnonymousId(id)) {
+			return false;
 		} else if (module instanceof ConfigurationCoreSettings) {
 			return false;
 		}
-		// also don't add any Factories or creation of those of Spring those are
+		// also don't add any factories or creation of those of Spring those are
 		// helper beans
 		else if (module instanceof MethodInvoker) {
 			return false;
@@ -428,22 +440,22 @@ public class DefaultConfiguration implements IConfiguration {
 
 		// register the module
 		if (!isModule(id, module)) {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Skipping the bean '" + id + "' as module");
-			}
-
-			return false;
-		} else if (isAnonymousId(id)) {
-			if (id.startsWith(MethodInvokingFactoryBean.class.getName())) {
-				if (LOG.isTraceEnabled()) {
-					LOG.trace("Skipping the bean '"
+			if (isAnonymousId(id)) {
+				if (id.startsWith(MethodInvokingFactoryBean.class.getName())) {
+					if (LOG.isTraceEnabled()) {
+						LOG.trace("Skipping the bean '"
+								+ id
+								+ "' as module, because it is an anonymous bean used for MethodInvokation");
+					}
+				} else if (LOG.isWarnEnabled()) {
+					LOG.warn("Skipping the bean '"
 							+ id
-							+ "' as module, because it is an anonymous bean used for MethodInvokation");
+							+ "' as module, because it is probably an anonymous bean");
 				}
-			} else if (LOG.isWarnEnabled()) {
-				LOG.warn("Skipping the bean '"
-						+ id
-						+ "' as module, because it is probably an anonymous bean");
+			} else {
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("Skipping the bean '" + id + "' as module");
+				}
 			}
 
 			return false;
@@ -613,35 +625,8 @@ public class DefaultConfiguration implements IConfiguration {
 		final String replaceXmlSelector = replacer.replacePlaceholders(
 				xmlSelector, getProperties());
 
-		// create the factory and enable auto-wiring to setup the core system
-		final DefaultListableBeanFactory factory = SpringHelper
-				.createBeanFactory(beanOverriding, false);
-
-		// create the reader
-		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
-				factory);
-
-		// create the transformer
-		if (xsltTransformer != null) {
-
-			// replace the properties within the xslt
-			org.springframework.core.io.Resource res = replacePlaceholders(xsltStream);
-
-			try {
-				final InputStream xsltReplacedStream = res == null ? null : res
-						.getInputStream();
-				xsltTransformer.setXsltTransformer(xsltReplacedStream);
-			} catch (final InvalidXsltException e) {
-				throw new InvalidConfigurationException(
-						"The specified XSLT is invalid and therefore cannot be used.",
-						e);
-			} catch (final IOException e) {
-				throw new InvalidConfigurationException(
-						"The specified XSLT stream cannot be accessed.", e);
-			}
-		}
-
-		// check if we have a context
+		// get all the resources to be loaded
+		final List<InputStream> resIos = new ArrayList<InputStream>();
 		if (context == null) {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Creating factory for files '" + replaceXmlSelector
@@ -668,8 +653,7 @@ public class DefaultConfiguration implements IConfiguration {
 							+ "' at location '" + resInfo.getFullPath() + "'");
 				}
 
-				// add the resource
-				addResourceToReader(reader, xsltTransformer, resIo, validate);
+				resIos.add(resIo);
 			}
 		} else {
 			final String contextPath = context.getPackage().getName()
@@ -684,12 +668,77 @@ public class DefaultConfiguration implements IConfiguration {
 			// get the resource
 			final InputStream resIo = context.getClassLoader()
 					.getResourceAsStream(fileClassPath);
-			addResourceToReader(reader, xsltTransformer, resIo, validate);
+			resIos.add(resIo);
 		}
 
+		// get the factory
+		final DefaultListableBeanFactory factory = loadBeanFactory(resIos,
+				xsltStream, validate, beanOverriding);
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Loaded factory for files '" + replaceXmlSelector
 					+ "' (size: " + factory.getBeanDefinitionCount() + ")");
+		}
+
+		return factory;
+	}
+
+	/**
+	 * Loads a {@link DefaultListableBeanFactory} from the specified resources.
+	 * 
+	 * @param resIos
+	 *            the {@link InputStream} instances to load the definitions from
+	 * @param xsltStream
+	 *            the stream of the XSLT used for transformation
+	 * @param validate
+	 *            <code>true</code> if the XML of the <code>xmlFileName</code>
+	 *            should be validated, otherwise <code>false</code>
+	 * @param beanOverriding
+	 *            <code>true</code> if beans of the context can be overwritten,
+	 *            otherwise <code>false</code>
+	 * 
+	 * @return the <code>ListableBeanFactory</code> loaded by the specified
+	 *         parameters
+	 */
+	public DefaultListableBeanFactory loadBeanFactory(
+			final Collection<InputStream> resIos, final InputStream xsltStream,
+			final boolean validate, final boolean beanOverriding) {
+
+		// create the factory and enable auto-wiring to setup the core system
+		final DefaultListableBeanFactory factory = SpringHelper
+				.createBeanFactory(true, beanOverriding);
+
+		// create the reader
+		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
+				factory);
+
+		// initialize the xslt transformer
+		if (xsltTransformer != null) {
+
+			// replace the properties within the xslt
+			org.springframework.core.io.Resource res = replacePlaceholders(xsltStream);
+
+			try {
+				final InputStream xsltReplacedStream = res == null ? null : res
+						.getInputStream();
+				xsltTransformer.setXsltTransformer(xsltReplacedStream);
+			} catch (final InvalidXsltException e) {
+				throw new InvalidConfigurationException(
+						"The specified XSLT is invalid and therefore cannot be used.",
+						e);
+			} catch (final IOException e) {
+				throw new InvalidConfigurationException(
+						"The specified XSLT stream cannot be accessed.", e);
+			}
+		}
+
+		// transform all the resources and add those
+		for (final InputStream resIo : resIos) {
+			addResourceToReader(reader, xsltTransformer, resIo, validate);
+		}
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Loaded " + factory.getBeanDefinitionCount()
+					+ " modules.");
 		}
 
 		/*
@@ -963,5 +1012,41 @@ public class DefaultConfiguration implements IConfiguration {
 		moduleFactory.autowireBeanProperties(bean,
 				AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 		return bean;
+	}
+
+	@Override
+	public Map<String, Object> loadDelayed(final String loaderId,
+			final InputStream resIo) throws InvalidConfigurationException {
+		final ILoaderDefinition loaderDefinition = loaderDefinitions
+				.get(loaderId);
+
+		// check if we have a loader
+		if (loaderDefinition == null) {
+			throw new InvalidConfigurationException("A loader with id '"
+					+ loaderId + "' could not be found.");
+		}
+
+		// create a factory to hold all the beans read
+		final List<InputStream> resIos = new ArrayList<InputStream>();
+		resIos.add(resIo);
+		final DefaultListableBeanFactory factory = loadBeanFactory(resIos,
+				loaderDefinition.getXsltTransformerInputStream(),
+				loaderDefinition.isValidationEnabled(),
+				loaderDefinition.isBeanOverridingAllowed());
+
+		// set a parent factory
+		factory.setParentBeanFactory(moduleFactory);
+
+		// now get all the modules
+		final Map<String, Object> factoryModules = factory
+				.getBeansOfType(Object.class);
+		final Map<String, Object> delayedModules = new HashMap<String, Object>();
+		for (final Entry<String, Object> e : factoryModules.entrySet()) {
+			if (isModule(e.getKey(), e.getValue())) {
+				delayedModules.put(e.getKey(), e.getValue());
+			}
+		}
+
+		return delayedModules;
 	}
 }
