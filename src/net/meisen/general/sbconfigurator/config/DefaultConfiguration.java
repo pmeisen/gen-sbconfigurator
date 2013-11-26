@@ -441,7 +441,7 @@ public class DefaultConfiguration implements IConfiguration {
 		// register the module
 		if (!isModule(id, module)) {
 			if (isAnonymousId(id)) {
-				if (id.startsWith(MethodInvokingFactoryBean.class.getName())) {
+				if (id.contains(MethodInvokingFactoryBean.class.getName())) {
 					if (LOG.isTraceEnabled()) {
 						LOG.trace("Skipping the bean '"
 								+ id
