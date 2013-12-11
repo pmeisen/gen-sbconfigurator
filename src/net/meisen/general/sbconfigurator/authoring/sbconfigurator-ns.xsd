@@ -43,7 +43,6 @@
     </xsd:complexType>
   </xsd:element>
   
-  
   <xsd:element name="loader">
     <xsd:complexType>
       <xsd:complexContent>

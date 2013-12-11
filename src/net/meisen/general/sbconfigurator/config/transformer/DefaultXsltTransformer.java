@@ -13,6 +13,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
@@ -22,6 +23,8 @@ import net.meisen.general.sbconfigurator.api.transformer.IXsltTransformer;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
 import net.meisen.general.sbconfigurator.config.exception.TransformationFailedException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -32,7 +35,32 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class DefaultXsltTransformer implements IXsltTransformer {
 
+	@Autowired
+	@Qualifier("xsltUriResolver")
+	private URIResolver resolver;
+
 	private Transformer xsltTransformer = null;
+
+	/**
+	 * Default constructor which registers no additional {@code URIResolver}.
+	 * The value might be set using auto-wiring with the {@code xsltUriResolver}
+	 * qualifier.
+	 * 
+	 * @see Autowired
+	 */
+	public DefaultXsltTransformer() {
+		this(null);
+	}
+
+	/**
+	 * Constructor which sets an {@code URIResolver}.
+	 * 
+	 * @param resolver
+	 *            the {@code URIResolver} to be used
+	 */
+	public DefaultXsltTransformer(final URIResolver resolver) {
+		this.resolver = resolver;
+	}
 
 	/**
 	 * This method is used to set the transformer to be used for the
@@ -40,11 +68,11 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 	 * <code>xsltClassPath</code>.
 	 * 
 	 * @param xsltClassPath
-	 *          the <code>String</code> pointing to the XSLT on the classpath
+	 *            the <code>String</code> pointing to the XSLT on the classpath
 	 * 
 	 * @throws InvalidXsltException
-	 *           if the XSLT cannot be found on the classpath, the XSLT is
-	 *           invalid, ...
+	 *             if the XSLT cannot be found on the classpath, the XSLT is
+	 *             invalid, ...
 	 */
 	public void setXsltTransformer(final String xsltClassPath)
 			throws InvalidXsltException {
@@ -57,8 +85,8 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 						.getInputStream());
 			} catch (final IOException e) {
 				throw new InvalidXsltException(
-						"The xslt could not be read from the classpath '" + xsltClassPath
-								+ "'", e);
+						"The xslt could not be read from the classpath '"
+								+ xsltClassPath + "'", e);
 			}
 		}
 	}
@@ -69,12 +97,12 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 	 * <code>xsltFile</code>.
 	 * 
 	 * @param xsltFile
-	 *          the <code>File</code> containing the XSLT
+	 *            the <code>File</code> containing the XSLT
 	 * @throws InvalidXsltException
 	 * 
 	 * @throws InvalidXsltException
-	 *           if the <code>xsltFile</code> cannot be read, the XSLT is invalid,
-	 *           ...
+	 *             if the <code>xsltFile</code> cannot be read, the XSLT is
+	 *             invalid, ...
 	 */
 	public void setXsltTransformer(final File xsltFile)
 			throws InvalidXsltException {
@@ -100,7 +128,9 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 		} else {
 
 			// create an instance of TransformerFactory
-			final TransformerFactory transFact = TransformerFactory.newInstance();
+			final TransformerFactory transFact = TransformerFactory
+					.newInstance();
+			transFact.setURIResolver(resolver);
 
 			// create the source
 			final Source xsltSource = new StreamSource(xsltStream);
@@ -108,10 +138,12 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 			try {
 				xsltTransformer = transFact.newTransformer(xsltSource);
 			} catch (TransformerConfigurationException e) {
-				throw new InvalidXsltException("The xslt stream could not be read.", e);
+				throw new InvalidXsltException(
+						"The xslt stream could not be read.", e);
 			} finally {
 				Streams.closeIO(xsltStream);
 			}
+			xsltTransformer.setURIResolver(resolver);
 		}
 	}
 
@@ -122,16 +154,17 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 	 * thrown if not transformation was possible.
 	 * 
 	 * @param xmlPath
-	 *          the path on the classpath pointing to the XML file to be
-	 *          transformed
+	 *            the path on the classpath pointing to the XML file to be
+	 *            transformed
 	 * @param outputStream
-	 *          the <code>OutputStream</code> to write the transformation to
+	 *            the <code>OutputStream</code> to write the transformation to
 	 * 
 	 * @throws TransformationFailedException
-	 *           if the transformation failed
+	 *             if the transformation failed
 	 */
 	public void transformFromClasspath(final String xmlPath,
-			final OutputStream outputStream) throws TransformationFailedException {
+			final OutputStream outputStream)
+			throws TransformationFailedException {
 
 		final ClassPathResource xmlRes = new ClassPathResource(xmlPath);
 
@@ -154,16 +187,17 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 
 	/**
 	 * Transforms the specified <code>xmlFile</code> using the current
-	 * transformer. An <code>TransformationFailedException</code> is thrown if the
-	 * transformation failed.
+	 * transformer. An <code>TransformationFailedException</code> is thrown if
+	 * the transformation failed.
 	 * 
 	 * @param xmlFile
-	 *          the <code>String</code> pointing to a valid file to be transformed
+	 *            the <code>String</code> pointing to a valid file to be
+	 *            transformed
 	 * @param outputStream
-	 *          the <code>OutputStream</code> to write the transformation to
+	 *            the <code>OutputStream</code> to write the transformation to
 	 * 
 	 * @throws TransformationFailedException
-	 *           if the transformation failed
+	 *             if the transformation failed
 	 */
 	public void transform(final String xmlFile, final OutputStream outputStream)
 			throws TransformationFailedException {
@@ -172,16 +206,16 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 
 	/**
 	 * Transforms the specified <code>xmlFile</code> using the current
-	 * transformer. An <code>TransformationFailedException</code> is thrown if the
-	 * transformation failed.
+	 * transformer. An <code>TransformationFailedException</code> is thrown if
+	 * the transformation failed.
 	 * 
 	 * @param xmlFile
-	 *          the <code>File</code> to be transformed
+	 *            the <code>File</code> to be transformed
 	 * @param outputStream
-	 *          the <code>OutputStream</code> to write the transformation to
+	 *            the <code>OutputStream</code> to write the transformation to
 	 * 
 	 * @throws TransformationFailedException
-	 *           if the transformation failed
+	 *             if the transformation failed
 	 */
 	public void transform(final File xmlFile, final OutputStream outputStream)
 			throws TransformationFailedException {
@@ -205,17 +239,19 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 
 	@Override
 	public void transform(final InputStream xmlStream,
-			final OutputStream outputStream) throws TransformationFailedException {
+			final OutputStream outputStream)
+			throws TransformationFailedException {
 
 		final Source xmlSource = new StreamSource(xmlStream);
 		final Result result = new StreamResult(outputStream);
-		
+
 		if (xsltTransformer == null) {
 			try {
 				Streams.copyStream(xmlStream, outputStream);
 			} catch (final IOException e) {
 				throw new TransformationFailedException(
-						"The xmlStream could not be copied to the outputStream", e);
+						"The xmlStream could not be copied to the outputStream",
+						e);
 			}
 		} else {
 

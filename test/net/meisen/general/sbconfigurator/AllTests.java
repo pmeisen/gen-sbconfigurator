@@ -6,6 +6,7 @@ import net.meisen.general.sbconfigurator.config.TestSamplePlugInLoader;
 import net.meisen.general.sbconfigurator.config.TestSpringExclusions;
 import net.meisen.general.sbconfigurator.config.placeholder.TestDefaultXmlPropertyReplacer;
 import net.meisen.general.sbconfigurator.config.placeholder.TestSpringPropertyHolder;
+import net.meisen.general.sbconfigurator.config.transformer.TestDefaultXsltTransformer;
 import net.meisen.general.sbconfigurator.helper.TestSpringHelper;
 import net.meisen.general.sbconfigurator.helper.TestStringParser;
 
@@ -20,9 +21,10 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ TestSpringPropertyHolder.class, TestStringParser.class,
-		TestDefaultXmlPropertyReplacer.class, TestDefaultConfiguration.class,
-		TestSamplePlugInLoader.class, TestSpringHelper.class,
-		TestSpringXMLAuthoring.class, TestSpringExclusions.class })
+		TestDefaultXsltTransformer.class, TestDefaultXmlPropertyReplacer.class,
+		TestDefaultConfiguration.class, TestSamplePlugInLoader.class,
+		TestSpringHelper.class, TestSpringXMLAuthoring.class,
+		TestSpringExclusions.class })
 public class AllTests {
 	// nothing more to do here
 }
