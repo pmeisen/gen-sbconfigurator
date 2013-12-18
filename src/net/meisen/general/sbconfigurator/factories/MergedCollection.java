@@ -33,8 +33,9 @@ public class MergedCollection extends AbstractFactoryBean<Collection<?>> {
 	 * @param collectionClass
 	 *            the class of the collection to be created
 	 */
+	@SuppressWarnings("rawtypes")
 	public void setCollectionClass(
-			final Class<? extends Collection<?>> collectionClass) {
+			final Class<? extends Collection> collectionClass) {
 		this.collectionClass = collectionClass;
 	}
 
