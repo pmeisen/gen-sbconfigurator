@@ -17,8 +17,8 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
  */
 public class MergedCollection extends AbstractFactoryBean<Collection<?>> {
 
-	@SuppressWarnings("unchecked")
-	private Class<? extends Collection<?>> collectionClass = (Class<? extends Collection<?>>) ArrayList.class;
+	@SuppressWarnings("rawtypes")
+	private Class<? extends Collection> collectionClass = ArrayList.class;
 	private Collection<Collection<?>> collections;
 
 	@Override
