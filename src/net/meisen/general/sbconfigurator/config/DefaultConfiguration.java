@@ -1033,7 +1033,7 @@ public class DefaultConfiguration implements IConfiguration {
 				loaderDefinition.getXsltTransformerInputStream(),
 				loaderDefinition.isValidationEnabled(),
 				loaderDefinition.isBeanOverridingAllowed());
-
+		
 		// set a parent factory
 		factory.setParentBeanFactory(moduleFactory);
 
