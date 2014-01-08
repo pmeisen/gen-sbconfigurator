@@ -13,7 +13,7 @@ import net.meisen.general.sbconfigurator.config.exception.InvalidConfigurationEx
  * @author pmeisen
  * 
  */
-public interface IConfiguration {
+public interface IConfiguration extends IModuleHolder {
 	/**
 	 * The id used to represent the <code>coreSettings</code>
 	 */
@@ -45,26 +45,6 @@ public interface IConfiguration {
 	 */
 	public void loadConfiguration(final Map<String, Object> injections)
 			throws InvalidConfigurationException;
-
-	/**
-	 * Get the loaded module for a specified <code>name</code>.
-	 * 
-	 * @param name
-	 *            the name of the module to retrieve
-	 * 
-	 * @return the <code>Object</code> associated to the <code>name</code>
-	 *         specified, might be <code>null</code> if no module with the
-	 *         specified <code>name</code> could be found
-	 */
-	public <T> T getModule(final String name);
-
-	/**
-	 * Method to retrieve all the modules loaded for the
-	 * <code>Configuration</code>.
-	 * 
-	 * @return a <code>Map</code> of all the loaded modules
-	 */
-	public Map<String, Object> getAllModules();
 
 	/**
 	 * Creates an instance of the specified <code>clazz</code> and wires
@@ -105,12 +85,6 @@ public interface IConfiguration {
 	 *         configuration; the loaded modules are not added to the
 	 *         configuration
 	 */
-	public Map<String, Object> loadDelayed(final String loaderId,
+	public IModuleHolder loadDelayed(final String loaderId,
 			final InputStream resIo);
-
-	/**
-	 * Method called to destroy all the objects (i.e. calling destroy-methods)
-	 * of the configuration.
-	 */
-	public void destroyConfiguration();
 }

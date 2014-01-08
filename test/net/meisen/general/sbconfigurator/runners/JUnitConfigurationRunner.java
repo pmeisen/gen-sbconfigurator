@@ -130,7 +130,7 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 				} catch (final Throwable t) {
 					throw t;
 				} finally {
-					configuration.destroyConfiguration();
+					configuration.release();
 				}
 			}
 		};

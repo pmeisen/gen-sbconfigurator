@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
+import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.test.sampleplugin.SamplePlugIn;
 import net.meisen.general.sbconfigurator.test.sampleplugin.SamplePojo;
 
@@ -106,8 +107,9 @@ public class TestSamplePlugInLoader {
 		assertNotNull(ios);
 
 		// load it delayed
-		final Map<String, Object> modules = configuration.loadDelayed(
+		final IModuleHolder modulesHolder = configuration.loadDelayed(
 				"testSampleLoader", ios);
+		final Map<String, Object> modules = modulesHolder.getAllModules();
 		assertNotNull(modules);
 		assertEquals(1, modules.size());
 		assertTrue(modules.values().iterator().next() instanceof SamplePlugIn);

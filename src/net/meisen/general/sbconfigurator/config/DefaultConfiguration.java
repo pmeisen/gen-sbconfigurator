@@ -1015,7 +1015,7 @@ public class DefaultConfiguration implements IConfiguration {
 	}
 
 	@Override
-	public Map<String, Object> loadDelayed(final String loaderId,
+	public DefaultModuleHolder loadDelayed(final String loaderId,
 			final InputStream resIo) throws InvalidConfigurationException {
 		final ILoaderDefinition loaderDefinition = loaderDefinitions
 				.get(loaderId);
@@ -1047,11 +1047,11 @@ public class DefaultConfiguration implements IConfiguration {
 			}
 		}
 
-		return delayedModules;
+		return new DefaultModuleHolder(factory);
 	}
 
 	@Override
-	public void destroyConfiguration() {
+	public void release() {
 		moduleFactory.destroySingletons();
 	}
 }
