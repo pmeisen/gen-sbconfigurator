@@ -15,6 +15,7 @@ import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.Statement;
 
 /**
  * JUnit <code>Runner</code> which can be used to create the test within the
@@ -118,8 +119,21 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 	}
 
 	@Override
-	public void run(final RunNotifier notifier) {
-		super.run(notifier);
+	protected Statement classBlock(final RunNotifier notifier) {
+		final Statement statement = super.classBlock(notifier);
+		return new Statement() {
+
+			@Override
+			public void evaluate() throws Throwable {
+				try {
+					statement.evaluate();
+				} catch (final Throwable t) {
+					throw t;
+				} finally {
+					configuration.destroyConfiguration();
+				}
+			}
+		};
 	}
 
 }
