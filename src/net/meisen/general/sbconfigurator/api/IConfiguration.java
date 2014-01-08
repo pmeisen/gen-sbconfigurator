@@ -107,4 +107,10 @@ public interface IConfiguration {
 	 */
 	public Map<String, Object> loadDelayed(final String loaderId,
 			final InputStream resIo);
+
+	/**
+	 * Method called to destroy all the objects (i.e. calling destroy-methods)
+	 * of the configuration.
+	 */
+	public void destroyConfiguration();
 }

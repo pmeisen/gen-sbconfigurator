@@ -135,7 +135,7 @@ public class ConfigurationCoreSettings {
 		} else {
 			settings.getConfiguration().loadConfiguration(injections);
 		}
-
+		
 		return settings;
 	}
 

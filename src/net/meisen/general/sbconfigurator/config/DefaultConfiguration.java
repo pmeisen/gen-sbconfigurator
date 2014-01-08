@@ -1033,7 +1033,7 @@ public class DefaultConfiguration implements IConfiguration {
 				loaderDefinition.getXsltTransformerInputStream(),
 				loaderDefinition.isValidationEnabled(),
 				loaderDefinition.isBeanOverridingAllowed());
-		
+
 		// set a parent factory
 		factory.setParentBeanFactory(moduleFactory);
 
@@ -1048,5 +1048,10 @@ public class DefaultConfiguration implements IConfiguration {
 		}
 
 		return delayedModules;
+	}
+
+	@Override
+	public void destroyConfiguration() {
+		moduleFactory.destroySingletons();
 	}
 }

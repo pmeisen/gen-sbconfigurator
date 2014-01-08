@@ -18,7 +18,7 @@ import org.junit.runners.model.InitializationError;
 
 /**
  * JUnit <code>Runner</code> which can be used to create the test within the
- * configuration's context, i.e. within the text auto-wiring is possible.<br/>
+ * configuration's context, i.e. within the test auto-wiring is possible.<br/>
  * The context and filename from which the configuration should be loaded can be
  * defined using the annotations {@link ContextClass} and/or {@link ContextFile}
  * .

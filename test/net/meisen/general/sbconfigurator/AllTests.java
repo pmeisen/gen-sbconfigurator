@@ -7,6 +7,8 @@ import net.meisen.general.sbconfigurator.config.TestSpringExclusions;
 import net.meisen.general.sbconfigurator.config.placeholder.TestDefaultXmlPropertyReplacer;
 import net.meisen.general.sbconfigurator.config.placeholder.TestSpringPropertyHolder;
 import net.meisen.general.sbconfigurator.config.transformer.TestDefaultXsltTransformer;
+import net.meisen.general.sbconfigurator.factories.TestMergedCollection;
+import net.meisen.general.sbconfigurator.factories.TestMethodInvokingFactoryBean;
 import net.meisen.general.sbconfigurator.helper.TestSpringHelper;
 import net.meisen.general.sbconfigurator.helper.TestStringParser;
 
@@ -20,11 +22,22 @@ import org.junit.runners.Suite;
  * 
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ TestSpringPropertyHolder.class, TestStringParser.class,
-		TestDefaultXsltTransformer.class, TestDefaultXmlPropertyReplacer.class,
-		TestDefaultConfiguration.class, TestSamplePlugInLoader.class,
+@Suite.SuiteClasses({
+
+		// Spring properties
+		TestSpringPropertyHolder.class,
+
+		// Configuration parser and helper
+		TestStringParser.class, TestDefaultXsltTransformer.class,
+		TestDefaultXmlPropertyReplacer.class, TestDefaultConfiguration.class,
+		TestSamplePlugInLoader.class,
+
+		// Spring additional stuff
 		TestSpringHelper.class, TestSpringXMLAuthoring.class,
-		TestSpringExclusions.class })
+		TestSpringExclusions.class,
+
+		// Spring additional factory-beans
+		TestMergedCollection.class, TestMethodInvokingFactoryBean.class })
 public class AllTests {
 	// nothing more to do here
 }

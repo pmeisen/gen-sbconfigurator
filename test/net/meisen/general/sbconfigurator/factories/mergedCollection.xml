@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+   
+  <bean id="simpleMergedCollection" class="net.meisen.general.sbconfigurator.factories.MergedCollection">
+    <property name="collections">
+      <list value-type="java.util.Collection">
+        <list value-type="java.lang.String">
+          <value>VALUE1</value>
+          <value>VALUE2</value>
+          <value>VALUE3</value>
+        </list>
+        
+        <list value-type="java.lang.Integer">
+          <value>1</value>
+          <value>2</value>
+        </list>
+      </list>
+    </property>
+  </bean>
+  
+  <bean id="definedTypeOfMergedCollection" class="net.meisen.general.sbconfigurator.factories.MergedCollection">
+    <property name="collectionClass" value="java.util.HashSet" />
+    <property name="collections">
+      <list value-type="java.util.Collection">
+        <list value-type="java.lang.String">
+          <value>VALUE1</value>
+          <value>VALUE2</value>
+          <value>VALUE1</value>
+        </list>
+        
+        <list value-type="java.lang.Integer">
+          <value>1</value>
+          <value>2</value>
+        </list>
+      </list>
+    </property>
+  </bean>
+  
+  <bean id="nullCollections" class="net.meisen.general.sbconfigurator.factories.MergedCollection">
+    <property name="collectionClass" value="java.util.TreeSet" />
+    <property name="collections">
+      <null />
+    </property>
+  </bean>
+  
+  <bean id="onlyNullMergedCollection" class="net.meisen.general.sbconfigurator.factories.MergedCollection">
+    <property name="collectionClass" value="java.util.TreeSet" />
+    <property name="collections">
+      <list value-type="java.util.Collection">
+        <null />
+      </list>
+    </property>
+  </bean>
+  
+  <bean id="nullMergedCollection" class="net.meisen.general.sbconfigurator.factories.MergedCollection">
+    <property name="collectionClass" value="java.util.TreeSet" />
+    <property name="collections">
+      <list value-type="java.util.Collection">
+        <null />
+        
+        <list value-type="java.lang.Integer">
+          <value>1</value>
+          <value>2</value>
+        </list>
+      </list>
+    </property>
+  </bean>
+  
+</beans>
