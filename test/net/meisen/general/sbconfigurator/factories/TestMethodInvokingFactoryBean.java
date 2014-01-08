@@ -13,6 +13,12 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
+/**
+ * Tests the implementation of a {@code MethodInvokingFactoryBean}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TestMethodInvokingFactoryBean {
 	private static DefaultListableBeanFactory factory;
 
@@ -33,8 +39,11 @@ public class TestMethodInvokingFactoryBean {
 		reader.loadBeanDefinitions(testXml);
 	}
 
+	/**
+	 * Tests the default functionality of a {@code MethodInvokingFactoryBean}.
+	 */
 	@Test
-	public void test() {
+	public void testSimpleMethodInvokation() {
 		final Object oSubject = factory.getBean("simpleMethodInvoker");
 		assertTrue(oSubject == null ? "null" : oSubject.getClass().getName(),
 				oSubject instanceof InvokerMock);
@@ -43,16 +52,21 @@ public class TestMethodInvokingFactoryBean {
 		final InvokerMock subject = (InvokerMock) oSubject;
 		assertEquals("firstValue", subject.getValue());
 	}
-	
+
+	/**
+	 * Tests the advanced functionality of a {@code MethodInvokingFactoryBean},
+	 * i.e. calling a post-method.
+	 */
 	@Test
-	public void test2() {
+	public void testMethodInvokationWithPost() {
 		final Object subject = factory.getBean("postMethodInvoker");
 		assertTrue(subject == null ? "null" : subject.getClass().getName(),
 				subject instanceof String);
 		assertEquals("initValue", subject);
 
 		// get the list
-		final InvokerMock invoked = (InvokerMock) factory.getBean("postMethodInvokerObject");
+		final InvokerMock invoked = (InvokerMock) factory
+				.getBean("postMethodInvokerObject");
 		assertEquals("postValue", invoked.getValue());
 	}
 

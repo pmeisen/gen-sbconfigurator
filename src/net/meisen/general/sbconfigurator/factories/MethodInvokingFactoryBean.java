@@ -5,21 +5,31 @@ import java.lang.reflect.Method;
 
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 
+/**
+ * An advanced {@code MethodInvokingFactoryBean} which is capable to invoke a
+ * method after the real {@code targetMethod} is invoked.
+ * 
+ * @author pmeisen
+ * 
+ * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
+ *      MethodInvokingFactoryBean (Spring)
+ * 
+ */
 @SuppressWarnings("unused")
 public class MethodInvokingFactoryBean extends
 		org.springframework.beans.factory.config.MethodInvokingFactoryBean {
 	private String postExecutionMethod;
 	private Object[] postArguments = new Object[0];
 
-	private ArgumentConvertingMethodInvoker methodInvoker;
+	private ArgumentConvertingMethodInvoker postMethodInvoker;
 
 	@Override
 	public Object invoke() throws InvocationTargetException,
 			IllegalAccessException {
 		final Object bean = super.invoke();
 
-		if (methodInvoker != null) {
-			methodInvoker.invoke();
+		if (postMethodInvoker != null) {
+			postMethodInvoker.invoke();
 		}
 
 		return bean;
@@ -30,14 +40,14 @@ public class MethodInvokingFactoryBean extends
 		super.prepare();
 
 		if (postExecutionMethod == null) {
-			methodInvoker = null;
+			postMethodInvoker = null;
 		} else {
-			methodInvoker = new ArgumentConvertingMethodInvoker();
-			methodInvoker.setArguments(postArguments);
-			methodInvoker.setTargetMethod(postExecutionMethod);
-			methodInvoker.setTargetObject(getTargetObject());
+			postMethodInvoker = new ArgumentConvertingMethodInvoker();
+			postMethodInvoker.setArguments(postArguments);
+			postMethodInvoker.setTargetMethod(postExecutionMethod);
+			postMethodInvoker.setTargetObject(getTargetObject());
 
-			methodInvoker.prepare();
+			postMethodInvoker.prepare();
 		}
 	}
 
@@ -63,10 +73,25 @@ public class MethodInvokingFactoryBean extends
 		return this.postArguments;
 	}
 
+	/**
+	 * Gets the method of the {@code targetObject} to be executed after the
+	 * defined {@code targetMethod} is invoked.
+	 * 
+	 * @return the method of the {@code targetObject} to be executed after the
+	 *         defined {@code targetMethod} is invoked
+	 */
 	public String getPostExecutionMethod() {
 		return postExecutionMethod;
 	}
 
+	/**
+	 * Sets the method of the {@code targetObject} to be executed after the
+	 * defined {@code targetMethod} is invoked.
+	 * 
+	 * @param postExecutionMethod
+	 *            the method of the {@code targetObject} to be executed after
+	 *            the defined {@code targetMethod} is invoked
+	 */
 	public void setPostExecutionMethod(String postExecutionMethod) {
 		this.postExecutionMethod = postExecutionMethod;
 	}
