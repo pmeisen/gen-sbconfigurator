@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sbc="http://dev.meisen.net/sbconfigurator/ns"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       					   http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd">
+  
+  <!-- include the default configuration -->
+  <import resource="classpath:/net/meisen/general/sbconfigurator/sbconfigurator-core.xml"/>
+    
+  <!-- load some other beans into the configuration -->
+  <sbc:loader id="addBeans" selector="net/meisen/general/sbconfigurator/config/additionalBeans-test.xml" />
+</beans>

@@ -7,18 +7,20 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
-import org.junit.Test;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
+import net.meisen.general.sbconfigurator.api.IModuleHolder;
+import net.meisen.general.sbconfigurator.config.mocks.DelayedBean;
 import net.meisen.general.sbconfigurator.config.mocks.NotWiredClass;
 import net.meisen.general.sbconfigurator.config.mocks.SatisfiableWiredClass;
 import net.meisen.general.sbconfigurator.config.mocks.SetterClass;
 import net.meisen.general.sbconfigurator.config.mocks.TestPropertyHolder;
 import net.meisen.general.sbconfigurator.config.mocks.UnsatisfiableWiredClass;
 import net.meisen.general.sbconfigurator.config.mocks.WiredClass;
+
+import org.junit.Test;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
  * Tests the implementation of the <code>DefaultConfiguration</code>.
@@ -97,7 +99,8 @@ public class TestDefaultConfiguration {
 				.loadCoreSettings();
 		final IConfiguration config = configCore.getConfiguration();
 
-		final NotWiredClass notWired = config.createInstance(NotWiredClass.class);
+		final NotWiredClass notWired = config
+				.createInstance(NotWiredClass.class);
 		assertNotNull(notWired);
 	}
 
@@ -151,8 +154,8 @@ public class TestDefaultConfiguration {
 
 	/**
 	 * Tests the wiring of an object, which has setter methods (which should be
-	 * ignored, the object should still be wired). With dependency checking set to
-	 * <code>true</code>, Spring would throw an exception here.
+	 * ignored, the object should still be wired). With dependency checking set
+	 * to <code>true</code>, Spring would throw an exception here.
 	 * 
 	 * @see DefaultListableBeanFactory#autowire(Class, int, boolean)
 	 */
@@ -230,8 +233,8 @@ public class TestDefaultConfiguration {
 
 	/**
 	 * Tests the wiring of an object, which has setter methods (which should be
-	 * ignored, the object should still be wired). With dependency checking set to
-	 * <code>true</code>, Spring would throw an exception here.
+	 * ignored, the object should still be wired). With dependency checking set
+	 * to <code>true</code>, Spring would throw an exception here.
 	 * 
 	 * @see DefaultListableBeanFactory#autowireBeanProperties(Object, int,
 	 *      boolean)
@@ -252,5 +255,44 @@ public class TestDefaultConfiguration {
 		config.wireInstance(wired);
 		assertNotNull(wired.coreSettings);
 		assertNull(wired.something);
+	}
+
+	/**
+	 * Tests the delayed loading and the release
+	 */
+	@Test
+	public void testReleaseAndDelayedLoading() {
+		final ConfigurationCoreSettings configCore = ConfigurationCoreSettings
+				.loadCoreSettings("sbconfigurator-addBeansLoader.xml",
+						getClass());
+		final IConfiguration config = configCore.getConfiguration();
+		assertNotNull(config);
+		assertEquals(3, config.getAllModules().size());
+
+		final IModuleHolder moduleHolder = config.loadDelayed("addBeans",
+				getClass().getResourceAsStream("delayedBeans-test.xml"));
+		assertNotNull(moduleHolder);
+		assertEquals(1, moduleHolder.getAllModules().size());
+
+		// get a specific module and check auto-wiring
+		final DelayedBean db = moduleHolder.getModule("testDelayedBean");
+		assertNotNull(db);
+		assertNotNull(db.sp);
+
+		// release the modules
+		moduleHolder.release();
+
+		// load again
+		final IModuleHolder moduleHolderAfterRelease = config.loadDelayed(
+				"addBeans",
+				getClass().getResourceAsStream("delayedBeans-test.xml"));
+		assertNotNull(moduleHolderAfterRelease);
+		assertEquals(1, moduleHolderAfterRelease.getAllModules().size());
+
+		// get a specific module and check auto-wiring
+		final DelayedBean dbAfterRelease = moduleHolder
+				.getModule("testDelayedBean");
+		assertNotNull(dbAfterRelease);
+		assertNotNull(dbAfterRelease.sp);
 	}
 }
