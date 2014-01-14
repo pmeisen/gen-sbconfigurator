@@ -52,7 +52,7 @@ public class MergedCollection extends AbstractFactoryBean<Collection<?>> {
 	@Override
 	protected Collection<?> createInstance() throws Exception {
 		@SuppressWarnings("unchecked")
-		final Collection<Object> mergedRes = (Collection<Object>) BeanUtils
+		final Collection<Object> mergedRes = BeanUtils
 				.instantiateClass(collectionClass);
 
 		if (collections == null || collections.size() == 0) {

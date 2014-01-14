@@ -118,7 +118,7 @@ public class TestSpringXMLAuthoring {
 		assertNotNull(innerDate);
 
 		// check the pushedDate
-		final Date pushedDate = (Date) outer.getPushedDate();
+		final Date pushedDate = outer.getPushedDate();
 		assertNotNull(pushedDate);
 		assertEquals(pushedDate, innerDate);
 

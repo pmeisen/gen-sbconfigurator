@@ -184,7 +184,7 @@ public class DefaultConfiguration implements IConfiguration {
 							}
 
 							// override the current one
-							final ILoaderDefinition newDef = (ILoaderDefinition) loader;
+							final ILoaderDefinition newDef = loader;
 							final ILoaderDefinition oldDef = userLoaderDefinitions
 									.put(id, newDef);
 
@@ -202,7 +202,7 @@ public class DefaultConfiguration implements IConfiguration {
 											+ "' is already used by a core LoaderDefinition.");
 						} else {
 							userLoaderDefinitions.put(id,
-									(ILoaderDefinition) loader);
+									loader);
 						}
 					}
 				}
