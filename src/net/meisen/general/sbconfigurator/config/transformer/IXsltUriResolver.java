@@ -21,13 +21,13 @@ import javax.xml.transform.Source;
  * @author pmeisen
  * 
  */
-public interface XsltURIResolver {
+public interface IXsltUriResolver {
 
 	/**
-	 * Gets the protocol this {@code XsltURIResolver} should be used for. The
+	 * Gets the protocol this {@code IXsltUriResolver} should be used for. The
 	 * protocol is case-sensitive.
 	 * 
-	 * @return the protocol this {@code XsltURIResolver} should be used for
+	 * @return the protocol this {@code IXsltUriResolver} should be used for
 	 */
 	public String getProtocol();
 

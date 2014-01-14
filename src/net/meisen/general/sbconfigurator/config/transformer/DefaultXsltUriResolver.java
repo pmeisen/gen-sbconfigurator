@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DefaultXsltUriResolver implements URIResolver {
 
 	@Autowired
-	private List<XsltURIResolver> resolvers;
+	private List<IXsltUriResolver> resolvers;
 
 	/**
 	 * Default constructor which doesn't add any additional
@@ -36,7 +36,7 @@ public class DefaultXsltUriResolver implements URIResolver {
 	 * @see Autowired
 	 */
 	public DefaultXsltUriResolver() {
-		this(new ArrayList<XsltURIResolver>());
+		this(new ArrayList<IXsltUriResolver>());
 	}
 
 	/**
@@ -45,8 +45,8 @@ public class DefaultXsltUriResolver implements URIResolver {
 	 * @param resolvers
 	 *            the {@code XsltURIResolver} to be registered
 	 */
-	public DefaultXsltUriResolver(final XsltURIResolver... resolvers) {
-		this(resolvers == null ? new ArrayList<XsltURIResolver>() : Arrays
+	public DefaultXsltUriResolver(final IXsltUriResolver... resolvers) {
+		this(resolvers == null ? new ArrayList<IXsltUriResolver>() : Arrays
 				.asList(resolvers));
 	}
 
@@ -56,11 +56,11 @@ public class DefaultXsltUriResolver implements URIResolver {
 	 * @param resolvers
 	 *            the {@code XsltURIResolver} to be registered
 	 */
-	public DefaultXsltUriResolver(final List<XsltURIResolver> resolvers) {
+	public DefaultXsltUriResolver(final List<IXsltUriResolver> resolvers) {
 		this.resolvers = resolvers;
 
 		final Set<String> protocols = new HashSet<String>();
-		for (final XsltURIResolver resolver : resolvers) {
+		for (final IXsltUriResolver resolver : resolvers) {
 			if (!protocols.add(resolver.getProtocol())) {
 				throw new InvalidConfigurationException(
 						"The protocol '"
@@ -82,7 +82,7 @@ public class DefaultXsltUriResolver implements URIResolver {
 			final String cmbPath = (host == null ? path.replaceFirst("^/", "")
 					: host + path);
 
-			for (final XsltURIResolver resolver : resolvers) {
+			for (final IXsltUriResolver resolver : resolvers) {
 				final String protocol = resolver.getProtocol();
 
 				// if we found the protol just resolve the URI

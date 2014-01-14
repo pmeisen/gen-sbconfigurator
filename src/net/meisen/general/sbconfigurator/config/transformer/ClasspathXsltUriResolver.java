@@ -16,7 +16,7 @@ import net.meisen.general.genmisc.resources.ResourceInfo;
  * @author pmeisen
  * 
  */
-public class ClasspathXsltUriResolver implements XsltURIResolver {
+public class ClasspathXsltUriResolver implements IXsltUriResolver {
 
 	@Override
 	public Source resolve(final URI uri, final String path) {
