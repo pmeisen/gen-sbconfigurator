@@ -134,6 +134,24 @@ public class DefaultConfiguration implements IConfiguration {
 	 */
 	private DefaultListableBeanFactory moduleFactory = null;
 
+	/**
+	 * Get the {@code XsltTransformer} used by this configuration.
+	 * 
+	 * @return the {@code XsltTransformer} used by this configuration
+	 */
+	public IXsltTransformer getXsltTransformer() {
+		return xsltTransformer;
+	}
+
+	/**
+	 * Get the {@code XsdValidator} used by this configuration.
+	 * 
+	 * @return the {@code XsdValidator} used by this configuration
+	 */
+	public IXsdValidator getXsdValidator() {
+		return xsdValidator;
+	}
+
 	@Override
 	public void loadConfiguration(final Map<String, Object> injections)
 			throws InvalidConfigurationException {
@@ -201,8 +219,7 @@ public class DefaultConfiguration implements IConfiguration {
 											+ id
 											+ "' is already used by a core LoaderDefinition.");
 						} else {
-							userLoaderDefinitions.put(id,
-									loader);
+							userLoaderDefinitions.put(id, loader);
 						}
 					}
 				}

@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DefaultXsltUriResolver implements URIResolver {
 
-	@Autowired
+	@Autowired(required = false)
 	private List<IXsltUriResolver> resolvers;
 
 	/**
@@ -74,6 +74,11 @@ public class DefaultXsltUriResolver implements URIResolver {
 	public Source resolve(final String href, final String base)
 			throws TransformerException {
 
+		// if there aren't any we cannot do anything
+		if (resolvers == null) {
+			return null;
+		}
+		
 		try {
 			final URI uri = new URI(href);
 			final String scheme = uri.getScheme();
@@ -91,7 +96,7 @@ public class DefaultXsltUriResolver implements URIResolver {
 				}
 			}
 		} catch (final URISyntaxException e) {
-			// nothing to do let's hope the underlaying system can resolve it
+			// nothing to do let's hope the underlying system can resolve it
 		}
 
 		return null;
