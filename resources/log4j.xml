@@ -33,7 +33,7 @@
   <!-- Limit loggers    -->
   <!-- ================ -->
   <logger name="org.springframework">
-    <level value="INFO"/>
+    <level value="DEBUG"/>
   </logger>
 
    <!-- ======================= -->

@@ -10,9 +10,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.UUID;
 
 import net.meisen.general.genmisc.resources.Resource;
 import net.meisen.general.genmisc.resources.ResourceInfo;
@@ -183,7 +183,7 @@ public class DefaultConfiguration implements IConfiguration {
 				// now load the definition
 				final DefaultListableBeanFactory beanFactory = loadBeanFactory(loaderDefinition);
 				final Map<String, ILoaderDefinition> loaderBeans = beanFactory
-						.getBeansOfType(ILoaderDefinition.class);
+						.getBeansOfType(ILoaderDefinition.class, false, false);
 
 				// load the core LoaderDefinitions
 				for (final Entry<String, ILoaderDefinition> coreEntry : loaderBeans
@@ -246,10 +246,6 @@ public class DefaultConfiguration implements IConfiguration {
 
 		// we collected everything
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("Loaded '"
-					+ moduleDefinitions.size()
-					+ "' moduleDefinitions. The modules will be instantiated now.");
-
 			LOG.trace("The following properties have been loaded:");
 
 			final List<Entry<Object, Object>> list = new ArrayList<Entry<Object, Object>>();
@@ -295,8 +291,15 @@ public class DefaultConfiguration implements IConfiguration {
 		}
 
 		// now let's add all the modules
-		final Map<String, Object> modules = moduleFactory
-				.getBeansOfType(Object.class);
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Loaded '"
+					+ moduleDefinitions.size()
+					+ "' moduleDefinitions. The modules will be instantiated now.");
+		}
+
+		// load all the objects to ensure that everything is loaded
+		final Map<String, Object> modules = moduleFactory.getBeansOfType(
+				Object.class, false, true);
 		for (final Entry<String, Object> entry : modules.entrySet()) {
 			registerModule(entry.getKey(), entry.getValue());
 		}

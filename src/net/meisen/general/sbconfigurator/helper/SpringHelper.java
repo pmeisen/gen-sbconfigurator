@@ -24,7 +24,8 @@ import org.springframework.util.ClassUtils;
  * 
  */
 public class SpringHelper {
-	private final static Logger LOG = LoggerFactory.getLogger(SpringHelper.class);
+	private final static Logger LOG = LoggerFactory
+			.getLogger(SpringHelper.class);
 
 	/**
 	 * Creates a <code>DefaultListableBeanFactory</code> with some default
@@ -35,11 +36,11 @@ public class SpringHelper {
 	 * </ul>
 	 * 
 	 * @param enableAutoWiring
-	 *          <code>true</code> if auto-wiring for the factory should be
-	 *          enabled, otherwise <code>false</code>
+	 *            <code>true</code> if auto-wiring for the factory should be
+	 *            enabled, otherwise <code>false</code>
 	 * @param allowBeanOverriding
-	 *          <code>true</code> if a bean can override another bean with the
-	 *          same id, otherwise <code>false</code>
+	 *            <code>true</code> if a bean can override another bean with the
+	 *            same id, otherwise <code>false</code>
 	 * 
 	 * @return a <code>DefaultListableBeanFactory</code> with some default
 	 *         settings
@@ -56,12 +57,14 @@ public class SpringHelper {
 
 		// enable auto-wiring
 		if (enableAutoWiring) {
-			// get the resolver used for autowiring, we want the qualifier to be used
+			// get the resolver used for autowiring, we want the qualifier to be
+			// used
 			// when resolving
 			final AutowireCandidateResolver resolver = new QualifierAnnotationAutowireCandidateResolver();
 			factory.setAutowireCandidateResolver(resolver);
 
-			// now create the post processor and set the factory and the resolver
+			// now create the post processor and set the factory and the
+			// resolver
 			final AutowiredAnnotationBeanPostProcessor autowiredPostProcessor = new AutowiredAnnotationBeanPostProcessor();
 			autowiredPostProcessor.setBeanFactory(factory);
 			factory.addBeanPostProcessor(autowiredPostProcessor);
@@ -75,17 +78,19 @@ public class SpringHelper {
 	 * <code>beanFactory</code>.
 	 * 
 	 * @param beanFactory
-	 *          the <code>DefaultListableBeanFactory</code> to get all the
-	 *          <code>BeanDefinitions</code> from
+	 *            the <code>DefaultListableBeanFactory</code> to get all the
+	 *            <code>BeanDefinitions</code> from
 	 * @param excludes
-	 *          a array of <code>Classes</code> which should be excluded, i.e. the
-	 *          classes are checked to be a super-class or super-interface as well
+	 *            a array of <code>Classes</code> which should be excluded, i.e.
+	 *            the classes are checked to be a super-class or super-interface
+	 *            as well
 	 * 
-	 * @return all the <code>BeanDefinition</code> of the <code>beanFactory</code>
-	 *         which do not define excluded classes.
+	 * @return all the <code>BeanDefinition</code> of the
+	 *         <code>beanFactory</code> which do not define excluded classes.
 	 */
 	public static Map<String, BeanDefinition> getBeanDefinitions(
-			final DefaultListableBeanFactory beanFactory, final Class<?>... excludes) {
+			final DefaultListableBeanFactory beanFactory,
+			final Class<?>... excludes) {
 		final Map<String, BeanDefinition> defs = new HashMap<String, BeanDefinition>();
 
 		// if there is a factory add all the definitions available
@@ -93,19 +98,26 @@ public class SpringHelper {
 
 			// add all the defs defined
 			for (final String defName : beanFactory.getBeanDefinitionNames()) {
-				final BeanDefinition def = beanFactory.getBeanDefinition(defName);
+				final BeanDefinition def = beanFactory
+						.getBeanDefinition(defName);
 
 				// get the class of the bean
 				Class<?> beanClass;
 				try {
-					beanClass = ClassUtils.forName(def.getBeanClassName(),
-							ClassUtils.getDefaultClassLoader());
+					final String className = def.getBeanClassName();
+					if (className != null) {
+						beanClass = ClassUtils.forName(className,
+								ClassUtils.getDefaultClassLoader());
+					} else {
+						beanClass = null;
+					}
 				} catch (final ClassNotFoundException e) {
 					if (LOG.isWarnEnabled()) {
 						LOG.warn(
 								"Unable to determine exclusion of bean of type '"
 										+ def.getBeanClassName()
-										+ "', because the resolving led to an error.", e);
+										+ "', because the resolving led to an error.",
+								e);
 					}
 
 					beanClass = null;
@@ -133,15 +145,16 @@ public class SpringHelper {
 	}
 
 	/**
-	 * Gets the <code>InputStream</code> of the specified <code>res</code>. Wraps
-	 * the exceptions away and makes handling easier.
+	 * Gets the <code>InputStream</code> of the specified <code>res</code>.
+	 * Wraps the exceptions away and makes handling easier.
 	 * 
 	 * @param res
-	 *          the <code>Resource</code> to get the <code>InputStream</code> for
+	 *            the <code>Resource</code> to get the <code>InputStream</code>
+	 *            for
 	 * 
-	 * @return the <code>InputStream</code> for the <code>ByteArrayResource</code>
-	 *         or <code>null</code> if an exception was thrown while creating the
-	 *         <code>InputStream</code>
+	 * @return the <code>InputStream</code> for the
+	 *         <code>ByteArrayResource</code> or <code>null</code> if an
+	 *         exception was thrown while creating the <code>InputStream</code>
 	 * 
 	 * @see ByteArrayResource#getInputStream()
 	 */
@@ -151,7 +164,8 @@ public class SpringHelper {
 			return res.getInputStream();
 		} catch (IOException e) {
 			if (LOG.isErrorEnabled()) {
-				LOG.error("Failed to create InputStream for ByteArrayResource", e);
+				LOG.error("Failed to create InputStream for ByteArrayResource",
+						e);
 			}
 
 			return null;
@@ -161,15 +175,16 @@ public class SpringHelper {
 	/**
 	 * 
 	 * @param exception
-	 *          the <code>Exception</code> to find the first
-	 *          none-SpringBeanException in the stack
+	 *            the <code>Exception</code> to find the first
+	 *            none-SpringBeanException in the stack
 	 * @param exceptionClazz
-	 *          the type of the expected exception to be found
+	 *            the type of the expected exception to be found
 	 * 
 	 * @throws IllegalArgumentException
-	 *           if the specified <code>exceptionClazz</code> is <code>null</code>
-	 *           or if the found none-SpringBeanException is not of the specified
-	 *           type (i.e. cannot be assigned to the <code>exceptionClazz</code>)
+	 *             if the specified <code>exceptionClazz</code> is
+	 *             <code>null</code> or if the found none-SpringBeanException is
+	 *             not of the specified type (i.e. cannot be assigned to the
+	 *             <code>exceptionClazz</code>)
 	 * 
 	 * @return the first none-SpringBeanException found within the stack; will
 	 *         return <code>null</code> if the stack consists only of
@@ -186,7 +201,8 @@ public class SpringHelper {
 		} else if (exception == null) {
 			return null;
 		} else if (exception instanceof BeanCreationException) {
-			return getNoneSpringBeanException(exception.getCause(), exceptionClazz);
+			return getNoneSpringBeanException(exception.getCause(),
+					exceptionClazz);
 		} else if (exceptionClazz.isAssignableFrom(exception.getClass())) {
 			@SuppressWarnings("unchecked")
 			final T tException = (T) exception;
@@ -194,8 +210,9 @@ public class SpringHelper {
 		} else if (exceptionClazz.isAssignableFrom(RuntimeException.class)) {
 			@SuppressWarnings("unchecked")
 			final T wrapperException = (T) new RuntimeException(
-					exception.getMessage() + " ('" + exception.getClass().getName()
-							+ "')", exception.getCause());
+					exception.getMessage() + " ('"
+							+ exception.getClass().getName() + "')",
+					exception.getCause());
 			return wrapperException;
 		} else {
 			throw new IllegalArgumentException("The exception '"

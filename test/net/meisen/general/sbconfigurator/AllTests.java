@@ -4,6 +4,7 @@ import net.meisen.general.sbconfigurator.authoring.TestSpringXMLAuthoring;
 import net.meisen.general.sbconfigurator.config.TestDefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.TestSamplePlugInLoader;
 import net.meisen.general.sbconfigurator.config.TestSpringExclusions;
+import net.meisen.general.sbconfigurator.config.order.TestInstantiationOrder;
 import net.meisen.general.sbconfigurator.config.placeholder.TestDefaultXmlPropertyReplacer;
 import net.meisen.general.sbconfigurator.config.placeholder.TestSpringPropertyHolder;
 import net.meisen.general.sbconfigurator.config.transformer.TestDefaultXsltTransformer;
@@ -29,7 +30,8 @@ import org.junit.runners.Suite;
 
 		// Configuration parser and helper
 		TestStringParser.class, TestDefaultXsltTransformer.class,
-		TestDefaultXmlPropertyReplacer.class, TestDefaultConfiguration.class,
+		TestDefaultXmlPropertyReplacer.class,
+		TestDefaultConfiguration.class,
 		TestSamplePlugInLoader.class,
 
 		// Spring additional stuff
@@ -37,7 +39,8 @@ import org.junit.runners.Suite;
 		TestSpringExclusions.class,
 
 		// Spring additional factory-beans
-		TestMergedCollection.class, TestMethodInvokingFactoryBean.class })
+		TestMergedCollection.class, TestMethodInvokingFactoryBean.class,
+		TestInstantiationOrder.class })
 public class AllTests {
 	// nothing more to do here
 }
