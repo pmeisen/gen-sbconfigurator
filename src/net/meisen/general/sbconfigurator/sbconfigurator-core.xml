@@ -15,6 +15,9 @@
     <property name="userLoaderOverridingAllowed" value="false"/>
   </bean>
   
+  <!-- add the exception registry -->
+  <bean id="coreExceptionRegistry" class="net.meisen.general.genmisc.exceptions.registry.DefaultExceptionRegistry" />
+  
   <!-- add some default xsltUriResolver -->
   <bean class="net.meisen.general.sbconfigurator.config.transformer.ClasspathXsltUriResolver" />
   

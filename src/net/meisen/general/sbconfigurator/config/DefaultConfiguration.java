@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
 
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.resources.Resource;
 import net.meisen.general.genmisc.resources.ResourceInfo;
 import net.meisen.general.genmisc.resources.Xml;
@@ -75,6 +76,10 @@ public class DefaultConfiguration implements IConfiguration {
 	@Autowired
 	@Qualifier(corePropertyHolderId)
 	private SpringPropertyHolder corePropertyHolder;
+
+	@Autowired
+	@Qualifier(coreExceptionRegistryId)
+	private IExceptionRegistry coreExceptionRegistry;
 
 	/**
 	 * This <code>Collection</code> is auto-wired with all the
@@ -316,6 +321,8 @@ public class DefaultConfiguration implements IConfiguration {
 		factory.registerSingleton(coreSettingsId, coreSettings);
 		factory.registerSingleton(coreConfigurationId, this);
 		factory.registerSingleton(corePropertyHolderId, corePropertyHolder);
+		factory.registerSingleton(coreExceptionRegistryId,
+				coreExceptionRegistry);
 	}
 
 	/**

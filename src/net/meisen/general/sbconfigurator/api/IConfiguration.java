@@ -29,6 +29,11 @@ public interface IConfiguration extends IModuleHolder {
 	 * The id used to represent the <code>corePropertyHolder</code>
 	 */
 	public final static String corePropertyHolderId = "corePropertyHolder";
+	/**
+	 * The id used for the central exceptionRegistry, additional exception can
+	 * be added using a methodInvokation
+	 */
+	public final static String coreExceptionRegistryId = "exceptionRegistry";
 
 	/**
 	 * Loads the <code>Configuration</code> of the application. This method is
