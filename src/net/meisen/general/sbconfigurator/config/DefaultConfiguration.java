@@ -18,6 +18,7 @@ import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.resources.Resource;
 import net.meisen.general.genmisc.resources.ResourceInfo;
 import net.meisen.general.genmisc.resources.Xml;
+import net.meisen.general.genmisc.types.Classes;
 import net.meisen.general.genmisc.types.Objects;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
@@ -32,16 +33,19 @@ import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
 import net.meisen.general.sbconfigurator.config.exception.TransformationFailedException;
 import net.meisen.general.sbconfigurator.config.exception.ValidationFailedException;
 import net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder;
+import net.meisen.general.sbconfigurator.factories.MethodExecutorBean;
 import net.meisen.general.sbconfigurator.helper.SpringHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.DefaultDocumentLoader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -300,6 +304,51 @@ public class DefaultConfiguration implements IConfiguration {
 			LOG.trace("Loaded '"
 					+ moduleDefinitions.size()
 					+ "' moduleDefinitions. The modules will be instantiated now.");
+		}
+
+		// first load the important methods
+		final List<String> head = new ArrayList<String>();
+		final List<String> body = new ArrayList<String>();
+		final List<String> tail = new ArrayList<String>();
+		final List<String> others = new ArrayList<String>();
+		for (final String name : moduleFactory.getBeanDefinitionNames()) {
+			final BeanDefinition beanDef = moduleFactory
+					.getBeanDefinition(name);
+			final String beanClassName = beanDef.getBeanClassName();
+
+			if (beanClassName == null) {
+				continue;
+			}
+
+			final Class<?> beanClass = Classes.getClass(beanClassName);
+			if (beanClass == null) {
+				others.add(name);
+			} else if (MethodExecutorBean.class.isAssignableFrom(beanClass)) {
+				final PropertyValue typeProperty = beanDef.getPropertyValues()
+						.getPropertyValue("type");
+				final Object value = typeProperty == null ? null : typeProperty
+						.getValue();
+
+				if (value == null
+						|| value.equals(new TypedStringValue("factory"))) {
+					head.add(name);
+				} else if (value.equals(new TypedStringValue("init"))) {
+					tail.add(name);
+				} else {
+					body.add(name);
+				}
+			} else {
+				others.add(name);
+			}
+		}
+
+		final List<String> orderedBeans = new ArrayList<String>();
+		orderedBeans.addAll(head);
+		orderedBeans.addAll(body);
+		orderedBeans.addAll(others);
+		orderedBeans.addAll(tail);
+		for (final String name : orderedBeans) {
+			moduleFactory.getBean(name);
 		}
 
 		// load all the objects to ensure that everything is loaded

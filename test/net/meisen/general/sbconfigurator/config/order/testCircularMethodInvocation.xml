@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sbc="http://dev.meisen.net/sbconfigurator/ns"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       					   http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd">
+
+  <import resource="classpath:/net/meisen/general/sbconfigurator/config/order/importCircularMethodInvocation.xml"/>
+
+  <bean id="containerUsageBean" class="net.meisen.general.sbconfigurator.config.order.mocks.ContainerUsageBean" />
+  <bean id="containerBean" class="net.meisen.general.sbconfigurator.config.order.mocks.ContainerBean" />
+   
+  <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
+    <property name="targetMethod" value="add" />
+    <property name="targetObject"><ref bean="containerBean" /></property>
+    
+    <property name="type" value="factory" />
+    
+    <property name="arguments">
+      <bean class="net.meisen.general.sbconfigurator.config.order.mocks.ContainerElementBean" />
+    </property>
+  </bean>
+  
+  <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
+    <property name="targetMethod" value="init" />
+    <property name="targetObject"><ref bean="containerUsageBean" /></property>
+    
+    <property name="type" value="init" />
+  </bean>
+  
+  <bean id="simpleBean" class="net.meisen.general.sbconfigurator.config.order.mocks.SimpleBean" />
+</beans>

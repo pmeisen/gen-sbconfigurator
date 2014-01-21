@@ -115,9 +115,9 @@ public class TestInstantiationOrder {
 
 		final String msg = COMMANDS.toString();
 		assertEquals(msg, 5, COMMANDS.size());
-		assertEquals(msg, "ComplexAutowiredBean.constructor", COMMANDS.get(0));
-		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(1));
-		assertEquals(msg, "AutowiredBean.constructor", COMMANDS.get(2));
+		assertEquals(msg, "AutowiredBean.constructor", COMMANDS.get(0));
+		assertEquals(msg, "ComplexAutowiredBean.constructor", COMMANDS.get(1));
+		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(2));
 		assertEquals(msg, "ComplexAutowiredBean.invoke", COMMANDS.get(3));
 		assertEquals(msg, "ComplexAutowiredBean.invoke", COMMANDS.get(4));
 	}
@@ -134,5 +134,31 @@ public class TestInstantiationOrder {
 
 		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(0));
 		assertEquals(msg, "SimpleBean.invoke", COMMANDS.get(1));
+	}
+
+	/**
+	 * Tests the usage of a defined methode execution
+	 */
+	@Test
+	public void testCircularMethodExecution() {
+		runExecution("testCircularMethodInvocation");
+
+		final String msg = COMMANDS.toString();
+		System.out.println("---->" + msg);
+
+		// assertEquals(msg, 2, COMMANDS.size());
+
+		assertEquals(msg, "ContainerBean.constructor", COMMANDS.get(0));
+		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(1));
+		assertEquals(msg, "ContainerElementBean.constructor", COMMANDS.get(2));
+		assertEquals(msg, "ContainerUsageBean.constructor", COMMANDS.get(3));
+		assertEquals(msg, "ContainerBean.add", COMMANDS.get(4));
+		assertEquals(msg, "ContainerElementBean.constructor", COMMANDS.get(5));
+		assertEquals(msg, "ContainerBean.add", COMMANDS.get(6));
+		assertEquals(msg, "ContainerElementBean.constructor", COMMANDS.get(7));
+		assertEquals(msg, "ContainerBean.add", COMMANDS.get(8));
+		assertEquals(msg, "ContainerElementBean.constructor", COMMANDS.get(9));
+		assertEquals(msg, "ContainerBean.add", COMMANDS.get(10));
+		assertEquals(msg, "ContainerUsageBean.init", COMMANDS.get(11));
 	}
 }
