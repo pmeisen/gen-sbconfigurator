@@ -115,10 +115,24 @@ public class TestInstantiationOrder {
 
 		final String msg = COMMANDS.toString();
 		assertEquals(msg, 5, COMMANDS.size());
-		assertEquals(msg, "AutowiredBean.constructor", COMMANDS.get(0));
-		assertEquals(msg, "ComplexAutowiredBean.constructor", COMMANDS.get(1));
-		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(2));
+		assertEquals(msg, "ComplexAutowiredBean.constructor", COMMANDS.get(0));
+		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(1));
+		assertEquals(msg, "AutowiredBean.constructor", COMMANDS.get(2));
 		assertEquals(msg, "ComplexAutowiredBean.invoke", COMMANDS.get(3));
 		assertEquals(msg, "ComplexAutowiredBean.invoke", COMMANDS.get(4));
+	}
+
+	/**
+	 * Adds a method invoker before the reference is available
+	 */
+	@Test
+	public void testPreMethodInvocation() {
+		runExecution("testPreMethodInvocation");
+
+		final String msg = COMMANDS.toString();
+		assertEquals(msg, 2, COMMANDS.size());
+
+		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(0));
+		assertEquals(msg, "SimpleBean.invoke", COMMANDS.get(1));
 	}
 }
