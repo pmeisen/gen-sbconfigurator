@@ -33,7 +33,7 @@ public interface IConfiguration extends IModuleHolder {
 	 * The id used for the central exceptionRegistry, additional exception can
 	 * be added using a methodInvokation
 	 */
-	public final static String coreExceptionRegistryId = "exceptionRegistry";
+	public final static String coreExceptionRegistryId = "coreExceptionRegistry";
 
 	/**
 	 * Loads the <code>Configuration</code> of the application. This method is
