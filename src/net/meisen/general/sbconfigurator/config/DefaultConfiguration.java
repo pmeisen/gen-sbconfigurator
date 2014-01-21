@@ -377,6 +377,8 @@ public class DefaultConfiguration implements IConfiguration {
 			return false;
 		} else if (corePropertyHolderId.equals(id)) {
 			return false;
+		} else if (coreExceptionRegistryId.equals(id)) {
+			return false;
 		} else if (isAnonymousId(id)) {
 			return false;
 		} else if (module instanceof ConfigurationCoreSettings) {
