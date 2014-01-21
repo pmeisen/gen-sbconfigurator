@@ -304,7 +304,7 @@ public class DefaultConfiguration implements IConfiguration {
 
 		// load all the objects to ensure that everything is loaded
 		final Map<String, Object> modules = moduleFactory.getBeansOfType(
-				Object.class, false, false);
+				Object.class, false, true);
 		for (final Entry<String, Object> entry : modules.entrySet()) {
 			registerModule(entry.getKey(), entry.getValue());
 		}
