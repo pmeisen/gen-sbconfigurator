@@ -17,11 +17,15 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class MethodExecutorBean extends MethodInvokingFactoryBean {
 	private String type;
+	private boolean invoked = false;
 
 	@Override
 	public Object invoke() throws InvocationTargetException,
 			IllegalAccessException {
-		super.invoke();
+		if (!invoked) {
+			super.invoke();
+			invoked = true;
+		}
 
 		return null;
 	}
@@ -49,5 +53,33 @@ public class MethodExecutorBean extends MethodInvokingFactoryBean {
 	 */
 	public void setType(final String type) {
 		this.type = type;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		prepare();
+	}
+
+	@Override
+	public Object getObject() throws Exception {
+		return doInvoke();
+	}
+
+	/**
+	 * Perform the invocation and convert InvocationTargetException into the
+	 * underlying target exception.
+	 */
+	private Object doInvoke() throws Exception {
+		try {
+			return invoke();
+		} catch (InvocationTargetException ex) {
+			if (ex.getTargetException() instanceof Exception) {
+				throw (Exception) ex.getTargetException();
+			}
+			if (ex.getTargetException() instanceof Error) {
+				throw (Error) ex.getTargetException();
+			}
+			throw ex;
+		}
 	}
 }

@@ -39,6 +39,7 @@ import net.meisen.general.sbconfigurator.helper.SpringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -310,7 +311,6 @@ public class DefaultConfiguration implements IConfiguration {
 		final List<String> head = new ArrayList<String>();
 		final List<String> body = new ArrayList<String>();
 		final List<String> tail = new ArrayList<String>();
-		final List<String> others = new ArrayList<String>();
 		for (final String name : moduleFactory.getBeanDefinitionNames()) {
 			final BeanDefinition beanDef = moduleFactory
 					.getBeanDefinition(name);
@@ -322,7 +322,7 @@ public class DefaultConfiguration implements IConfiguration {
 
 			final Class<?> beanClass = Classes.getClass(beanClassName);
 			if (beanClass == null) {
-				others.add(name);
+				// do nothing
 			} else if (MethodExecutorBean.class.isAssignableFrom(beanClass)) {
 				final PropertyValue typeProperty = beanDef.getPropertyValues()
 						.getPropertyValue("type");
@@ -337,19 +337,22 @@ public class DefaultConfiguration implements IConfiguration {
 				} else {
 					body.add(name);
 				}
-			} else {
-				others.add(name);
 			}
 		}
 
-		final List<String> orderedBeans = new ArrayList<String>();
-		orderedBeans.addAll(head);
-		orderedBeans.addAll(body);
-		orderedBeans.addAll(others);
-		orderedBeans.addAll(tail);
-		for (final String name : orderedBeans) {
-			moduleFactory.getBean(name);
+		// register the modules of head and body now
+		registerFromFactory(head);
+		registerFromFactory(body);
+		for (final String name : moduleFactory.getBeanNamesForType(
+				Object.class, false, true)) {
+			if (!head.contains(name) && !body.contains(name)
+					&& !tail.contains(name)) {
+				registerFromFactory(name);
+			}
 		}
+
+		// register the modules of the tail
+		registerFromFactory(tail);
 
 		// load all the objects to ensure that everything is loaded
 		final Map<String, Object> modules = moduleFactory.getBeansOfType(
@@ -357,6 +360,42 @@ public class DefaultConfiguration implements IConfiguration {
 		for (final Entry<String, Object> entry : modules.entrySet()) {
 			registerModule(entry.getKey(), entry.getValue());
 		}
+	}
+
+	/**
+	 * Try to register all the specified names as module. That means that the
+	 * {@code moduleFactory} is used to retrieve/create the beans.
+	 * 
+	 * @param names
+	 *            the name of the beans to be created
+	 */
+	protected void registerFromFactory(final Collection<String> names) {
+		for (final String name : names) {
+			registerModule(name, moduleFactory.getBean(name));
+		}
+	}
+
+	/**
+	 * Try to register the specified name as module. That means that the
+	 * {@code moduleFactory} is used to retrieve/create the bean.
+	 * 
+	 * @param name
+	 *            the name of the bean to be created
+	 * 
+	 * @return {@code true} if the bean was successfully created and registered,
+	 *         otherwise {@code false}
+	 */
+	protected boolean registerFromFactory(final String name) {
+		final Object bean;
+		try {
+			bean = moduleFactory.getBean(name);
+		} catch (final BeanCreationException ex) {
+			// ignore try to get it in the last step using the Spring
+			// implementation
+			return false;
+		}
+
+		return registerModule(name, bean);
 	}
 
 	/**
@@ -519,7 +558,10 @@ public class DefaultConfiguration implements IConfiguration {
 		// register the module
 		if (!isModule(id, module)) {
 			if (isAnonymousId(id)) {
-				if (id.contains(MethodInvokingFactoryBean.class.getName())) {
+				if (id.contains(MethodInvokingFactoryBean.class.getName())
+						|| id.contains(MethodExecutorBean.class.getName())
+						|| id.contains(net.meisen.general.sbconfigurator.factories.MethodInvokingFactoryBean.class
+								.getName())) {
 					if (LOG.isTraceEnabled()) {
 						LOG.trace("Skipping the bean '"
 								+ id

@@ -115,9 +115,9 @@ public class TestInstantiationOrder {
 
 		final String msg = COMMANDS.toString();
 		assertEquals(msg, 5, COMMANDS.size());
-		assertEquals(msg, "AutowiredBean.constructor", COMMANDS.get(0));
-		assertEquals(msg, "ComplexAutowiredBean.constructor", COMMANDS.get(1));
-		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(2));
+		assertEquals(msg, "ComplexAutowiredBean.constructor", COMMANDS.get(0));
+		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(1));
+		assertEquals(msg, "AutowiredBean.constructor", COMMANDS.get(2));
 		assertEquals(msg, "ComplexAutowiredBean.invoke", COMMANDS.get(3));
 		assertEquals(msg, "ComplexAutowiredBean.invoke", COMMANDS.get(4));
 	}
@@ -144,9 +144,7 @@ public class TestInstantiationOrder {
 		runExecution("testCircularMethodInvocation");
 
 		final String msg = COMMANDS.toString();
-		System.out.println("---->" + msg);
-
-		// assertEquals(msg, 2, COMMANDS.size());
+		assertEquals(msg, 12, COMMANDS.size());
 
 		assertEquals(msg, "ContainerBean.constructor", COMMANDS.get(0));
 		assertEquals(msg, "SimpleBean.constructor", COMMANDS.get(1));
