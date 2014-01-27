@@ -8,6 +8,7 @@ import net.meisen.general.sbconfigurator.config.order.TestInstantiationOrder;
 import net.meisen.general.sbconfigurator.config.placeholder.TestDefaultXmlPropertyReplacer;
 import net.meisen.general.sbconfigurator.config.placeholder.TestSpringPropertyHolder;
 import net.meisen.general.sbconfigurator.config.transformer.TestDefaultXsltTransformer;
+import net.meisen.general.sbconfigurator.factories.TestDatePropertyEditor;
 import net.meisen.general.sbconfigurator.factories.TestMergedCollection;
 import net.meisen.general.sbconfigurator.factories.TestMethodInvokingFactoryBean;
 import net.meisen.general.sbconfigurator.helper.TestSpringHelper;
@@ -40,7 +41,7 @@ import org.junit.runners.Suite;
 
 		// Spring additional factory-beans
 		TestMergedCollection.class, TestMethodInvokingFactoryBean.class,
-		TestInstantiationOrder.class })
+		TestInstantiationOrder.class, TestDatePropertyEditor.class })
 public class AllTests {
 	// nothing more to do here
 }

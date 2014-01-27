@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.meisen.general.sbconfigurator.factories.ConfiguratorPropertyEditorRegistrar;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanCreationException;
@@ -69,6 +71,8 @@ public class SpringHelper {
 			autowiredPostProcessor.setBeanFactory(factory);
 			factory.addBeanPostProcessor(autowiredPostProcessor);
 		}
+		
+		factory.addPropertyEditorRegistrar(new ConfiguratorPropertyEditorRegistrar());
 
 		return factory;
 	}

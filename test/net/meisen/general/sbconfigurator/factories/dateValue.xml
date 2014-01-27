@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+      
+  <bean id="dateProperty" class="net.meisen.general.sbconfigurator.factories.mocks.DateProperty">
+    <property name="date" value="2010-02-13" />
+  </bean>
+  
+  <bean id="dateConstructor" class="net.meisen.general.sbconfigurator.factories.mocks.DateConstructor">
+    <constructor-arg type="java.util.Date" value="2010-02-13" />
+  </bean>
+</beans>
