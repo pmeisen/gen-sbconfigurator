@@ -10,6 +10,7 @@ import net.meisen.general.sbconfigurator.factories.ConfiguratorPropertyEditorReg
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -71,7 +72,7 @@ public class SpringHelper {
 			autowiredPostProcessor.setBeanFactory(factory);
 			factory.addBeanPostProcessor(autowiredPostProcessor);
 		}
-		
+
 		factory.addPropertyEditorRegistrar(new ConfiguratorPropertyEditorRegistrar());
 
 		return factory;
@@ -204,7 +205,8 @@ public class SpringHelper {
 					"The exceptionClazz cannot be null and must be an instance of Throwable.");
 		} else if (exception == null) {
 			return null;
-		} else if (exception instanceof BeanCreationException) {
+		} else if (exception instanceof BeanCreationException
+				|| exception instanceof BeanDefinitionStoreException) {
 			return getNoneSpringBeanException(exception.getCause(),
 					exceptionClazz);
 		} else if (exceptionClazz.isAssignableFrom(exception.getClass())) {
