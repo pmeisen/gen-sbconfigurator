@@ -1,8 +1,6 @@
 package net.meisen.general.sbconfigurator.factories;
 
 import java.beans.PropertyEditorSupport;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -18,11 +16,6 @@ import net.meisen.general.genmisc.types.Dates;
  */
 public class DatePropertyEditor extends PropertyEditorSupport {
 
-	private static final String[] PATTERNS = new String[] { null,
-			"dd.MM.yyyy HH:mm:ss", "dd.MM.yyyy", "yyyy-MM-dd HH:mm:ss",
-			"yyyy-MM-dd", "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy",
-			"yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd" };
-
 	@Override
 	public void setAsText(final String text) throws IllegalArgumentException {
 		if (text == null) {
@@ -30,38 +23,15 @@ public class DatePropertyEditor extends PropertyEditorSupport {
 		} else if ("".equals(text)) {
 			setValue(new Date());
 		} else {
-
-			// we have to validate the format of the String
-			final SimpleDateFormat formatter = new SimpleDateFormat();
-			for (final String pattern : PATTERNS) {
-				final Date parsedDate = tryParse(formatter, pattern, text);
-				if (parsedDate != null) {
-					setValue(parsedDate);
-					return;
-				}
+			final Date parsedDate = Dates.isDate(text);
+			if (parsedDate == null) {
+				throw new IllegalArgumentException("Unable to parse the text '"
+						+ text
+						+ "' to a valid date. Please use a valid format: "
+						+ Arrays.asList(Dates.PATTERNS));
+			} else {
+				setValue(parsedDate);
 			}
-
-			throw new IllegalArgumentException("Unable to parse the text '"
-					+ text + "' to a valid date. Please use a valid format: "
-					+ Arrays.asList(PATTERNS));
-		}
-	}
-
-	private Date tryParse(final SimpleDateFormat formatter,
-			final String pattern, final String text) {
-
-		if (pattern != null) {
-			try {
-				formatter.applyPattern(pattern);
-			} catch (final IllegalArgumentException e) {
-				return null;
-			}
-		}
-
-		try {
-			return formatter.parse(text);
-		} catch (final ParseException e) {
-			return null;
 		}
 	}
 
