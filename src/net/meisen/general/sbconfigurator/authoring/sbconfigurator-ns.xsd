@@ -48,6 +48,7 @@
       <xsd:complexContent>
         <xsd:extension base="beans:identifiedType">
           <xsd:attribute name="selector" type="nonEmptyString" use="required" />
+          <xsd:attribute name="defaultSelector" type="nonEmptyString" use="optional" />
           <xsd:attribute name="xslt" type="xsd:string" default="" />
           <xsd:attribute name="loadFromClassPath" type="xsd:boolean" default="true" />
           <xsd:attribute name="loadFromWorkingDir" type="xsd:boolean" default="true" />

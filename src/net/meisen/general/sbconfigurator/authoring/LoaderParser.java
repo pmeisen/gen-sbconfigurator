@@ -18,6 +18,7 @@ import org.w3c.dom.Element;
  */
 public class LoaderParser extends AbstractBeanDefinitionParser {
 	private final static String XML_ATTRIBUTE_SELECTOR = "selector";
+	private final static String XML_ATTRIBUTE_DEFAULTSELECTOR = "defaultSelector";
 	private final static String XML_ATTRIBUTE_XSLT = "xslt";
 	private final static String XML_ATTRIBUTE_LOADFROMCLASSPATH = "loadFromClassPath";
 	private final static String XML_ATTRIBUTE_LOADFROMWORKINGDIR = "loadFromWorkingDir";
@@ -50,6 +51,8 @@ public class LoaderParser extends AbstractBeanDefinitionParser {
 				"beanOverridingAllowed", false);
 		setValue(builder, element, XML_ATTRIBUTE_VALIDATIONENABLED,
 				"validationEnabled", true);
+		setValue(builder, element, XML_ATTRIBUTE_DEFAULTSELECTOR,
+				"defaultSelector", null);
 
 		// the outer implementation of AbstractBeanDefinitionParser sets the id
 		return builder.getBeanDefinition();
@@ -77,7 +80,7 @@ public class LoaderParser extends AbstractBeanDefinitionParser {
 	protected void setValue(final BeanDefinitionBuilder builder,
 			final Element element, final String attribute,
 			final String property, final Object def) {
-		setValue(builder, property, element.getAttribute(attribute), "");
+		setValue(builder, property, element.getAttribute(attribute), def);
 	}
 
 	/**
@@ -98,8 +101,13 @@ public class LoaderParser extends AbstractBeanDefinitionParser {
 	protected void setValue(final BeanDefinitionBuilder builder,
 			final String property, final Object value, final Object def) {
 
-		if (value instanceof String && StringUtils.hasText(value.toString())) {
-			builder.addPropertyValue(property, value);
+		if (value instanceof String) {
+			final String stringValue = (String) value;
+			if (StringUtils.hasText(stringValue)) {
+				builder.addPropertyValue(property, value);
+			} else {
+				builder.addPropertyValue(property, def);
+			}
 		} else if (value != null) {
 			builder.addPropertyValue(property, value);
 		} else {

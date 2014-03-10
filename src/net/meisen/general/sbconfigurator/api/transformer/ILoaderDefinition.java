@@ -15,8 +15,8 @@ import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 public interface ILoaderDefinition {
 
 	/**
-	 * Gets a newly created <code>InputStream</code> to read the xslt transformer
-	 * definition of this <code>ILoaderDefinition</code>.
+	 * Gets a newly created <code>InputStream</code> to read the xslt
+	 * transformer definition of this <code>ILoaderDefinition</code>.
 	 * 
 	 * @return a newly created <code>InputStream</code> to read the xslt
 	 *         transformer definition of this <code>ILoaderDefinition</code>.
@@ -27,8 +27,8 @@ public interface ILoaderDefinition {
 	 * Gets a newly created <code>InputStream</code> to read the xsd schema of
 	 * this <code>ILoaderDefinition</code>.
 	 * 
-	 * @return a newly created <code>InputStream</code> to read the xsd schema of
-	 *         this <code>ILoaderDefinition</code>.
+	 * @return a newly created <code>InputStream</code> to read the xsd schema
+	 *         of this <code>ILoaderDefinition</code>.
 	 */
 	public InputStream getXsdSchemaInputStream();
 
@@ -41,8 +41,8 @@ public interface ILoaderDefinition {
 	public boolean hasXsdSchema();
 
 	/**
-	 * Gets the selector to be used to select the xml-files to be changed by this
-	 * <code>ILoaderDefinition</code>.
+	 * Gets the selector to be used to select the xml-files to be changed by
+	 * this <code>ILoaderDefinition</code>.
 	 * 
 	 * @return the selector to be used to select the xml-files to be changed by
 	 *         this <code>ILoaderDefinition</code>
@@ -65,8 +65,8 @@ public interface ILoaderDefinition {
 	public boolean hasContext();
 
 	/**
-	 * Defines if it is possible to override beans by the loader created for this
-	 * <code>ILoaderDefinition</code>.
+	 * Defines if it is possible to override beans by the loader created for
+	 * this <code>ILoaderDefinition</code>.
 	 * 
 	 * @return <code>true</code> if bean overriding is allowed, otherwise
 	 *         <code>false</code>
@@ -77,8 +77,8 @@ public interface ILoaderDefinition {
 	 * Defines if the XML read during loading should be validated. This setting
 	 * can be overruled by the general configuration setting.
 	 * 
-	 * @return <code>true</code> if the XML should be validated during the loading
-	 *         process or not
+	 * @return <code>true</code> if the XML should be validated during the
+	 *         loading process or not
 	 * 
 	 * @see ConfigurationCoreSettings#isConfigurationValidationEnabled()
 	 */
@@ -88,19 +88,30 @@ public interface ILoaderDefinition {
 	 * Defines if the defined selector should select files from the class-path (
 	 * <code>true</code>) or not (<code>false</code>).
 	 * 
-	 * @return <code>true</code> if the selected should search on the class-path,
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> if the selected should search on the
+	 *         class-path, otherwise <code>false</code>
 	 */
 	public boolean isLoadFromClassPath();
 
 	/**
 	 * Defines if the defined selector should select files from the current
-	 * working directory and all it's sub-directories ( <code>true</code>) or not
-	 * (<code>false</code>).
+	 * working directory and all it's sub-directories ( <code>true</code>) or
+	 * not (<code>false</code>).
 	 * 
 	 * @return <code>true</code> if the selector should search in the current
 	 *         working-directory (and all sub-directories), otherwise
 	 *         <code>false</code>
 	 */
 	public boolean isLoadFromWorkingDir();
+
+	/**
+	 * A default selector to be used if the specified selector doesn't select
+	 * any resources.
+	 * 
+	 * @return the selector to be used if the specified selector doesn't select
+	 *         any resources
+	 * 
+	 * @see #getSelector()
+	 */
+	public String getDefaultSelector();
 }

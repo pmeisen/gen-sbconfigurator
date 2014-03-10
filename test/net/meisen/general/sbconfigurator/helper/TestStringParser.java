@@ -68,7 +68,8 @@ public class TestStringParser {
 		assertEquals(1, parser.parseString("1"));
 		assertEquals(5, parser.parseString("5"));
 		assertEquals(5.56775, parser.parseString("5.56775"));
-		assertEquals(new BigDecimal("5.58092809320973209170298782018307258092809"),
+		assertEquals(
+				new BigDecimal("5.58092809320973209170298782018307258092809"),
 				parser.parseString("5.58092809320973209170298782018307258092809"));
 	}
 
@@ -76,7 +77,7 @@ public class TestStringParser {
 	 * Tests the parsing of date
 	 * 
 	 * @throws ParseException
-	 *           if the generated test date is invalid
+	 *             if the generated test date is invalid
 	 */
 	@Test
 	public void testDate() throws ParseException {

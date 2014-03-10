@@ -655,6 +655,7 @@ public class DefaultConfiguration implements IConfiguration {
 	public DefaultListableBeanFactory loadBeanFactory(
 			final ILoaderDefinition loaderDefinition) {
 		return loadBeanFactory(loaderDefinition.getSelector(),
+				loaderDefinition.getDefaultSelector(),
 				loaderDefinition.getXsltTransformerInputStream(),
 				loaderDefinition.getContext(),
 				loaderDefinition.isValidationEnabled(),
@@ -740,6 +741,85 @@ public class DefaultConfiguration implements IConfiguration {
 			final InputStream xsltStream, final Class<?> context,
 			final boolean validate, final boolean beanOverriding,
 			final boolean loadFromClasspath, final boolean loadFromWorkingDir) {
+		return loadBeanFactory(xmlSelector, null, xsltStream, context,
+				validate, beanOverriding, loadFromClasspath, loadFromWorkingDir);
+	}
+
+	/**
+	 * Loads the <code>BeanFactory</code> which is specified by the passed
+	 * <code>xmlFileName</code>, using the passed <code>xsltTransformer</code>
+	 * to transform the data into a bean XML definition. The XML might be
+	 * validated if <code>validate</code> is set to <code>true</code>.
+	 * Furthermore the <code>beanOverriding</code> specifies if beans can be
+	 * overwritten within the context, i.e. all the XML files found with the
+	 * specified <code>xmlFileName</code>.
+	 * 
+	 * @param xmlSelector
+	 *            the XML files to be loaded
+	 * @param defaultXmlSelector
+	 *            the selector to be used if the {@code xmlSelector} doesn't
+	 *            select any files
+	 * @param xsltStream
+	 *            the stream of the XSLT used for transformation
+	 * @param context
+	 *            the context to look for the specified <code>xmlFileName</code>
+	 *            , might be <code>null</code> if all files on the class-path
+	 *            with the specified <code>xmlFileName</code> should be loaded
+	 * @param validate
+	 *            <code>true</code> if the XML of the <code>xmlFileName</code>
+	 *            should be validated, otherwise <code>false</code>
+	 * @param beanOverriding
+	 *            <code>true</code> if beans of the context can be overwritten,
+	 *            otherwise <code>false</code>
+	 * @param loadFromClasspath
+	 *            <code>true</code> if the <code>xmlFileName</code> should be
+	 *            searched on the classpath, otherwise <code>false</code>
+	 * @param loadFromWorkingDir
+	 *            <code>true</code> if the <code>xmlFileName</code> should be
+	 *            searched in the current working-directory (and all
+	 *            sub-directories), otherwise <code>false</code>
+	 * 
+	 * @return the <code>ListableBeanFactory</code> loaded by the specified
+	 *         parameters
+	 */
+	public DefaultListableBeanFactory loadBeanFactory(final String xmlSelector,
+			final String defaultXmlSelector, final InputStream xsltStream,
+			final Class<?> context, final boolean validate,
+			final boolean beanOverriding, final boolean loadFromClasspath,
+			final boolean loadFromWorkingDir) {
+
+		// get all the resources to be loaded
+		List<InputStream> resIos = getResourceInputStreams(xmlSelector,
+				context, loadFromClasspath, loadFromWorkingDir);
+
+		// check if resources were found and use the default otherwise
+		if (resIos.size() == 0 && defaultXmlSelector != null) {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Didn't find any files for '" + xmlSelector
+						+ "'. The defaultXmlSelector '" + defaultXmlSelector
+						+ "' is used to load the resources to be loaded.");
+			}
+
+			System.out.println("--->" + defaultXmlSelector);
+			
+			resIos = getResourceInputStreams(defaultXmlSelector, context,
+					loadFromClasspath, loadFromWorkingDir);
+		}
+
+		// get the factory
+		final DefaultListableBeanFactory factory = loadBeanFactory(resIos,
+				xsltStream, validate, beanOverriding);
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Loaded factory for files '" + xmlSelector + "' (size: "
+					+ factory.getBeanDefinitionCount() + ")");
+		}
+
+		return factory;
+	}
+
+	private List<InputStream> getResourceInputStreams(final String xmlSelector,
+			final Class<?> context, final boolean loadFromClasspath,
+			final boolean loadFromWorkingDir) {
 
 		// get the selector with replaced properties
 		final String replaceXmlSelector = replacer.replacePlaceholders(
@@ -791,15 +871,7 @@ public class DefaultConfiguration implements IConfiguration {
 			resIos.add(resIo);
 		}
 
-		// get the factory
-		final DefaultListableBeanFactory factory = loadBeanFactory(resIos,
-				xsltStream, validate, beanOverriding);
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Loaded factory for files '" + replaceXmlSelector
-					+ "' (size: " + factory.getBeanDefinitionCount() + ")");
-		}
-
-		return factory;
+		return resIos;
 	}
 
 	/**

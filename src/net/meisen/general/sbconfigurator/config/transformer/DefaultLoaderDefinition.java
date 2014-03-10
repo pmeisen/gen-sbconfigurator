@@ -29,6 +29,7 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 			.getLogger(DefaultLoaderDefinition.class);
 
 	private String selector = null;
+	private String defaultSelector = null;
 	private byte[] xsd = null;
 	private byte[] xslt = null;
 	private Class<?> context = null;
@@ -38,27 +39,27 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	private boolean loadFromWorkingDir = false;
 
 	/**
-	 * Default constructor which doesn't specify anything. The setters have to be
-	 * used prior to using the definition.
+	 * Default constructor which doesn't specify anything. The setters have to
+	 * be used prior to using the definition.
 	 */
 	public DefaultLoaderDefinition() {
 		// nothing to do
 	}
 
 	/**
-	 * This constructor sets the most important values of the definition, i.e. the
-	 * XSLT (if needed) and the selector to select the XML files specifying
+	 * This constructor sets the most important values of the definition, i.e.
+	 * the XSLT (if needed) and the selector to select the XML files specifying
 	 * whatever has to be loaded.
 	 * 
 	 * @param xsltClassPath
-	 *          the classpath to the <code>XSLT</code> to be used for
-	 *          transformation purposes, can be <code>null</code> if the XML is
-	 *          already a valid SpringContext definition.
+	 *            the classpath to the <code>XSLT</code> to be used for
+	 *            transformation purposes, can be <code>null</code> if the XML
+	 *            is already a valid SpringContext definition.
 	 * @param selector
-	 *          the selector which specifies which XML to be loaded
+	 *            the selector which specifies which XML to be loaded
 	 * 
 	 * @throws InvalidXsltException
-	 *           if the XSLT is invalid
+	 *             if the XSLT is invalid
 	 */
 	public DefaultLoaderDefinition(final String xsltClassPath,
 			final String selector) throws InvalidXsltException {
@@ -67,20 +68,20 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 
 	/**
 	 * This constructor sets the values of the definition, i.e. the XSLT (if
-	 * needed), the selector to select the XML files specifying whatever has to be
-	 * loaded and the context.
+	 * needed), the selector to select the XML files specifying whatever has to
+	 * be loaded and the context.
 	 * 
 	 * @param xsltClassPath
-	 *          the classpath to the <code>XSLT</code> to be used for
-	 *          transformation purposes, can be <code>null</code> if the XML is
-	 *          already a valid SpringContext definition.
+	 *            the classpath to the <code>XSLT</code> to be used for
+	 *            transformation purposes, can be <code>null</code> if the XML
+	 *            is already a valid SpringContext definition.
 	 * @param selector
-	 *          the selector which specifies which XML to be loaded
+	 *            the selector which specifies which XML to be loaded
 	 * @param context
-	 *          the context to look for the files selected via the selector.
+	 *            the context to look for the files selected via the selector.
 	 * 
 	 * @throws InvalidXsltException
-	 *           if the XSLT is invalid
+	 *             if the XSLT is invalid
 	 */
 	public DefaultLoaderDefinition(final String xsltClassPath,
 			final String selector, final Class<?> context)
@@ -104,7 +105,7 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * Sets the context in which the selected files should be chosen.
 	 * 
 	 * @param context
-	 *          the context in which the selected files should be chosen
+	 *            the context in which the selected files should be chosen
 	 */
 	public void setContext(final Class<?> context) {
 		this.context = context;
@@ -115,19 +116,19 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * reads the schema from the passed <code>xsdClassPath</code>.
 	 * 
 	 * @param xsdClassPath
-	 *          the <code>String</code> pointing to the XSD on the classpath
+	 *            the <code>String</code> pointing to the XSD on the classpath
 	 * 
 	 * @throws InvalidXsdException
-	 *           if the XSD cannot be found on the classpath, the XSD is invalid,
-	 *           ...
+	 *             if the XSD cannot be found on the classpath, the XSD is
+	 *             invalid, ...
 	 */
 	public void setXsdSchema(final String xsdClassPath)
 			throws InvalidXsdException {
 		try {
 			setXsdSchema(new ClassPathResource(xsdClassPath).getInputStream());
 		} catch (final IOException e) {
-			throw new InvalidXsdException("The specified xsd at '" + xsdClassPath
-					+ "' could not be accessed.", e);
+			throw new InvalidXsdException("The specified xsd at '"
+					+ xsdClassPath + "' could not be accessed.", e);
 		}
 	}
 
@@ -136,11 +137,11 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * reads the schema from the passed <code>xsdFile</code>.
 	 * 
 	 * @param xsdFile
-	 *          the <code>File</code> containing the XSD
+	 *            the <code>File</code> containing the XSD
 	 * 
 	 * @throws InvalidXsdException
-	 *           if the <code>xsdFile</code> cannot be read, the XSD is invalid,
-	 *           ...
+	 *             if the <code>xsdFile</code> cannot be read, the XSD is
+	 *             invalid, ...
 	 */
 	public void setXsdSchema(final File xsdFile) throws InvalidXsdException {
 		try {
@@ -162,18 +163,19 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * set!
 	 * 
 	 * @param xsdStream
-	 *          the <code>InputStream</code> to read the schema from
+	 *            the <code>InputStream</code> to read the schema from
 	 * 
 	 * @throws InvalidXsdException
-	 *           if the schema definition is invalid, the <code>xsdStream</code>
-	 *           cannot be read, ...
+	 *             if the schema definition is invalid, the
+	 *             <code>xsdStream</code> cannot be read, ...
 	 */
 	public void setXsdSchema(final InputStream xsdStream)
 			throws InvalidXsdException {
 		try {
 			this.xsd = Streams.copyStreamToByteArray(xsdStream);
 		} catch (final IOException e) {
-			throw new InvalidXsdException("The xsd stream could not be read.", e);
+			throw new InvalidXsdException("The xsd stream could not be read.",
+					e);
 		}
 	}
 
@@ -183,11 +185,11 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * <code>xsltClassPath</code>.
 	 * 
 	 * @param xsltClassPath
-	 *          the <code>String</code> pointing to the XSLT on the classpath
+	 *            the <code>String</code> pointing to the XSLT on the classpath
 	 * 
 	 * @throws InvalidXsltException
-	 *           if the XSLT cannot be found on the classpath, the XSLT is
-	 *           invalid, ...
+	 *             if the XSLT cannot be found on the classpath, the XSLT is
+	 *             invalid, ...
 	 */
 	public void setXslt(final String xsltClassPath) throws InvalidXsltException {
 		setXsltTransformer(xsltClassPath);
@@ -199,11 +201,11 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * <code>xsltClassPath</code>.
 	 * 
 	 * @param xsltClassPath
-	 *          the <code>String</code> pointing to the XSLT on the classpath
+	 *            the <code>String</code> pointing to the XSLT on the classpath
 	 * 
 	 * @throws InvalidXsltException
-	 *           if the XSLT cannot be found on the classpath, the XSLT is
-	 *           invalid, ...
+	 *             if the XSLT cannot be found on the classpath, the XSLT is
+	 *             invalid, ...
 	 */
 	public void setXsltTransformer(final String xsltClassPath)
 			throws InvalidXsltException {
@@ -214,7 +216,8 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 				setXsltTransformer(new ClassPathResource(xsltClassPath)
 						.getInputStream());
 			} catch (final IOException e) {
-				throw new InvalidXsltException("The xslt stream could not be read.", e);
+				throw new InvalidXsltException(
+						"The xslt stream could not be read.", e);
 			}
 		}
 	}
@@ -225,12 +228,12 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * <code>xsltFile</code>.
 	 * 
 	 * @param xsltFile
-	 *          the <code>File</code> containing the XSLT
+	 *            the <code>File</code> containing the XSLT
 	 * @throws InvalidXsltException
 	 * 
 	 * @throws InvalidXsltException
-	 *           if the <code>xsltFile</code> cannot be read, the XSLT is invalid,
-	 *           ...
+	 *             if the <code>xsltFile</code> cannot be read, the XSLT is
+	 *             invalid, ...
 	 */
 	public void setXsltTransformer(final File xsltFile)
 			throws InvalidXsltException {
@@ -240,8 +243,8 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 			try {
 				setXsltTransformer(new FileInputStream(xsltFile));
 			} catch (final FileNotFoundException e) {
-				throw new InvalidXsltException("The specified xslt file '" + xsltFile
-						+ "' could not be found.", e);
+				throw new InvalidXsltException("The specified xslt file '"
+						+ xsltFile + "' could not be found.", e);
 			}
 		}
 	}
@@ -254,15 +257,15 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * <br/>
 	 * <br/>
 	 * <i>Note:</i><br/>
-	 * The <code>InputStream</code> will be <b>closed</b> after the transformer is
-	 * read!
+	 * The <code>InputStream</code> will be <b>closed</b> after the transformer
+	 * is read!
 	 * 
 	 * @param xsltStream
-	 *          the <code>InputStream</code> to read the transformer from
+	 *            the <code>InputStream</code> to read the transformer from
 	 * 
 	 * @throws InvalidXsltException
-	 *           if the transformer definition is invalid, the
-	 *           <code>xsltStream</code> cannot be read, ...
+	 *             if the transformer definition is invalid, the
+	 *             <code>xsltStream</code> cannot be read, ...
 	 */
 	public void setXsltTransformer(final InputStream xsltStream)
 			throws InvalidXsltException {
@@ -338,15 +341,32 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	}
 
 	/**
-	 * Sets the selector to be used to select the xml-files to be changed by this
-	 * <code>ILoaderDefinition</code>.
+	 * Sets the selector to be used to select the xml-files to be changed by
+	 * this <code>ILoaderDefinition</code>.
 	 * 
 	 * @param selector
-	 *          the selector which defines which xml-files are modified by this
-	 *          <code>ILoaderDefinition</code>
+	 *            the selector which defines which xml-files are modified by
+	 *            this <code>ILoaderDefinition</code>
 	 */
 	public void setSelector(final String selector) {
 		this.selector = selector;
+	}
+
+	@Override
+	public String getDefaultSelector() {
+		return defaultSelector;
+	}
+
+	/**
+	 * Defines the default selector to be used if the specified selector
+	 * couldn't select any resources.
+	 * 
+	 * @param defaultSelector
+	 *            default selector to be used if the specified selector couldn't
+	 *            select any resources
+	 */
+	public void setDefaultSelector(final String defaultSelector) {
+		this.defaultSelector = defaultSelector;
 	}
 
 	@Override
@@ -359,8 +379,8 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * <code>ILoaderDefinition</code>.
 	 * 
 	 * @param beanOverridingAllowed
-	 *          <code>true</code> if bean overriding is allowed, otherwise
-	 *          <code>false</code>
+	 *            <code>true</code> if bean overriding is allowed, otherwise
+	 *            <code>false</code>
 	 */
 	public void setBeanOverridingAllowed(final boolean beanOverridingAllowed) {
 		this.beanOverridingAllowed = beanOverridingAllowed;
@@ -369,9 +389,10 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	@Override
 	public String toString() {
 		return "Loader: " + selector + " (context: '"
-				+ (context == null ? null : context.getName()) + "', overriding: '"
-				+ beanOverridingAllowed + "', hasXsd: '" + hasXsdSchema()
-				+ "', hasXslt: '" + hasXsltTransformer() + "')";
+				+ (context == null ? null : context.getName())
+				+ "', overriding: '" + beanOverridingAllowed + "', hasXsd: '"
+				+ hasXsdSchema() + "', hasXslt: '" + hasXsltTransformer()
+				+ "')";
 	}
 
 	@Override
@@ -384,8 +405,8 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * can be overruled by the general configuration setting.
 	 * 
 	 * @param validationEnabled
-	 *          <code>true</code> if the XML should be validated during the
-	 *          loading process or not
+	 *            <code>true</code> if the XML should be validated during the
+	 *            loading process or not
 	 * 
 	 * @see ConfigurationCoreSettings#isConfigurationValidationEnabled()
 	 */
@@ -399,12 +420,12 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	}
 
 	/**
-	 * Defines if the selector should be applied against files on the class-path (
-	 * <code>true</code>) or not <code>false</code>.
+	 * Defines if the selector should be applied against files on the class-path
+	 * ( <code>true</code>) or not <code>false</code>.
 	 * 
 	 * @param loadFromClassPath
-	 *          <code>true</code> if the selected should search on the class-path,
-	 *          otherwise <code>false</code>
+	 *            <code>true</code> if the selected should search on the
+	 *            class-path, otherwise <code>false</code>
 	 */
 	public void setLoadFromClassPath(final boolean loadFromClassPath) {
 		this.loadFromClassPath = loadFromClassPath;
@@ -420,9 +441,9 @@ public class DefaultLoaderDefinition implements ILoaderDefinition {
 	 * working-directory (and all it's sub-directories) or not.
 	 * 
 	 * @param loadFromWorkingDir
-	 *          <code>true</code> if the selector should search in the current
-	 *          working-directory (and all sub-directories), otherwise
-	 *          <code>false</code>
+	 *            <code>true</code> if the selector should search in the current
+	 *            working-directory (and all sub-directories), otherwise
+	 *            <code>false</code>
 	 */
 	public void setLoadFromWorkingDir(final boolean loadFromWorkingDir) {
 		this.loadFromWorkingDir = loadFromWorkingDir;

@@ -295,4 +295,26 @@ public class TestDefaultConfiguration {
 		assertNotNull(dbAfterRelease);
 		assertNotNull(dbAfterRelease.sp);
 	}
+
+	/**
+	 * Tests the definition of a default selector which is used if the other
+	 * selector didn't select anything.
+	 */
+	@Test
+	public void testDefaultSelector() {
+		ConfigurationCoreSettings configCore;
+		IConfiguration config;
+
+		configCore = ConfigurationCoreSettings.loadCoreSettings(
+				"sbconfigurator-noDefaultSelector.xml", getClass());
+		config = configCore.getConfiguration();
+		assertNotNull(config);
+		assertEquals(0, config.getAllModules().size());
+
+		configCore = ConfigurationCoreSettings.loadCoreSettings(
+				"sbconfigurator-defaultSelector.xml", getClass());
+		config = configCore.getConfiguration();
+		assertNotNull(config);
+		assertEquals(3, config.getAllModules().size());
+	}
 }
