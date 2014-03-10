@@ -52,6 +52,8 @@
           <xsd:attribute name="xslt" type="xsd:string" default="" />
           <xsd:attribute name="loadFromClassPath" type="xsd:boolean" default="true" />
           <xsd:attribute name="loadFromWorkingDir" type="xsd:boolean" default="true" />
+          <xsd:attribute name="defaultLoadFromWorkingDir" type="xsd:boolean" use="optional" default="true" />
+          <xsd:attribute name="defaultLoadFromClassPath" type="xsd:boolean" use="optional" default="true" />
           <xsd:attribute name="beanOverridingAllowed" type="xsd:boolean" default="false" />
           <xsd:attribute name="validationEnabled" type="xsd:boolean" default="true" />
         </xsd:extension>

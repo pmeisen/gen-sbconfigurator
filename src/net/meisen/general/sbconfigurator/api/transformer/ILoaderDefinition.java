@@ -114,4 +114,24 @@ public interface ILoaderDefinition {
 	 * @see #getSelector()
 	 */
 	public String getDefaultSelector();
+
+	/**
+	 * Defines if the defined {@code defaultSelector} should select files from
+	 * the class-path ( <code>true</code>) or not (<code>false</code>).
+	 * 
+	 * @return <code>true</code> if the {@code defaultSelector} should should
+	 *         search on the class-path, otherwise <code>false</code>
+	 */
+	public boolean isDefaultLoadFromClassPath();
+
+	/**
+	 * Defines if the defined {@code defaultSelector} should select files from
+	 * the current working directory and all it's sub-directories (
+	 * <code>true</code>) or not (<code>false</code>).
+	 * 
+	 * @return <code>true</code> if the {@code defaultSelector} should search in
+	 *         the current working-directory (and all sub-directories),
+	 *         otherwise <code>false</code>
+	 */
+	public boolean isDefaultLoadFromWorkingDir();
 }

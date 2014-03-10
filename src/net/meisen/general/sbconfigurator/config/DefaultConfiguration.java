@@ -661,7 +661,9 @@ public class DefaultConfiguration implements IConfiguration {
 				loaderDefinition.isValidationEnabled(),
 				loaderDefinition.isBeanOverridingAllowed(),
 				loaderDefinition.isLoadFromClassPath(),
-				loaderDefinition.isLoadFromWorkingDir());
+				loaderDefinition.isLoadFromWorkingDir(),
+				loaderDefinition.isDefaultLoadFromClassPath(),
+				loaderDefinition.isDefaultLoadFromWorkingDir());
 	}
 
 	/**
@@ -742,7 +744,8 @@ public class DefaultConfiguration implements IConfiguration {
 			final boolean validate, final boolean beanOverriding,
 			final boolean loadFromClasspath, final boolean loadFromWorkingDir) {
 		return loadBeanFactory(xmlSelector, null, xsltStream, context,
-				validate, beanOverriding, loadFromClasspath, loadFromWorkingDir);
+				validate, beanOverriding, loadFromClasspath,
+				loadFromWorkingDir, loadFromClasspath, loadFromWorkingDir);
 	}
 
 	/**
@@ -772,11 +775,19 @@ public class DefaultConfiguration implements IConfiguration {
 	 *            <code>true</code> if beans of the context can be overwritten,
 	 *            otherwise <code>false</code>
 	 * @param loadFromClasspath
-	 *            <code>true</code> if the <code>xmlFileName</code> should be
+	 *            <code>true</code> if the <code>xmlSelector</code> should be
 	 *            searched on the classpath, otherwise <code>false</code>
 	 * @param loadFromWorkingDir
-	 *            <code>true</code> if the <code>xmlFileName</code> should be
+	 *            <code>true</code> if the <code>xmlSelector</code> should be
 	 *            searched in the current working-directory (and all
+	 *            sub-directories), otherwise <code>false</code>
+	 * @param loadDefaultFromClasspath
+	 *            <code>true</code> if the <code>defaultXmlSelector</code>
+	 *            should be searched on the classpath, otherwise
+	 *            <code>false</code>
+	 * @param loadDefaultFromWorkingDir
+	 *            <code>true</code> if the <code>defaultXmlSelector</code>
+	 *            should be searched in the current working-directory (and all
 	 *            sub-directories), otherwise <code>false</code>
 	 * 
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
@@ -786,7 +797,9 @@ public class DefaultConfiguration implements IConfiguration {
 			final String defaultXmlSelector, final InputStream xsltStream,
 			final Class<?> context, final boolean validate,
 			final boolean beanOverriding, final boolean loadFromClasspath,
-			final boolean loadFromWorkingDir) {
+			final boolean loadFromWorkingDir,
+			final boolean loadDefaultFromClasspath,
+			final boolean loadDefaultFromWorkingDir) {
 
 		// get all the resources to be loaded
 		List<InputStream> resIos = getResourceInputStreams(xmlSelector,
@@ -800,10 +813,8 @@ public class DefaultConfiguration implements IConfiguration {
 						+ "' is used to load the resources to be loaded.");
 			}
 
-			System.out.println("--->" + defaultXmlSelector);
-			
 			resIos = getResourceInputStreams(defaultXmlSelector, context,
-					loadFromClasspath, loadFromWorkingDir);
+					loadDefaultFromClasspath, loadDefaultFromWorkingDir);
 		}
 
 		// get the factory

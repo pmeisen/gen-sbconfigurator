@@ -316,5 +316,11 @@ public class TestDefaultConfiguration {
 		config = configCore.getConfiguration();
 		assertNotNull(config);
 		assertEquals(3, config.getAllModules().size());
+
+		configCore = ConfigurationCoreSettings.loadCoreSettings(
+				"sbconfigurator-defaultSelectorFromWorkingDir.xml", getClass());
+		config = configCore.getConfiguration();
+		assertNotNull(config);
+		assertEquals(0, config.getAllModules().size());
 	}
 }

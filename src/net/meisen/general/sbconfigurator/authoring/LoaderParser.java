@@ -22,6 +22,8 @@ public class LoaderParser extends AbstractBeanDefinitionParser {
 	private final static String XML_ATTRIBUTE_XSLT = "xslt";
 	private final static String XML_ATTRIBUTE_LOADFROMCLASSPATH = "loadFromClassPath";
 	private final static String XML_ATTRIBUTE_LOADFROMWORKINGDIR = "loadFromWorkingDir";
+	private final static String XML_ATTRIBUTE_DEFAULTLOADFROMCLASSPATH = "defaultLoadFromClassPath";
+	private final static String XML_ATTRIBUTE_DEFAULTLOADFROMWORKINGDIR = "defaultLoadFromWorkingDir";
 	private final static String XML_ATTRIBUTE_BEANOVERRIDINGALLOWED = "beanOverridingAllowed";
 	private final static String XML_ATTRIBUTE_VALIDATIONENABLED = "validationEnabled";
 
@@ -43,16 +45,20 @@ public class LoaderParser extends AbstractBeanDefinitionParser {
 
 		// set the attributes not required
 		setValue(builder, element, XML_ATTRIBUTE_XSLT, "xslt", "");
-		setValue(builder, element, XML_ATTRIBUTE_LOADFROMCLASSPATH,
-				"loadFromClassPath", true);
-		setValue(builder, element, XML_ATTRIBUTE_LOADFROMWORKINGDIR,
-				"loadFromWorkingDir", true);
+		final Object loadFromClasspath = setValue(builder, element,
+				XML_ATTRIBUTE_LOADFROMCLASSPATH, "loadFromClassPath", true);
+		final Object loadFromWorkingDir = setValue(builder, element,
+				XML_ATTRIBUTE_LOADFROMWORKINGDIR, "loadFromWorkingDir", true);
 		setValue(builder, element, XML_ATTRIBUTE_BEANOVERRIDINGALLOWED,
 				"beanOverridingAllowed", false);
 		setValue(builder, element, XML_ATTRIBUTE_VALIDATIONENABLED,
 				"validationEnabled", true);
 		setValue(builder, element, XML_ATTRIBUTE_DEFAULTSELECTOR,
 				"defaultSelector", null);
+		setValue(builder, element, XML_ATTRIBUTE_DEFAULTLOADFROMCLASSPATH,
+				"defaultLoadFromClassPath", loadFromClasspath);
+		setValue(builder, element, XML_ATTRIBUTE_DEFAULTLOADFROMWORKINGDIR,
+				"defaultLoadFromWorkingDir", loadFromWorkingDir);
 
 		// the outer implementation of AbstractBeanDefinitionParser sets the id
 		return builder.getBeanDefinition();
@@ -76,11 +82,13 @@ public class LoaderParser extends AbstractBeanDefinitionParser {
 	 *            the property to be set
 	 * @param def
 	 *            the default value to be used if the attribute is not specified
+	 * 
+	 * @return the set value
 	 */
-	protected void setValue(final BeanDefinitionBuilder builder,
+	protected Object setValue(final BeanDefinitionBuilder builder,
 			final Element element, final String attribute,
 			final String property, final Object def) {
-		setValue(builder, property, element.getAttribute(attribute), def);
+		return setValue(builder, property, element.getAttribute(attribute), def);
 	}
 
 	/**
@@ -97,21 +105,27 @@ public class LoaderParser extends AbstractBeanDefinitionParser {
 	 *            the property to be set
 	 * @param def
 	 *            the default value to be used if the attribute is not specified
+	 * 
+	 * @return the set value
 	 */
-	protected void setValue(final BeanDefinitionBuilder builder,
+	protected Object setValue(final BeanDefinitionBuilder builder,
 			final String property, final Object value, final Object def) {
 
 		if (value instanceof String) {
 			final String stringValue = (String) value;
 			if (StringUtils.hasText(stringValue)) {
 				builder.addPropertyValue(property, value);
+				return value;
 			} else {
 				builder.addPropertyValue(property, def);
+				return def;
 			}
 		} else if (value != null) {
 			builder.addPropertyValue(property, value);
+			return value;
 		} else {
 			builder.addPropertyValue(property, def);
+			return def;
 		}
 	}
 
