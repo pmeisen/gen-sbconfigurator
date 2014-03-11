@@ -9,6 +9,7 @@ import net.meisen.general.sbconfigurator.config.placeholder.TestDefaultXmlProper
 import net.meisen.general.sbconfigurator.config.placeholder.TestPlaceholderInSelectorSimple;
 import net.meisen.general.sbconfigurator.config.placeholder.TestSpringPropertyHolder;
 import net.meisen.general.sbconfigurator.config.transformer.TestDefaultXsltTransformer;
+import net.meisen.general.sbconfigurator.factories.TestBeanCreator;
 import net.meisen.general.sbconfigurator.factories.TestDatePropertyEditor;
 import net.meisen.general.sbconfigurator.factories.TestMergedCollection;
 import net.meisen.general.sbconfigurator.factories.TestMethodInvokingFactoryBean;
@@ -31,21 +32,24 @@ import org.junit.runners.Suite;
 		TestSpringPropertyHolder.class,
 
 		// Configuration parser and helper
-		TestStringParser.class, TestDefaultXsltTransformer.class,
+		TestStringParser.class,
+		TestDefaultXsltTransformer.class,
 		TestDefaultXmlPropertyReplacer.class,
 		TestDefaultConfiguration.class,
 		TestSamplePlugInLoader.class,
 
 		// Placeholder usage
 		TestPlaceholderInSelectorSimple.class,
-		
+
 		// Spring additional stuff
-		TestSpringHelper.class, TestSpringXMLAuthoring.class,
+		TestSpringHelper.class,
+		TestSpringXMLAuthoring.class,
 		TestSpringExclusions.class,
 
 		// Spring additional factory-beans
 		TestMergedCollection.class, TestMethodInvokingFactoryBean.class,
-		TestInstantiationOrder.class, TestDatePropertyEditor.class })
+		TestInstantiationOrder.class, TestDatePropertyEditor.class,
+		TestBeanCreator.class })
 public class AllTests {
 	// nothing more to do here
 }
