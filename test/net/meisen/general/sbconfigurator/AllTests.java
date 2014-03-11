@@ -6,6 +6,7 @@ import net.meisen.general.sbconfigurator.config.TestSamplePlugInLoader;
 import net.meisen.general.sbconfigurator.config.TestSpringExclusions;
 import net.meisen.general.sbconfigurator.config.order.TestInstantiationOrder;
 import net.meisen.general.sbconfigurator.config.placeholder.TestDefaultXmlPropertyReplacer;
+import net.meisen.general.sbconfigurator.config.placeholder.TestPlaceholderInSelectorSimple;
 import net.meisen.general.sbconfigurator.config.placeholder.TestSpringPropertyHolder;
 import net.meisen.general.sbconfigurator.config.transformer.TestDefaultXsltTransformer;
 import net.meisen.general.sbconfigurator.factories.TestDatePropertyEditor;
@@ -35,6 +36,9 @@ import org.junit.runners.Suite;
 		TestDefaultConfiguration.class,
 		TestSamplePlugInLoader.class,
 
+		// Placeholder usage
+		TestPlaceholderInSelectorSimple.class,
+		
 		// Spring additional stuff
 		TestSpringHelper.class, TestSpringXMLAuthoring.class,
 		TestSpringExclusions.class,

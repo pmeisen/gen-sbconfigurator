@@ -53,8 +53,8 @@ public class TestDefaultConfiguration {
 		// all the system properties should be available
 		for (final Object prop : System.getProperties().keySet()) {
 			assertEquals("Checking System property '" + prop.toString() + "'",
-					properties.getProperty(prop.toString()),
-					System.getProperty(prop.toString()));
+					System.getProperty(prop.toString()),
+					properties.getProperty(prop.toString()));
 		}
 	}
 

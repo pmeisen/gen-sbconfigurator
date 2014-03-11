@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
@@ -109,7 +110,7 @@ import org.springframework.util.CollectionUtils;
 public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(SpringPropertyHolder.class);
-	
+
 	private static final Constants constants = new Constants(
 			PropertyPlaceholderConfigurer.class);
 
@@ -145,7 +146,7 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * @return all the defined properties
 	 * 
 	 * @throws IOException
-	 *           if a file resource is defined but cannot be read or accessed
+	 *             if a file resource is defined but cannot be read or accessed
 	 */
 	public Properties getProperties() throws IOException {
 		return getProperties(true);
@@ -156,7 +157,7 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * used until the cache is reseted.
 	 * 
 	 * @throws IOException
-	 *           if the defined properties
+	 *             if the defined properties
 	 */
 	public void cacheProperties() throws IOException {
 		resetCache();
@@ -178,14 +179,14 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * Get all the properties defined by <code>this</code> holder.
 	 * 
 	 * @param inclOtherReplacer
-	 *          <code>true</code> to include the properties defined by other
-	 *          <code>SpringPropertyHolder</code> instances, otherwise
-	 *          <code>false</code>
+	 *            <code>true</code> to include the properties defined by other
+	 *            <code>SpringPropertyHolder</code> instances, otherwise
+	 *            <code>false</code>
 	 * 
 	 * @return the defined properties
 	 * 
 	 * @throws IOException
-	 *           if a file resource is defined but cannot be read or accessed
+	 *             if a file resource is defined but cannot be read or accessed
 	 */
 	public Properties getProperties(final boolean inclOtherReplacer)
 			throws IOException {
@@ -193,6 +194,9 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 		if (inclOtherReplacer && allDefinedProperties != null) {
 			return allDefinedProperties;
 		} else if (!inclOtherReplacer && allLocalProperties != null) {
+			return allLocalProperties;
+		} else if (!inclOtherReplacer) {
+			allLocalProperties = getLocalProperties();
 			return allLocalProperties;
 		} else {
 			final Properties localResult = getLocalProperties();
@@ -219,7 +223,7 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 			allLocalProperties = localResult;
 
 			// return all properties or just the local once
-			return inclOtherReplacer ? allDefinedProperties : allLocalProperties;
+			return allDefinedProperties;
 		}
 	}
 
@@ -230,7 +234,7 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * @return the locally defined properties
 	 * 
 	 * @throws IOException
-	 *           if a defined property-file cannot be read
+	 *             if a defined property-file cannot be read
 	 */
 	protected Properties getLocalProperties() throws IOException {
 
@@ -240,7 +244,8 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 		// fallback means use them if no others are there, therefore add them
 		// first
 		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
-			CollectionUtils.mergePropertiesIntoMap(System.getProperties(), result);
+			CollectionUtils.mergePropertiesIntoMap(System.getProperties(),
+					result);
 		}
 
 		// now override all the system once (if there are any) with the merged
@@ -249,7 +254,8 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 
 		// if system properties should override to it now
 		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
-			CollectionUtils.mergePropertiesIntoMap(System.getProperties(), result);
+			CollectionUtils.mergePropertiesIntoMap(System.getProperties(),
+					result);
 		}
 
 		return result;
@@ -258,25 +264,22 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	/**
 	 * Gets all the properties of the other defined
 	 * <code>SpringPropertyHolder</code> instances, whereby the definition-order
-	 * matters concerning the overriding of properties, i.e. the latter definition
-	 * overrides the earlier (if the same property is defined several times).
+	 * matters concerning the overriding of properties, i.e. the latter
+	 * definition overrides the earlier (if the same property is defined several
+	 * times).
 	 * 
 	 * @return the properties defined by the other
 	 *         <code>SpringPropertyHolder</code> instances
 	 * 
 	 * @throws IOException
-	 *           if a file resource is defined but cannot be read or accessed
+	 *             if a file resource is defined but cannot be read or accessed
 	 */
 	protected Properties getOtherProperties() throws IOException {
 		final Properties result = new Properties();
 
 		for (final SpringPropertyHolder propertyHolder : propertyHolders) {
-			final int oldSystemPropertyMode = propertyHolder
-					.getSystemPropertiesMode();
-			propertyHolder.setSystemPropertiesMode(SYSTEM_PROPERTIES_MODE_NEVER);
 			CollectionUtils.mergePropertiesIntoMap(
-					propertyHolder.getLocalProperties(), result);
-			propertyHolder.setSystemPropertiesMode(oldSystemPropertyMode);
+					propertyHolder.getProperties(false), result);
 		}
 
 		return result;
@@ -314,11 +317,11 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	}
 
 	/**
-	 * Defines one selector for <code>this</code> instance. All other pre-defined
-	 * selectors are removed.
+	 * Defines one selector for <code>this</code> instance. All other
+	 * pre-defined selectors are removed.
 	 * 
 	 * @param locationSelector
-	 *          the selector to be used
+	 *            the selector to be used
 	 */
 	public void setLocationSelector(final String locationSelector) {
 		setLocationSelectors(new String[] { locationSelector });
@@ -329,7 +332,7 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * pre-defined selectors are removed.
 	 * 
 	 * @param locationSelectors
-	 *          the array of selectors to use
+	 *            the array of selectors to use
 	 */
 	public void setLocationSelectors(final String[] locationSelectors) {
 
@@ -357,8 +360,9 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 					.getResources(locationSelector, true, false);
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Found '" + resInfos.size()
-						+ "' properties to be loaded by the selector: '" + locationSelector
-						+ "'" + (resInfos.size() > 0 ? " (" + resInfos + ")" : ""));
+						+ "' properties to be loaded by the selector: '"
+						+ locationSelector + "'"
+						+ (resInfos.size() > 0 ? " (" + resInfos + ")" : ""));
 			}
 
 			// get all the found resource infos
@@ -380,7 +384,8 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 
 				// transform the stream to a byte-array
 				try {
-					final byte[] byteArray = Streams.copyStreamToByteArray(resIo);
+					final byte[] byteArray = Streams
+							.copyStreamToByteArray(resIo);
 					locations.add(new ByteArrayResource(byteArray));
 				} catch (final IOException e) {
 					if (LOG.isWarnEnabled()) {
@@ -397,7 +402,8 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 
 	/**
 	 * Defines if the properties of other <code>SpringPropertyHolder</code>
-	 * instances override the properties of this one (if defined to load at all).
+	 * instances override the properties of this one (if defined to load at
+	 * all).
 	 * 
 	 * @return <code>true</code> if the properties of the
 	 *         <code>SpringPropertyHolder</code> instances override the once
@@ -412,11 +418,30 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * instances override the properties of this one.
 	 * 
 	 * @param otherHolderOverride
-	 *          <code>true</code> if the properties of the
-	 *          <code>SpringPropertyHolder</code> instances should override the
-	 *          once defined by <code>this</code>, otherwise <code>false</code>
+	 *            <code>true</code> if the properties of the
+	 *            <code>SpringPropertyHolder</code> instances should override
+	 *            the once defined by <code>this</code>, otherwise
+	 *            <code>false</code>
 	 */
 	public void setOtherHolderOverride(boolean otherHolderOverride) {
 		this.otherHolderOverride = otherHolderOverride;
+	}
+
+	/**
+	 * Gets the value specified for {@code localOverride}.
+	 * 
+	 * @return the value specified for {@code localOverride}
+	 */
+	public boolean isLocalOverride() {
+		return localOverride;
+	}
+
+	/**
+	 * Gets all the other {@code PropertyHolder} instances used by {@code this}.
+	 * 
+	 * @return the other {@code PropertyHolder} instances
+	 */
+	public List<SpringPropertyHolder> getOtherPropertyHolder() {
+		return Collections.unmodifiableList(propertyHolders);
 	}
 }

@@ -31,6 +31,7 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 
 	private final IConfiguration configuration;
 	private final Map<String, String> properties = new HashMap<String, String>();
+	private final Map<String, String> oldProperties = new HashMap<String, String>();
 
 	/**
 	 * The default constructor for the runner, which specifies the
@@ -74,7 +75,6 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 		}
 
 		// set the properties
-		final Map<String, String> oldProperties = new HashMap<String, String>();
 		for (final Entry<String, String> entry : properties.entrySet()) {
 			final String key = entry.getKey();
 			final String value = entry.getValue();
@@ -94,18 +94,6 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 		final ConfigurationCoreSettings settings = ConfigurationCoreSettings
 				.loadCoreSettings(contextFile, contextClazz);
 		configuration = settings.getConfiguration();
-
-		// now we should reset the properties
-		for (final Entry<String, String> entry : oldProperties.entrySet()) {
-			final String key = entry.getKey();
-			final String value = entry.getValue();
-
-			if (value == null) {
-				System.clearProperty(key);
-			} else {
-				System.setProperty(key, value);
-			}
-		}
 	}
 
 	@Override
@@ -131,6 +119,19 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 					throw t;
 				} finally {
 					configuration.release();
+
+					// now we should reset the properties
+					for (final Entry<String, String> entry : oldProperties
+							.entrySet()) {
+						final String key = entry.getKey();
+						final String value = entry.getValue();
+
+						if (value == null) {
+							System.clearProperty(key);
+						} else {
+							System.setProperty(key, value);
+						}
+					}
 				}
 			}
 		};

@@ -6,7 +6,10 @@
 
   <!-- get the properties used for the whole configuration -->
   <bean id="corePropertyHolder" class="net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder" init-method="cacheProperties">
+    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_FALLBACK" />
     <property name="locationSelector" value="sbconfigurator.properties" />
+    <property name="localOverride" value="false" />
+    <property name="otherHolderOverride" value="true" />
   </bean>
 
   <!-- get the general settings -->
