@@ -9,6 +9,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
 
+/**
+ * Factory to create beans.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 		BeanClassLoaderAware {
 
@@ -36,10 +42,21 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 		this.beanClassLoader = classLoader;
 	}
 
+	/**
+	 * Gets the arguments used to construct the instance.
+	 * 
+	 * @return the arguments used to construct the instance
+	 */
 	public Object[] getConstArgs() {
 		return constArgs;
 	}
 
+	/**
+	 * Sets the arguments used to construct the instance.
+	 * 
+	 * @param constArgs
+	 *            the arguments used to construct the instance
+	 */
 	public void setConstArgs(final Object[] constArgs) {
 		this.constArgs = constArgs;
 	}
@@ -64,6 +81,14 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 		}
 	}
 
+	/**
+	 * Creates an instance of the bean.
+	 * 
+	 * @return the created instance
+	 * 
+	 * @throws Exception
+	 *             if the instance cannot be created
+	 */
 	protected Object createInstance() throws Exception {
 		final Constructor<?> constructor = findMatchingConstructor();
 		return constructor.newInstance(constArgs);
