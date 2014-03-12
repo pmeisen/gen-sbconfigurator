@@ -199,7 +199,8 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 			allLocalProperties = getLocalProperties();
 			return allLocalProperties;
 		} else {
-			final Properties localResult = getLocalProperties();
+			final Properties localResult = allLocalProperties == null ? getLocalProperties()
+					: allLocalProperties;
 			final Properties otherResult = getOtherProperties();
 
 			// the result which will be set
