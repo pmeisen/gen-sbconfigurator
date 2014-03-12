@@ -15,6 +15,7 @@ import net.meisen.general.sbconfigurator.factories.TestMergedCollection;
 import net.meisen.general.sbconfigurator.factories.TestMethodInvokingFactoryBean;
 import net.meisen.general.sbconfigurator.helper.TestSpringHelper;
 import net.meisen.general.sbconfigurator.helper.TestStringParser;
+import net.meisen.general.sbconfigurator.runners.TestJUnitConfigurationRunner;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -27,7 +28,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-
+	
 		// Spring properties
 		TestSpringPropertyHolder.class,
 
@@ -38,6 +39,9 @@ import org.junit.runners.Suite;
 		TestDefaultConfiguration.class,
 		TestSamplePlugInLoader.class,
 
+		// Test the test helper
+		TestJUnitConfigurationRunner.TestSuite.class, 
+		
 		// Placeholder usage
 		TestPlaceholderInSelectorSimple.class,
 
