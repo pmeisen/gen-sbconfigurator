@@ -91,19 +91,23 @@ public class JUnitConfigurationRunner extends BlockJUnit4ClassRunner {
 		}
 
 		// now we need the ConfigurationCoreSettings
-		final ConfigurationCoreSettings settings = ConfigurationCoreSettings
-				.loadCoreSettings(contextFile, contextClazz);
-		configuration = settings.getConfiguration();
+		try {
+			final ConfigurationCoreSettings settings = ConfigurationCoreSettings
+					.loadCoreSettings(contextFile, contextClazz);
+			configuration = settings.getConfiguration();
+		} catch (final RuntimeException e) {
+			throw e;
+		} finally {
+			// now we should reset the properties
+			for (final Entry<String, String> entry : oldProperties.entrySet()) {
+				final String key = entry.getKey();
+				final String value = entry.getValue();
 
-		// now we should reset the properties
-		for (final Entry<String, String> entry : oldProperties.entrySet()) {
-			final String key = entry.getKey();
-			final String value = entry.getValue();
-
-			if (value == null) {
-				System.clearProperty(key);
-			} else {
-				System.setProperty(key, value);
+				if (value == null) {
+					System.clearProperty(key);
+				} else {
+					System.setProperty(key, value);
+				}
 			}
 		}
 	}
