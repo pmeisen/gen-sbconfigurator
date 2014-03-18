@@ -1,7 +1,9 @@
 package net.meisen.general.sbconfigurator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.helper.SpringHelper;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertiesLoaderSupport;
 
 /**
  * The core settings of the configuration should be loaded when the application
@@ -78,7 +81,7 @@ public class ConfigurationCoreSettings {
 	 */
 	public static ConfigurationCoreSettings loadCoreSettings(
 			final String coreSettingsContext, final Class<?> clazz) {
-		return loadCoreSettings(coreSettingsContext, clazz, null);
+		return loadCoreSettings(coreSettingsContext, clazz, null, null);
 	}
 
 	/**
@@ -92,6 +95,9 @@ public class ConfigurationCoreSettings {
 	 * @param clazz
 	 *            using the <code>coreSettingsContext</code> of the specified
 	 *            class
+	 * @param properties
+	 *            properties to be used within the configuration, can be
+	 *            <code>null</code>
 	 * @param injections
 	 *            additional injections to be added, can be <code>null</code>
 	 * 
@@ -99,6 +105,7 @@ public class ConfigurationCoreSettings {
 	 */
 	public static ConfigurationCoreSettings loadCoreSettings(
 			final String coreSettingsContext, final Class<?> clazz,
+			final List<PropertiesLoaderSupport> properties,
 			final Map<String, Object> injections) {
 
 		final String fCoreSettingsContext = coreSettingsContext == null ? ConfigurationCoreSettings.coreSettingsContext
@@ -110,6 +117,12 @@ public class ConfigurationCoreSettings {
 		// core-system
 		final DefaultListableBeanFactory factory = SpringHelper
 				.createBeanFactory(true, true);
+		if (properties != null) {
+			for (final PropertiesLoaderSupport p : properties) {
+				factory.registerSingleton("PROPERTIES_"
+						+ UUID.randomUUID().toString(), p);
+			}
+		}
 
 		// create the reader
 		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
@@ -135,7 +148,7 @@ public class ConfigurationCoreSettings {
 		} else {
 			settings.getConfiguration().loadConfiguration(injections);
 		}
-		
+
 		return settings;
 	}
 

@@ -2,6 +2,7 @@ package net.meisen.general.sbconfigurator.config.placeholder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -10,6 +11,7 @@ import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 
 import org.junit.Test;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.core.io.support.PropertiesLoaderSupport;
 
 /**
  * Tests the usage of a placeholder within the selector
@@ -35,8 +37,10 @@ public class TestPlaceholderInSelectorSimple extends
 		assertEquals(1, corePropertyHolder.getOtherPropertyHolder().size());
 
 		// get the one defined in the file
-		final SpringPropertyHolder innerHolder = corePropertyHolder
+		final PropertiesLoaderSupport propertyHolder = corePropertyHolder
 				.getOtherPropertyHolder().get(0);
+		assertTrue(propertyHolder instanceof SpringPropertyHolder);
+		final SpringPropertyHolder innerHolder = (SpringPropertyHolder) propertyHolder;
 
 		assertEquals(false, innerHolder.isOtherHolderOverride());
 		assertEquals(false, innerHolder.isLocalOverride());

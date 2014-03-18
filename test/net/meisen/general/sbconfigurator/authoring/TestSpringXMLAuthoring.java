@@ -5,11 +5,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
+import java.util.Properties;
 
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.authoring.mock.RecursiveConfigurationWiringInner;
 import net.meisen.general.sbconfigurator.authoring.mock.RecursiveConfigurationWiringOuter;
 import net.meisen.general.sbconfigurator.authoring.mock.SimpleConfigurationWiring;
+import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.test.sampleplugin.SamplePlugIn;
 import net.meisen.general.sbconfigurator.test.sampleplugin.SamplePojo;
 
@@ -135,5 +137,23 @@ public class TestSpringXMLAuthoring {
 
 		// cleanUp
 		context.close();
+	}
+
+	/**
+	 * Tests the injection of properties.
+	 */
+	@Test
+	public void testPropertiesInjection() {
+		final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				"net/meisen/general/sbconfigurator/authoring/sbconfigurator-placeholder-authoring-test.xml");
+
+		// get the configuration
+		final DefaultConfiguration config = (DefaultConfiguration) context
+				.getBean("testConfig");
+		assertNotNull(config);
+
+		final Properties p = config.getProperties();
+		assertTrue(p.containsKey("testValue1"));
+		assertTrue(p.containsKey("testValue2"));
 	}
 }

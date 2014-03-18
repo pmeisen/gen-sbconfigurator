@@ -9,9 +9,11 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.io.support.PropertiesLoaderSupport;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
@@ -28,8 +30,10 @@ public class ConfigParser extends AbstractBeanDefinitionParser {
 	private final static String XML_ATTRIBUTE_CONTEXTCLASS = "contextClass";
 	private final static String XML_ATTRIBUTE_INNERID = "innerId";
 	private final static String XML_ATTRIBUTE_OUTERID = "outerId";
+	private final static String XML_ATTRIBUTE_LOADID = "loadFromId";
 	private final static String XML_ELEMENT_MODULE = "module";
 	private final static String XML_ELEMENT_INJECT = "inject";
+	private final static String XML_ELEMENT_PROPERTIES = "properties";
 
 	@Override
 	protected AbstractBeanDefinition parseInternal(final Element element,
@@ -54,6 +58,8 @@ public class ConfigParser extends AbstractBeanDefinitionParser {
 		}
 		builder.addPropertyValue("injections",
 				createInjectionsMap(element, parserContext));
+		builder.addPropertyValue("properties",
+				createPropertiesList(element, parserContext));
 
 		// create the final beanDefinition
 		final AbstractBeanDefinition definition = builder.getBeanDefinition();
@@ -125,6 +131,40 @@ public class ConfigParser extends AbstractBeanDefinitionParser {
 		}
 
 		return map;
+	}
+
+	/**
+	 * Creates the list of the properties to be used within the configuration
+	 * from the outer world.
+	 * 
+	 * @param element
+	 *            the parent element which contains all the properties
+	 * @param parserContext
+	 *            the <code>ParserContext</code>
+	 * 
+	 * @return the <code>List</code> containing the beans with properties
+	 */
+	protected List<?> createPropertiesList(final Element element,
+			final ParserContext parserContext) {
+		final List<Element> propEls = DomUtils.getChildElementsByTagName(
+				element, XML_ELEMENT_PROPERTIES);
+
+		// create the list
+		final ManagedList<Object> list = new ManagedList<Object>(propEls.size());
+		list.setSource(parserContext.extractSource(element));
+		list.setElementTypeName(PropertiesLoaderSupport.class.getName());
+		list.setMergeEnabled(false);
+
+		for (final Element propEl : propEls) {
+			final String loadId = propEl.getAttribute(XML_ATTRIBUTE_LOADID);
+
+			final RuntimeBeanReference ref = new RuntimeBeanReference(loadId);
+			ref.setSource(parserContext.extractSource(propEl));
+
+			list.add(ref);
+		}
+
+		return list;
 	}
 
 	/**

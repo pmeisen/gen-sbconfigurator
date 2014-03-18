@@ -21,6 +21,8 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.Constants;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertiesAccess;
+import org.springframework.core.io.support.PropertiesLoaderSupport;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -123,7 +125,7 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	private Properties allLocalProperties = null;
 
 	@Autowired(required = false)
-	List<SpringPropertyHolder> propertyHolders = new ArrayList<SpringPropertyHolder>();
+	private List<PropertiesLoaderSupport> propertyHolders = new ArrayList<PropertiesLoaderSupport>();
 
 	/**
 	 * Default constructor, which sets the
@@ -274,13 +276,23 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * 
 	 * @throws IOException
 	 *             if a file resource is defined but cannot be read or accessed
-	 */
+	 */	
 	protected Properties getOtherProperties() throws IOException {
 		final Properties result = new Properties();
 
-		for (final SpringPropertyHolder propertyHolder : propertyHolders) {
-			CollectionUtils.mergePropertiesIntoMap(
-					propertyHolder.getProperties(false), result);
+		System.out.println("--------->" + propertyHolders.size());
+		 
+		for (final PropertiesLoaderSupport propertyHolder : propertyHolders) {
+			final Properties properties;
+
+			if (propertyHolder instanceof SpringPropertyHolder) {
+				final SpringPropertyHolder sph = ((SpringPropertyHolder) propertyHolder);
+				properties = sph.getProperties(false);
+			} else {
+				properties = PropertiesAccess.getProperties(propertyHolder);
+			}
+
+			CollectionUtils.mergePropertiesIntoMap(properties, result);
 		}
 
 		return result;
@@ -442,7 +454,7 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * 
 	 * @return the other {@code PropertyHolder} instances
 	 */
-	public List<SpringPropertyHolder> getOtherPropertyHolder() {
+	public List<PropertiesLoaderSupport> getOtherPropertyHolder() {
 		return Collections.unmodifiableList(propertyHolders);
 	}
 }

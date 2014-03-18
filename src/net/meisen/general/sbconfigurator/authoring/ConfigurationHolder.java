@@ -1,11 +1,13 @@
 package net.meisen.general.sbconfigurator.authoring;
 
+import java.util.List;
 import java.util.Map;
 
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.core.io.support.PropertiesLoaderSupport;
 
 /**
  * {@link FactoryBean} which is used to create the {@link IConfiguration}.
@@ -20,6 +22,7 @@ public class ConfigurationHolder implements FactoryBean<IConfiguration> {
 	private String configXml = null;
 
 	private Map<String, Object> injections = null;
+	private List<PropertiesLoaderSupport> properties = null;
 
 	/**
 	 * Helper method to get the {@link IConfiguration} wrapped by this factory.
@@ -29,7 +32,8 @@ public class ConfigurationHolder implements FactoryBean<IConfiguration> {
 	public IConfiguration getConfiguration() {
 		if (c == null) {
 			final ConfigurationCoreSettings c = ConfigurationCoreSettings
-					.loadCoreSettings(configXml, contextClass, getInjections());
+					.loadCoreSettings(configXml, contextClass, getProperties(),
+							getInjections());
 			this.c = c.getConfiguration();
 		}
 
@@ -106,5 +110,29 @@ public class ConfigurationHolder implements FactoryBean<IConfiguration> {
 	 */
 	public void setInjections(final Map<String, Object> injections) {
 		this.injections = injections;
+	}
+
+	/**
+	 * Get all the {@code PropertiesLoader} defined for the
+	 * {@code ConfigurationHolder} from outside.
+	 * 
+	 * @return the list with all the {@code PropertiesLoader}
+	 * 
+	 * @see PropertiesLoaderSupport
+	 */
+	public List<PropertiesLoaderSupport> getProperties() {
+		return properties;
+	}
+
+	/**
+	 * Sets the list with teh {@code PropertiesLoader} defined from outside.
+	 * 
+	 * @param properties
+	 *            the list with all the {@code PropertiesLoader}
+	 * 
+	 * @see PropertiesLoaderSupport
+	 */
+	public void setProperties(final List<PropertiesLoaderSupport> properties) {
+		this.properties = properties;
 	}
 }
