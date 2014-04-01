@@ -279,8 +279,6 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 */	
 	protected Properties getOtherProperties() throws IOException {
 		final Properties result = new Properties();
-
-		System.out.println("--------->" + propertyHolders.size());
 		 
 		for (final PropertiesLoaderSupport propertyHolder : propertyHolders) {
 			final Properties properties;
