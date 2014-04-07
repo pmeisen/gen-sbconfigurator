@@ -10,6 +10,7 @@ import net.meisen.general.sbconfigurator.config.placeholder.TestPlaceholderInSel
 import net.meisen.general.sbconfigurator.config.placeholder.TestSpringPropertyHolder;
 import net.meisen.general.sbconfigurator.config.transformer.TestDefaultXsltTransformer;
 import net.meisen.general.sbconfigurator.factories.TestBeanCreator;
+import net.meisen.general.sbconfigurator.factories.TestBeanReference;
 import net.meisen.general.sbconfigurator.factories.TestDatePropertyEditor;
 import net.meisen.general.sbconfigurator.factories.TestMergedCollection;
 import net.meisen.general.sbconfigurator.factories.TestMethodInvokingFactoryBean;
@@ -28,7 +29,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	
+
 		// Spring properties
 		TestSpringPropertyHolder.class,
 
@@ -40,8 +41,8 @@ import org.junit.runners.Suite;
 		TestSamplePlugInLoader.class,
 
 		// Test the test helper
-		TestJUnitConfigurationRunner.TestSuite.class, 
-		
+		TestJUnitConfigurationRunner.TestSuite.class,
+
 		// Placeholder usage
 		TestPlaceholderInSelectorSimple.class,
 
@@ -53,7 +54,7 @@ import org.junit.runners.Suite;
 		// Spring additional factory-beans
 		TestMergedCollection.class, TestMethodInvokingFactoryBean.class,
 		TestInstantiationOrder.class, TestDatePropertyEditor.class,
-		TestBeanCreator.class })
+		TestBeanCreator.class, TestBeanReference.class })
 public class AllTests {
 	// nothing more to do here
 }

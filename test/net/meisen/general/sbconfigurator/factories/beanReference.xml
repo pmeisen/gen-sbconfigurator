@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+  
+  <bean id="simpleInteger" class="java.lang.Integer">
+    <constructor-arg value="5000" />
+  </bean>
+  
+  <bean id="beanReference" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+    <property name="bean">
+      <bean class="java.util.Date" />
+    </property>
+  </bean>
+  
+  <bean id="beanSynonymReference" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+    <property name="bean" ref="simpleInteger" />
+  </bean>
+  
+  <bean id="beanByValueReference" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+    <property name="bean" value="Just a Simple Value" />
+  </bean>
+  
+  <bean id="nullBeanWithoutType" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+  	<property name="bean"><null /></property>
+  </bean>
+  
+  <bean id="nullBeanWithType" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+    <property name="class" value="java.lang.Long" />
+  </bean>
+</beans>
