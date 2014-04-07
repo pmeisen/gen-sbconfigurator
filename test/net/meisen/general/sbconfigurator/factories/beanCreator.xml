@@ -44,6 +44,7 @@
         <entry key="stringValue" value="7000" />
         <entry key="anyObject"><bean class="java.lang.Object" /></entry>
         <entry key="dateValue" value-ref="beanDate" />
+        <entry key="something" value="NotNeeded" />
       </map>
     </property>
   </bean>

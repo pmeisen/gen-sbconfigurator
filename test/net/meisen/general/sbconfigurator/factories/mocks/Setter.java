@@ -14,6 +14,7 @@ public class Setter {
 	private Object anyObject = null;
 	private String stringValue = null;
 	private Date dateValue = null;
+	private Boolean calledSomething = null;
 
 	/**
 	 * Get an integer number.
@@ -106,7 +107,29 @@ public class Setter {
 	 * @param anyObject
 	 *            the object to be set
 	 */
-	public void setAnyObject(Object anyObject) {
+	public void setAnyObject(final Object anyObject) {
 		this.anyObject = anyObject;
+	}
+
+	/**
+	 * Sets the flag that something was called to {@code true}.
+	 * 
+	 * @param ignored
+	 *            a value which is ignored, just the flag that something was
+	 *            called is set to {@code true}
+	 */
+	public void setSomething(final Object ignored) {
+		this.calledSomething = true;
+	}
+
+	/**
+	 * Gets the value if something was called, returns {@code null} if not,
+	 * otherwise {@code true}.
+	 * 
+	 * @return the value if something was called, returns {@code null} if not,
+	 *         otherwise {@code true}
+	 */
+	public Boolean isSomethingCalled() {
+		return calledSomething;
 	}
 }

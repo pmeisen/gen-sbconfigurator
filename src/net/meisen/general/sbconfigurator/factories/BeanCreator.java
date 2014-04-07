@@ -3,6 +3,7 @@ package net.meisen.general.sbconfigurator.factories;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
-import org.springframework.validation.DataBinder;
 
 /**
  * Factory to create beans.
@@ -100,7 +100,7 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 
 		// check if we have to apply properties
 		if (properties != null && properties.size() > 0) {
-			new DirectFieldAccessor(object).setPropertyValues(values);
+			new BeanWrapperImpl(object).setPropertyValues(values);
 		}
 
 		return object;
@@ -193,13 +193,11 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 	}
 
 	/**
-	 * Defines the properties to be set using a {@code DataBinder} on the
+	 * Defines the properties to be set using a {@code BeanWrapperImpl} on the
 	 * created object.
 	 * 
 	 * @param properties
 	 *            the properties to be set
-	 * 
-	 * @see DataBinder
 	 */
 	public void setProperties(final Map<String, Object> properties) {
 		this.properties = properties;

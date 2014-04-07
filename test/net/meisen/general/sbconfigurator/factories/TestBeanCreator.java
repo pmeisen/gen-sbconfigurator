@@ -85,10 +85,12 @@ public class TestBeanCreator {
 		assertNotNull(s.getLongNumber());
 		assertNotNull(s.getStringValue());
 		assertNotNull(s.getAnyObject());
+		assertNotNull(s.isSomethingCalled());
 		assertEquals(new Integer(1), s.getIntNumber());
 		assertEquals(new Long(1000), s.getLongNumber());
 		assertEquals("7000", s.getStringValue());
 		assertTrue(s.getDateValue() instanceof Date);
 		assertTrue(s.getAnyObject() instanceof Object);
+		assertTrue(s.isSomethingCalled());
 	}
 }
