@@ -3,6 +3,7 @@ package net.meisen.general.sbconfigurator.factories;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -31,6 +32,7 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 	// objects to be created
 	private Class<?> clazz = null;
 	private Object created = null;
+	private MutablePropertyValues values = null;
 
 	/**
 	 * Gets the classloader used to create an instance of the bean.
@@ -98,10 +100,7 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 
 		// check if we have to apply properties
 		if (properties != null && properties.size() > 0) {
-			final DataBinder binder = new DataBinder(object);
-			final MutablePropertyValues values = new MutablePropertyValues(
-					properties);
-			binder.bind(values);
+			new DirectFieldAccessor(object).setPropertyValues(values);
 		}
 
 		return object;
@@ -132,6 +131,7 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		this.clazz = ClassUtils.forName(beanClass, this.beanClassLoader);
+		this.values = new MutablePropertyValues(properties);
 	}
 
 	/**
