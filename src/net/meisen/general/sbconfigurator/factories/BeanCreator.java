@@ -1,13 +1,16 @@
 package net.meisen.general.sbconfigurator.factories;
 
 import java.lang.reflect.Constructor;
+import java.util.Map;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
+import org.springframework.validation.DataBinder;
 
 /**
  * Factory to create beans.
@@ -23,6 +26,7 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 	private boolean singleton = true;
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 	private Object[] constArgs = new Object[0];
+	private Map<String, Object> properties;
 
 	// objects to be created
 	private Class<?> clazz = null;
@@ -76,7 +80,6 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 
 			return created;
 		} else {
-
 			return createInstance();
 		}
 	}
@@ -91,7 +94,17 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 	 */
 	protected Object createInstance() throws Exception {
 		final Constructor<?> constructor = findMatchingConstructor();
-		return constructor.newInstance(constArgs);
+		final Object object = constructor.newInstance(constArgs);
+
+		// check if we have to apply properties
+		if (properties != null && properties.size() > 0) {
+			final DataBinder binder = new DataBinder(object);
+			final MutablePropertyValues values = new MutablePropertyValues(
+					properties);
+			binder.bind(values);
+		}
+
+		return object;
 	}
 
 	@Override
@@ -168,5 +181,27 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 		}
 
 		return matchingConstructor;
+	}
+
+	/**
+	 * Gets the defined properties.
+	 * 
+	 * @return the defined properties
+	 */
+	public Map<String, Object> getProperties() {
+		return properties;
+	}
+
+	/**
+	 * Defines the properties to be set using a {@code DataBinder} on the
+	 * created object.
+	 * 
+	 * @param properties
+	 *            the properties to be set
+	 * 
+	 * @see DataBinder
+	 */
+	public void setProperties(final Map<String, Object> properties) {
+		this.properties = properties;
 	}
 }

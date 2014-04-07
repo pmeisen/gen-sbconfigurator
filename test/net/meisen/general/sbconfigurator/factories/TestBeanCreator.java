@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
+import net.meisen.general.sbconfigurator.factories.mocks.Setter;
 import net.meisen.general.sbconfigurator.helper.SpringHelper;
 
 import org.junit.Test;
@@ -50,8 +51,7 @@ public class TestBeanCreator {
 	 */
 	@Test
 	public void testSingletons() {
-		final DefaultListableBeanFactory f = f(pre
-				+ "beanCreatorSingletons.xml");
+		final DefaultListableBeanFactory f = f(pre + "beanCreator.xml");
 
 		Object o;
 
@@ -74,5 +74,21 @@ public class TestBeanCreator {
 		assertTrue(o instanceof Integer);
 		assertEquals(5, o);
 		assertTrue(o == f.getBean("beanClassByStringCreator"));
+
+		// test multiple constructor args
+		o = f.getBean("beanClassWithProperties");
+		assertNotNull(o);
+		assertTrue(o instanceof Setter);
+		final Setter s = (Setter) o;
+		assertNotNull(s.getDateValue());
+		assertNotNull(s.getIntNumber());
+		assertNotNull(s.getLongNumber());
+		assertNotNull(s.getStringValue());
+		assertNotNull(s.getAnyObject());
+		assertEquals(new Integer(1), s.getIntNumber());
+		assertEquals(new Long(1000), s.getLongNumber());
+		assertEquals("7000", s.getStringValue());
+		assertTrue(s.getDateValue() instanceof Date);
+		assertTrue(s.getAnyObject() instanceof Object);
 	}
 }
