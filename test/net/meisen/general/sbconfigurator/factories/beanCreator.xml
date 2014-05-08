@@ -48,4 +48,10 @@
       </map>
     </property>
   </bean>
+  
+  <!-- create an instance which is autowired -->
+  <bean id="Date" class="java.util.Date" />
+  <bean id="beanAutowiredInstance" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+    <property name="beanClass" value="net.meisen.general.sbconfigurator.factories.mocks.AutowiredInstance" />
+  </bean>
 </beans>

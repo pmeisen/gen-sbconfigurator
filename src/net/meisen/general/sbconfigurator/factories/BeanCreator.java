@@ -6,9 +6,13 @@ import java.util.Map;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
 
@@ -19,7 +23,9 @@ import org.springframework.util.MethodInvoker;
  * 
  */
 public class BeanCreator implements FactoryBean<Object>, InitializingBean,
-		BeanClassLoaderAware {
+		BeanClassLoaderAware, BeanFactoryAware, DisposableBean {
+
+	private BeanFactory beanFactory;
 
 	// properties to be set via the configuration
 	private String beanClass = null;
@@ -100,6 +106,12 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 		// check if we have to apply properties
 		if (properties != null && properties.size() > 0) {
 			new BeanWrapperImpl(object).setPropertyValues(values);
+		}
+
+		// auto-wire everything if the factory supports that
+		if (beanFactory instanceof AutowireCapableBeanFactory) {
+			((AutowireCapableBeanFactory) beanFactory).autowireBeanProperties(
+					object, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 		}
 
 		return object;
@@ -200,5 +212,17 @@ public class BeanCreator implements FactoryBean<Object>, InitializingBean,
 	 */
 	public void setProperties(final Map<String, Object> properties) {
 		this.properties = properties;
+	}
+
+	@Override
+	public void setBeanFactory(final BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		if (isSingleton()) {
+			this.created = null;
+		}
 	}
 }

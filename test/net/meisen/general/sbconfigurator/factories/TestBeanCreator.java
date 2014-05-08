@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
+import net.meisen.general.sbconfigurator.factories.mocks.AutowiredInstance;
 import net.meisen.general.sbconfigurator.factories.mocks.Setter;
 import net.meisen.general.sbconfigurator.helper.SpringHelper;
 
@@ -92,5 +93,11 @@ public class TestBeanCreator {
 		assertTrue(s.getDateValue() instanceof Date);
 		assertTrue(s.getAnyObject() instanceof Object);
 		assertTrue(s.isSomethingCalled());
+
+		// test auto-wiring
+		o = f.getBean("beanAutowiredInstance");
+		assertNotNull(o);
+		assertTrue(o instanceof AutowiredInstance);
+		assertNotNull(((AutowiredInstance) o).getDate());
 	}
 }
