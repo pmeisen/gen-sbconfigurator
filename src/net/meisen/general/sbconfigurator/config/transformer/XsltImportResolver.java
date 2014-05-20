@@ -45,8 +45,8 @@ public abstract class XsltImportResolver implements IXsltUriResolver {
 	 * Collection containing all the XSLT on the class-path. The first created
 	 * instance of a {@code XsltImportResolver} will refresh the collection.
 	 */
-	protected static Collection<ResourceInfo> ALL_XSLT = Resource.getResources(
-			Pattern.compile("(?i).*\\.xslt"), true, false);
+	protected static final Collection<ResourceInfo> ALL_XSLT = Resource
+			.getResources(Pattern.compile("(?i).*\\.xslt"), true, false);
 	private boolean xsltCachingEnabled = true;
 
 	@Override
