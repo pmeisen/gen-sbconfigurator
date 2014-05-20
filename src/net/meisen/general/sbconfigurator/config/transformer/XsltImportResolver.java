@@ -41,16 +41,29 @@ import net.meisen.general.genmisc.types.Files;
  */
 public abstract class XsltImportResolver implements IXsltUriResolver {
 
+	/**
+	 * Collection containing all the XSLT on the class-path. The first created
+	 * instance of a {@code XsltImportResolver} will refresh the collection.
+	 */
+	protected static Collection<ResourceInfo> ALL_XSLT = Resource.getResources(
+			Pattern.compile("(?i).*\\.xslt"), true, false);
+	private boolean xsltCachingEnabled = true;
+
 	@Override
 	public Source resolve(final URI uri, final String path) {
 
-		// get all the XSLTs available on the classpath
-		final Collection<ResourceInfo> xsltResInfos = Resource.getResources(
-				Pattern.compile("(?i).*\\.xslt"), true, false);
+		// make sure we have the xslt loaded
+		final Collection<ResourceInfo> allXslt;
+		if (isXsltCachingEnabled()) {
+			allXslt = ALL_XSLT;
+		} else {
+			allXslt = Resource.getResources(Pattern.compile("(?i).*\\.xslt"),
+					true, false);
+		}
 
 		// get the valid XSLTs
 		final Set<String> xsltIncludes = new HashSet<String>();
-		for (final ResourceInfo resInfo : xsltResInfos) {
+		for (final ResourceInfo resInfo : allXslt) {
 
 			// transform the ResourceInfo to a Class
 			final String clazz = transformToClass(resInfo);
@@ -181,5 +194,24 @@ public abstract class XsltImportResolver implements IXsltUriResolver {
 		} catch (final ClassNotFoundException e) {
 			return false;
 		}
+	}
+
+	/**
+	 * Checks if the caching of xslt-files is enabled.
+	 * 
+	 * @return {@code true} if caching is enabled, otherwise {@code false}
+	 */
+	public boolean isXsltCachingEnabled() {
+		return xsltCachingEnabled;
+	}
+
+	/**
+	 * Enables or disables xslt-caching for {@code this} import resolver.
+	 * 
+	 * @param xsltCachingEnabled
+	 *            {@code true} to enable xslt-caching, otherwise {@code false}
+	 */
+	public void setXsltCachingEnabled(final boolean xsltCachingEnabled) {
+		this.xsltCachingEnabled = xsltCachingEnabled;
 	}
 }
