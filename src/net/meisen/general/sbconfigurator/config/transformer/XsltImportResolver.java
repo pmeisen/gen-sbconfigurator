@@ -193,6 +193,8 @@ public abstract class XsltImportResolver implements IXsltUriResolver {
 			return baseClazz.isAssignableFrom(clazz);
 		} catch (final ClassNotFoundException e) {
 			return false;
+		} catch (final NoClassDefFoundError e) {
+			return false;
 		}
 	}
 
