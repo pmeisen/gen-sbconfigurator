@@ -165,7 +165,6 @@ public class DefaultConfiguration implements IConfiguration {
 	@Override
 	public void loadConfiguration(final Map<String, Object> injections)
 			throws InvalidConfigurationException {
-		final Map<String, ILoaderDefinition> userLoaderDefinitions = new HashMap<String, ILoaderDefinition>();
 
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Starting to load the Configuration...");
@@ -192,47 +191,6 @@ public class DefaultConfiguration implements IConfiguration {
 
 				// now load the definition
 				final DefaultListableBeanFactory beanFactory = loadBeanFactory(loaderDefinition);
-				final Map<String, ILoaderDefinition> loaderBeans = beanFactory
-						.getBeansOfType(ILoaderDefinition.class, false, false);
-
-				// load the core LoaderDefinitions
-				for (final Entry<String, ILoaderDefinition> coreEntry : loaderBeans
-						.entrySet()) {
-					final ILoaderDefinition loader = coreEntry.getValue();
-					final String id = coreEntry.getKey();
-
-					// ILoaderDefinitions have to be loaded
-					if (loader instanceof ILoaderDefinition) {
-						if (userLoaderDefinitions.containsKey(id)) {
-							if (!isUserLoaderOverridingAllowed()) {
-								throw new InvalidConfigurationException(
-										"The id of the loader '"
-												+ id
-												+ "' is used multiple times, which is not allowed via the coreSettings.");
-							}
-
-							// override the current one
-							final ILoaderDefinition newDef = loader;
-							final ILoaderDefinition oldDef = userLoaderDefinitions
-									.put(id, newDef);
-
-							// log the overriding
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("The loader '" + id + "' ('"
-										+ oldDef.getClass().getName()
-										+ "' was overridden by '"
-										+ newDef.getClass().getName());
-							}
-						} else if (loaderDefinitions.containsKey(id)) {
-							throw new InvalidConfigurationException(
-									"The id of the loader '"
-											+ id
-											+ "' is already used by a core LoaderDefinition.");
-						} else {
-							userLoaderDefinitions.put(id, loader);
-						}
-					}
-				}
 
 				// add all the other definitions to be loaded later
 				final Map<String, BeanDefinition> defs = SpringHelper
@@ -246,15 +204,10 @@ public class DefaultConfiguration implements IConfiguration {
 
 		// the core engine is up and running now
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("Core implementation of Configuration is up and running, found "
-					+ userLoaderDefinitions.size()
-					+ " more LoaderDefinition(s) to be loaded.");
+			LOG.trace("Core implementation of Configuration is up and running.");
 		}
 
-		// load the additional definitions which are defined by users
-		registerUserLoaderDefinitions(userLoaderDefinitions);
-
-		// we collected everything
+		// print the used properties
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("The following properties have been loaded:");
 
@@ -411,37 +364,6 @@ public class DefaultConfiguration implements IConfiguration {
 		factory.registerSingleton(corePropertyHolderId, corePropertyHolder);
 		factory.registerSingleton(coreExceptionRegistryId,
 				coreExceptionRegistry);
-	}
-
-	/**
-	 * Registers all the user <code>LoaderDefintions</code> defined via the
-	 * <code>coreLoaderDefinition</code>.
-	 * 
-	 * @param userLoaderDefinitions
-	 *            the <code>LoaderDefinition</code> instances which are provided
-	 *            via the <code>coreLoaderDefinition</code>
-	 */
-	protected void registerUserLoaderDefinitions(
-			final Map<String, ILoaderDefinition> userLoaderDefinitions) {
-
-		// lets load the userDefinitions now
-		for (final Entry<String, ILoaderDefinition> entry : userLoaderDefinitions
-				.entrySet()) {
-			final ILoaderDefinition loaderDefinition = entry.getValue();
-
-			// load the definitions
-			final DefaultListableBeanFactory beanFactory = loadBeanFactory(loaderDefinition);
-
-			// add it to the loaded ones
-			loaderDefinitions.put(entry.getKey(), loaderDefinition);
-
-			// add all the definitions to be loaded later
-			final Map<String, BeanDefinition> defs = SpringHelper
-					.getBeanDefinitions(beanFactory, ILoaderDefinition.class);
-
-			// everything else is registered as module
-			registerModuleBeanDefinitions(defs, entry.getKey());
-		}
 	}
 
 	/**
