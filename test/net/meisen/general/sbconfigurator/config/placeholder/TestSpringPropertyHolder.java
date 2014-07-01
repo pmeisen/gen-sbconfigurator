@@ -27,8 +27,8 @@ public class TestSpringPropertyHolder {
 	 * <code>xmlFile</code>.
 	 * 
 	 * @param xmlFile
-	 *          the <code>xmlFile</code> to load the
-	 *          <code>SpringPropertyHolder</code> from
+	 *            the <code>xmlFile</code> to load the
+	 *            <code>SpringPropertyHolder</code> from
 	 * 
 	 * @return the read <code>Properties</code> from the
 	 *         <code>SpringPropertyHolder</code>
@@ -38,15 +38,15 @@ public class TestSpringPropertyHolder {
 	}
 
 	/**
-	 * Helper method to load the property bean with the specified <code>id</code>
-	 * of the specified <code>xmlFile</code>.
+	 * Helper method to load the property bean with the specified
+	 * <code>id</code> of the specified <code>xmlFile</code>.
 	 * 
 	 * @param xmlFile
-	 *          the <code>xmlFile</code> to load the
-	 *          <code>SpringPropertyHolder</code> from
+	 *            the <code>xmlFile</code> to load the
+	 *            <code>SpringPropertyHolder</code> from
 	 * @param id
-	 *          the id of the bean to be loaded, can be <code>null</code> if no
-	 *          specific <code>SpringPropertyHolder</code> should be used
+	 *            the id of the bean to be loaded, can be <code>null</code> if
+	 *            no specific <code>SpringPropertyHolder</code> should be used
 	 * 
 	 * @return the read <code>Properties</code> from the
 	 *         <code>SpringPropertyHolder</code> with the specified
@@ -60,7 +60,8 @@ public class TestSpringPropertyHolder {
 		try {
 			return springProperties.getProperties();
 		} catch (final IOException e) {
-			throw new IllegalStateException("Invalid definition for properties.", e);
+			throw new IllegalStateException(
+					"Invalid definition for properties.", e);
 		}
 	}
 
@@ -68,22 +69,23 @@ public class TestSpringPropertyHolder {
 	 * Helper method to retrieve the bean which holds the properties.
 	 * 
 	 * @param xmlFile
-	 *          the <code>xmlFile</code> to load the
-	 *          <code>SpringPropertyHolder</code> from
+	 *            the <code>xmlFile</code> to load the
+	 *            <code>SpringPropertyHolder</code> from
 	 * @param id
-	 *          the id of the bean to be loaded, can be <code>null</code> if no
-	 *          specific <code>SpringPropertyHolder</code> should be used
+	 *            the id of the bean to be loaded, can be <code>null</code> if
+	 *            no specific <code>SpringPropertyHolder</code> should be used
 	 * 
 	 * @return the loaded <code>SpringPropertyHolder</code>
 	 */
-	protected SpringPropertyHolder getSpringPropertyHolder(final String xmlFile,
-			final String id) {
+	protected SpringPropertyHolder getSpringPropertyHolder(
+			final String xmlFile, final String id) {
 		// factory for the beans
-		final DefaultListableBeanFactory factory = SpringHelper.createBeanFactory(
-				true, false);
+		final DefaultListableBeanFactory factory = SpringHelper
+				.createBeanFactory(true, false);
 
 		// create the reader
-		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
+				factory);
 
 		// load the xml definition
 		final Resource res = new ClassPathResource("propertyBeans/" + xmlFile,
@@ -128,11 +130,13 @@ public class TestSpringPropertyHolder {
 		assertEquals(3, properties.size());
 		assertEquals("sample1", properties.get("location.property.value1"));
 		assertEquals("sample2", properties.get("location.property.value2"));
-		assertEquals("sample3,sample4", properties.get("location.property.value3"));
+		assertEquals("sample3,sample4",
+				properties.get("location.property.value3"));
 	}
 
 	/**
-	 * Loads the <code>propertyFilesByLocations.xml</code> and checks the result.
+	 * Loads the <code>propertyFilesByLocations.xml</code> and checks the
+	 * result.
 	 */
 	@Test
 	public void testPropertyFilesByLocations() {
@@ -141,9 +145,12 @@ public class TestSpringPropertyHolder {
 		assertEquals("sample1", properties.get("test.properties.value1"));
 		assertEquals("sample2", properties.get("test.properties.value2"));
 		assertEquals("sample3", properties.get("test.properties.value3"));
-		assertEquals("anothersample1", properties.get("test.properties.newvalue1"));
-		assertEquals("anothersample2", properties.get("test.properties.newvalue2"));
-		assertEquals("anothersample3", properties.get("test.properties.newvalue3"));
+		assertEquals("anothersample1",
+				properties.get("test.properties.newvalue1"));
+		assertEquals("anothersample2",
+				properties.get("test.properties.newvalue2"));
+		assertEquals("anothersample3",
+				properties.get("test.properties.newvalue3"));
 		assertEquals("anothersample4", properties.get("test.properties.value4"));
 	}
 
@@ -159,7 +166,8 @@ public class TestSpringPropertyHolder {
 	}
 
 	/**
-	 * Loads the <code>propertyFilesBySelectors.xml</code> and checks the result.
+	 * Loads the <code>propertyFilesBySelectors.xml</code> and checks the
+	 * result.
 	 */
 	@Test
 	public void testPropertyFileBySelectors() {
@@ -202,6 +210,29 @@ public class TestSpringPropertyHolder {
 	}
 
 	/**
+	 * Tests the usage of final properties.
+	 * 
+	 * @throws IOException
+	 *             if the properties cannot be retrieved
+	 */
+	@Test
+	public void testOtherFinalPropertyOverride() throws IOException {
+		final SpringPropertyHolder holder = getSpringPropertyHolder(
+				"otherPropertyHolderOverride.xml", "mainPropertyHolder");
+
+		holder.setFinalProperty("global.testValue", "final");
+
+		assertEquals(4, holder.getProperties().size());
+		assertEquals("final", holder.getProperties().get("global.testValue"));
+		assertEquals("notmain_value1",
+				holder.getProperties().get("noname.testValue1"));
+		assertEquals("notmain_value2",
+				holder.getProperties().get("noname.testValue2"));
+		assertEquals("main_value1",
+				holder.getProperties().get("main.testValue1"));
+	}
+
+	/**
 	 * Loads the <code>propertyFullExample.xml</code> and checks the result.
 	 */
 	@Test
@@ -233,7 +264,7 @@ public class TestSpringPropertyHolder {
 	 * the InputStream can only be read once.
 	 * 
 	 * @throws IOException
-	 *           if the properties cannot be read the first time
+	 *             if the properties cannot be read the first time
 	 */
 	@Test
 	public void testSeveralLoadingOfPropertiesFromSelector() throws IOException {
@@ -248,8 +279,8 @@ public class TestSpringPropertyHolder {
 			holder.getProperties();
 		} catch (final Exception e) {
 			e.printStackTrace();
-			fail("Could not access the InputStream several times ('" + e.getMessage()
-					+ "')");
+			fail("Could not access the InputStream several times ('"
+					+ e.getMessage() + "')");
 		}
 	}
 }

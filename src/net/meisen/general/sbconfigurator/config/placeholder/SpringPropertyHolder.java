@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -124,6 +125,8 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 
 	private Properties allLocalProperties = null;
 
+	private Properties finalProperties = null;
+
 	@Autowired(required = false)
 	private List<PropertiesLoaderSupport> propertyHolders = new ArrayList<PropertiesLoaderSupport>();
 
@@ -193,13 +196,15 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	public Properties getProperties(final boolean inclOtherReplacer)
 			throws IOException {
 
+		final Properties finalResult;
+
 		if (inclOtherReplacer && allDefinedProperties != null) {
-			return allDefinedProperties;
+			finalResult = allDefinedProperties;
 		} else if (!inclOtherReplacer && allLocalProperties != null) {
-			return allLocalProperties;
+			finalResult = allLocalProperties;
 		} else if (!inclOtherReplacer) {
 			allLocalProperties = getLocalProperties();
-			return allLocalProperties;
+			finalResult = allLocalProperties;
 		} else {
 			final Properties localResult = allLocalProperties == null ? getLocalProperties()
 					: allLocalProperties;
@@ -226,7 +231,16 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 			allLocalProperties = localResult;
 
 			// return all properties or just the local once
-			return allDefinedProperties;
+			finalResult = allDefinedProperties;
+		}
+
+		if (finalProperties == null) {
+			return finalResult;
+		} else {
+			final Properties result = new Properties();
+			CollectionUtils.mergePropertiesIntoMap(finalResult, result);
+			CollectionUtils.mergePropertiesIntoMap(finalProperties, result);
+			return result;
 		}
 	}
 
@@ -276,10 +290,10 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 * 
 	 * @throws IOException
 	 *             if a file resource is defined but cannot be read or accessed
-	 */	
+	 */
 	protected Properties getOtherProperties() throws IOException {
 		final Properties result = new Properties();
-		 
+
 		for (final PropertiesLoaderSupport propertyHolder : propertyHolders) {
 			final Properties properties;
 
@@ -454,5 +468,53 @@ public class SpringPropertyHolder extends PropertyPlaceholderConfigurer {
 	 */
 	public List<PropertiesLoaderSupport> getOtherPropertyHolder() {
 		return Collections.unmodifiableList(propertyHolders);
+	}
+
+	/**
+	 * Sets some final properties, i.e. properties which are final for this
+	 * instance, because those are set at last.
+	 * 
+	 * @param properties
+	 *            the final properties to be set
+	 */
+	public void setFinalProperties(final Properties properties) {
+		if (finalProperties == null) {
+			finalProperties = new Properties();
+		}
+
+		finalProperties.putAll(properties);
+	}
+
+	/**
+	 * Sets some final properties, i.e. properties which are final for this
+	 * instance, because those are set at last.
+	 * 
+	 * @param properties
+	 *            the final properties to be set
+	 */
+	public void setFinalProperties(final Map<String, String> properties) {
+		if (finalProperties == null) {
+			finalProperties = new Properties();
+		}
+
+		finalProperties.putAll(properties);
+	}
+
+	/**
+	 * Sets a final property, i.e. properties which are final for this instance,
+	 * because those are set at last.
+	 * 
+	 * @param key
+	 *            the key of the property
+	 * @param value
+	 *            the value of the property
+	 * 
+	 */
+	public void setFinalProperty(final String key, final String value) {
+		if (finalProperties == null) {
+			finalProperties = new Properties();
+		}
+
+		finalProperties.setProperty(key, value);
 	}
 }
