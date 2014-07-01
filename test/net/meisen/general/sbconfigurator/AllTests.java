@@ -2,6 +2,7 @@ package net.meisen.general.sbconfigurator;
 
 import net.meisen.general.sbconfigurator.authoring.TestSpringXMLAuthoring;
 import net.meisen.general.sbconfigurator.config.TestDefaultConfiguration;
+import net.meisen.general.sbconfigurator.config.TestPropertyInjection;
 import net.meisen.general.sbconfigurator.config.TestSamplePlugInLoader;
 import net.meisen.general.sbconfigurator.config.TestSpringExclusions;
 import net.meisen.general.sbconfigurator.config.order.TestInstantiationOrder;
@@ -54,7 +55,8 @@ import org.junit.runners.Suite;
 		// Spring additional factory-beans
 		TestMergedCollection.class, TestMethodInvokingFactoryBean.class,
 		TestInstantiationOrder.class, TestDatePropertyEditor.class,
-		TestBeanCreator.class, TestBeanReference.class })
+		TestBeanCreator.class, TestBeanReference.class,
+		TestPropertyInjection.class })
 public class AllTests {
 	// nothing more to do here
 }

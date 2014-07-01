@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -175,7 +176,7 @@ public class DefaultConfiguration implements IConfiguration {
 		if (loaderDefinitions == null) {
 
 			// make sure we have a Collection from now on
-			loaderDefinitions = new HashMap<String, ILoaderDefinition>();
+			loaderDefinitions = new LinkedHashMap<String, ILoaderDefinition>();
 		} else {
 
 			// load the default loader definitions
@@ -191,11 +192,19 @@ public class DefaultConfiguration implements IConfiguration {
 
 				// now load the definition
 				final DefaultListableBeanFactory beanFactory = loadBeanFactory(loaderDefinition);
+				final Map<String, PropertyInjectorBean> propIns = beanFactory
+						.getBeansOfType(PropertyInjectorBean.class, false,
+								false);
+				for (final PropertyInjectorBean propIn : propIns.values()) {
+					corePropertyHolder.setFinalProperties(propIn
+							.getProperties());
+				}
 
 				// add all the other definitions to be loaded later
 				final Map<String, BeanDefinition> defs = SpringHelper
 						.getBeanDefinitions(beanFactory,
-								ILoaderDefinition.class);
+								ILoaderDefinition.class,
+								PropertyInjectorBean.class);
 
 				// everything else is registered as module
 				registerModuleBeanDefinitions(defs, entry.getKey());
