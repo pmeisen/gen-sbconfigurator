@@ -841,6 +841,15 @@ public class DefaultConfiguration implements IConfiguration {
 		final DefaultListableBeanFactory factory = SpringHelper
 				.createBeanFactory(true, beanOverriding);
 
+		/*
+		 * If we don't have any resources we can just return the factory, this
+		 * should increase the performance for empty reads, cause template
+		 * creation might take some time sometimes.
+		 */
+		if (resIos.size() == 0) {
+			return factory;
+		}
+
 		// create the reader
 		final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 				factory);
