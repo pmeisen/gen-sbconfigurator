@@ -6,9 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
+import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -39,7 +42,10 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 	@Qualifier("xsltUriResolver")
 	private URIResolver resolver;
 
-	private Transformer xsltTransformer = null;
+	private final TransformerFactory transFact;
+	private final Map<String, Templates> cachedTemplates;
+
+	private Transformer xsltTransformer;
 
 	/**
 	 * Default constructor which registers no additional {@code URIResolver}.
@@ -59,6 +65,10 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 	 *            the {@code URIResolver} to be used
 	 */
 	public DefaultXsltTransformer(final URIResolver resolver) {
+		this.transFact = TransformerFactory.newInstance();
+		this.cachedTemplates = new HashMap<String, Templates>();
+		this.xsltTransformer = null;
+
 		this.resolver = resolver;
 	}
 
@@ -128,8 +138,6 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 		} else {
 
 			// create an instance of TransformerFactory
-			final TransformerFactory transFact = TransformerFactory
-					.newInstance();
 			transFact.setURIResolver(resolver);
 
 			// create the source
@@ -143,6 +151,46 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 			} finally {
 				Streams.closeIO(xsltStream);
 			}
+			xsltTransformer.setURIResolver(resolver);
+		}
+	}
+
+	@Override
+	public void setCachedXsltTransformer(final String id,
+			final InputStream xsltStream) throws InvalidXsltException {
+		Templates cached;
+
+		cached = cachedTemplates.get(id);
+		if (cached != null) {
+			try {
+				xsltTransformer = cached.newTransformer();
+			} catch (final TransformerConfigurationException e) {
+				throw new InvalidXsltException("The template of '" + id
+						+ "' could not be read.", e);
+			}
+		} else if (Objects.empty(xsltStream)) {
+			xsltTransformer = null;
+		} else {
+
+			// create an instance of TransformerFactory
+			transFact.setURIResolver(resolver);
+
+			// create the source
+			final Source xsltSource = new StreamSource(xsltStream);
+			try {
+				final Templates template = transFact.newTemplates(xsltSource);
+				cachedTemplates.put(id, template);
+				xsltTransformer = template.newTransformer();
+			} catch (final TransformerConfigurationException e) {
+				throw new InvalidXsltException(
+						"The xslt stream could not be read.", e);
+			} finally {
+				Streams.closeIO(xsltStream);
+			}
+		}
+
+		// set the resolver
+		if (xsltTransformer != null) {
 			xsltTransformer.setURIResolver(resolver);
 		}
 	}

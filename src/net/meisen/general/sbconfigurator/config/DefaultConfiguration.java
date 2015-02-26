@@ -187,11 +187,12 @@ public class DefaultConfiguration implements IConfiguration {
 				// do some logging
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("Loading configuration from loader '"
-							+ entry.getKey() + "'; " + loaderDefinition);
+							+ entry.getKey() + "': " + loaderDefinition);
 				}
 
 				// now load the definition
-				final DefaultListableBeanFactory beanFactory = loadBeanFactory(loaderDefinition);
+				final DefaultListableBeanFactory beanFactory = loadBeanFactory(
+						entry.getKey(), loaderDefinition);
 				final Map<String, PropertyInjectorBean> propIns = beanFactory
 						.getBeansOfType(PropertyInjectorBean.class, false,
 								false);
@@ -576,6 +577,8 @@ public class DefaultConfiguration implements IConfiguration {
 	 * Loads the <code>BeanFactory</code> which is specified by the passed
 	 * <code>LoaderDefinition</code>.
 	 * 
+	 * @param loaderId
+	 *            the identifier of the loader, used to identify the xslt loaded
 	 * @param loaderDefinition
 	 *            the <code>LoaderDefinition</code> which specifies which data
 	 *            to be loaded
@@ -583,11 +586,11 @@ public class DefaultConfiguration implements IConfiguration {
 	 * @return the <code>ListableBeanFactory</code> loaded by the specified
 	 *         <code>LoaderDefinition</code>
 	 */
-	public DefaultListableBeanFactory loadBeanFactory(
+	public DefaultListableBeanFactory loadBeanFactory(final String loaderId,
 			final ILoaderDefinition loaderDefinition) {
 		return loadBeanFactory(loaderDefinition.getSelector(),
 				loaderDefinition.getDefaultSelector(),
-				loaderDefinition.getXsltTransformerInputStream(),
+				loaderDefinition.getXsltTransformerInputStream(), loaderId,
 				loaderDefinition.getContext(),
 				loaderDefinition.isValidationEnabled(),
 				loaderDefinition.isBeanOverridingAllowed(),
@@ -674,7 +677,7 @@ public class DefaultConfiguration implements IConfiguration {
 			final InputStream xsltStream, final Class<?> context,
 			final boolean validate, final boolean beanOverriding,
 			final boolean loadFromClasspath, final boolean loadFromWorkingDir) {
-		return loadBeanFactory(xmlSelector, null, xsltStream, context,
+		return loadBeanFactory(xmlSelector, null, xsltStream, null, context,
 				validate, beanOverriding, loadFromClasspath,
 				loadFromWorkingDir, loadFromClasspath, loadFromWorkingDir);
 	}
@@ -695,6 +698,8 @@ public class DefaultConfiguration implements IConfiguration {
 	 *            select any files
 	 * @param xsltStream
 	 *            the stream of the XSLT used for transformation
+	 * @param xsltId
+	 *            a unique id which specifies the xslt to be used
 	 * @param context
 	 *            the context to look for the specified <code>xmlFileName</code>
 	 *            , might be <code>null</code> if all files on the class-path
@@ -726,9 +731,9 @@ public class DefaultConfiguration implements IConfiguration {
 	 */
 	public DefaultListableBeanFactory loadBeanFactory(final String xmlSelector,
 			final String defaultXmlSelector, final InputStream xsltStream,
-			final Class<?> context, final boolean validate,
-			final boolean beanOverriding, final boolean loadFromClasspath,
-			final boolean loadFromWorkingDir,
+			final String xsltId, final Class<?> context,
+			final boolean validate, final boolean beanOverriding,
+			final boolean loadFromClasspath, final boolean loadFromWorkingDir,
 			final boolean loadDefaultFromClasspath,
 			final boolean loadDefaultFromWorkingDir) {
 
@@ -750,7 +755,7 @@ public class DefaultConfiguration implements IConfiguration {
 
 		// get the factory
 		final DefaultListableBeanFactory factory = loadBeanFactory(resIos,
-				xsltStream, validate, beanOverriding);
+				xsltStream, xsltId, validate, beanOverriding);
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Loaded factory for files '" + xmlSelector + "' (size: "
 					+ factory.getBeanDefinitionCount() + ")");
@@ -823,6 +828,8 @@ public class DefaultConfiguration implements IConfiguration {
 	 *            the {@link InputStream} instances to load the definitions from
 	 * @param xsltStream
 	 *            the stream of the XSLT used for transformation
+	 * @param xsltId
+	 *            a unique id which specifies the xslt to be used
 	 * @param validate
 	 *            <code>true</code> if the XML of the <code>xmlFileName</code>
 	 *            should be validated, otherwise <code>false</code>
@@ -835,7 +842,8 @@ public class DefaultConfiguration implements IConfiguration {
 	 */
 	public DefaultListableBeanFactory loadBeanFactory(
 			final Collection<InputStream> resIos, final InputStream xsltStream,
-			final boolean validate, final boolean beanOverriding) {
+			final String xsltId, final boolean validate,
+			final boolean beanOverriding) {
 
 		// create the factory and enable auto-wiring to setup the core system
 		final DefaultListableBeanFactory factory = SpringHelper
@@ -1173,7 +1181,7 @@ public class DefaultConfiguration implements IConfiguration {
 		final List<InputStream> resIos = new ArrayList<InputStream>();
 		resIos.add(resIo);
 		final DefaultListableBeanFactory factory = loadBeanFactory(resIos,
-				loaderDefinition.getXsltTransformerInputStream(),
+				loaderDefinition.getXsltTransformerInputStream(), loaderId,
 				loaderDefinition.isValidationEnabled(),
 				loaderDefinition.isBeanOverridingAllowed());
 
