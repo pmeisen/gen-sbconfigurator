@@ -178,9 +178,10 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 			// create the source
 			final Source xsltSource = new StreamSource(xsltStream);
 			try {
-				final Templates template = transFact.newTemplates(xsltSource);
-				cachedTemplates.put(id, template);
+				final Templates template = transFact.newTemplates(xsltSource);				
 				xsltTransformer = template.newTransformer();
+				
+				cachedTemplates.put(id, template);
 			} catch (final TransformerConfigurationException e) {
 				throw new InvalidXsltException(
 						"The xslt stream could not be read.", e);
