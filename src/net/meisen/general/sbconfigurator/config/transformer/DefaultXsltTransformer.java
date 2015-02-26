@@ -315,4 +315,9 @@ public class DefaultXsltTransformer implements IXsltTransformer {
 		// close the stream - just to be sure
 		Streams.closeIO(outputStream);
 	}
+
+	@Override
+	public boolean hasCachedXslt(final String xsltId) {
+		return cachedTemplates.containsKey(xsltId);
+	}
 }

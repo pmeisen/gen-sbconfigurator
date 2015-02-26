@@ -70,4 +70,14 @@ public interface IXsltTransformer {
 	public void transform(final InputStream xmlStream,
 			final OutputStream outputStream)
 			throws TransformationFailedException;
+
+	/**
+	 * Checks if a template for the specified version exists.
+	 * 
+	 * @param xsltId
+	 *            the identifier to be checked
+	 *            
+	 * @return {@code true} if one exists, otherwise {@code false}
+	 */
+	public boolean hasCachedXslt(final String xsltId);
 }

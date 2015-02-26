@@ -865,13 +865,24 @@ public class DefaultConfiguration implements IConfiguration {
 		// initialize the xslt transformer
 		if (xsltTransformer != null) {
 
-			// replace the properties within the xslt
-			org.springframework.core.io.Resource res = replacePlaceholders(xsltStream);
-
 			try {
-				final InputStream xsltReplacedStream = res == null ? null : res
-						.getInputStream();
-				xsltTransformer.setXsltTransformer(xsltReplacedStream);
+				if (xsltTransformer.hasCachedXslt(xsltId)) {
+					xsltTransformer.setCachedXsltTransformer(xsltId, null);
+				} else {
+					// replace the properties within the xslt
+					org.springframework.core.io.Resource res = replacePlaceholders(xsltStream);
+
+					final InputStream xsltReplacedStream = res == null ? null
+							: res.getInputStream();
+
+					// cache if asked for
+					if (xsltId == null) {
+						xsltTransformer.setXsltTransformer(xsltReplacedStream);
+					} else {
+						xsltTransformer.setCachedXsltTransformer(xsltId,
+								xsltReplacedStream);
+					}
+				}
 			} catch (final InvalidXsltException e) {
 				throw new InvalidConfigurationException(
 						"The specified XSLT is invalid and therefore cannot be used.",
