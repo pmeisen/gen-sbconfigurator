@@ -5,7 +5,7 @@
   
   <groupId>net.meisen.general</groupId>
   <artifactId>net-meisen-general-gen-sbconfigurator</artifactId>
-  <version>TRUNK</version>
+  <version>TRUNK-SNAPSHOT</version>
   <name>gen-sbconfigurator</name>
   <description>Library which allows the definition of a general configuration (i.e. XML based) which is than translated into Spring contexts (using XSLT)</description>
   <packaging>jar</packaging>
@@ -35,6 +35,13 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>3.2.12.RELEASE</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
