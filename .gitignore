@@ -2,4 +2,7 @@
 /override.properties
 /.classpath
 /.project
-/bin
+/lib
+/target
+/testLib
+/testTarget

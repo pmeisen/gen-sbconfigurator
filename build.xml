@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <project name="gen-sbconfigurator" default="assemble">
-  <include file="../tida-workspace/common-libs/ant-util/util-ant.xml"/>
+    <include file="../tida-workspace/common-libs/ant-util/util-ant.xml"/>
 
-  <property name="jarFile" value="${ant.project.name}-TRUNK-SNAPSHOT.jar"/>
-  <property name="testSuite" value="net.meisen.general.sbconfigurator.AllTests"/>
+    <property name="testSuite" value="net.meisen.general.sbconfigurator.AllTests"/>
 
-  <target name="01-resolve-dependencies">
-    <resolve-dependencies/>
-  </target>
+    <target name="01-resolve-dependencies">
+        <resolve-dependencies/>
+    </target>
 
-  <target name="02-compile-sources" depends="01-resolve-dependencies">
-    <do-compile-java-default/>
-  </target>
+    <target name="02-compile-sources" depends="01-resolve-dependencies">
+        <do-compile-java-default/>
+    </target>
 
-  <target name="03-run-test-suite" depends="02-compile-sources">
-    <!--
-      the working directory must be changed, so that the beans aren't loaded twice,
-      once from the classpath and once from the test-source directory
-      -->
-    <do-run-test-suite workDir="./resources" testSuite="${testSuite}"/>
-  </target>
+    <target name="03-run-test-suite" depends="02-compile-sources">
+        <!--
+          the working directory must be changed, so that the beans aren't loaded twice,
+          once from the classpath and once from the test-source directory
+          -->
+        <do-run-test-suite workDir="./resources" testSuite="${testSuite}"/>
+    </target>
 
-  <target name="04-deploy" depends="02-compile-sources">
-    <build-jar jarFile="${jarFile}"/>
-  </target>
+    <target name="04-deploy" depends="02-compile-sources">
+        <build-jar/>
+        <build-test-jar/>
+    </target>
 </project>
