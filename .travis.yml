@@ -23,7 +23,6 @@ before_install:
   - unzip -o /tmp/master.zip -d ../
   - mv ../tida-workspace-master ../tida-workspace
 
-
   - mkdir -p $MAVEN_M2
   - cd $MAVEN_M2
   - rm -R *
